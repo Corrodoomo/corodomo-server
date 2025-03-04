@@ -1,0 +1,28 @@
+services:
+  corodomo_postgres:
+    image: postgres
+    container_name: corodomo_pgdb
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: corodomo_admin
+      POSTGRES_PASSWORD: corodomo_2931
+    volumes:
+      - corodomo_pgdata:/var/lib/postgresql/data
+
+  corodomo_pgadmin:
+    image: dpage/pgadmin4
+    container_name: corodomo_pgadmin4_container
+    restart: always
+    ports:
+      - "8888:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: corodomo@mail.com
+      PGADMIN_DEFAULT_PASSWORD: corodomo
+    volumes:
+      - corodomo_pgadmin:/var/lib/pgadmin
+
+volumes:
+  corodomo_pgdata:
+  corodomo_pgadmin:

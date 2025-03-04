@@ -1,0 +1,52 @@
+import { AppModule } from './app.module';
+import { useSwagger } from './app.swagger';
+import { Logger, ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import * as cors from 'cors';
+import { join } from 'path';
+
+async function bootstrap() {
+	const logger = new Logger('Bootstrap');
+	const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+		logger: ['error', 'debug', 'verbose'],
+	});
+	app.useGlobalPipes(
+		new ValidationPipe({
+			transform: true,
+			transformOptions: {
+				enableImplicitConversion: true,
+			},
+			whitelist: true,
+		}),
+	);
+	const configService = app.get<ConfigService>(ConfigService);
+	const port = configService.get<string>('PORT') || 5000;
+	const nodeEnv = configService.get<string>('NODE_ENV');
+
+	app.enableCors({
+		origin: true,
+		credentials: true,
+	});
+	app.setGlobalPrefix('api/v1');
+
+	app.use(
+		cors({
+			origin: 'http://localhost:3000',
+			credentials: true,
+		}),
+	);
+	app.setBaseViewsDir(join(__dirname, 'views'));
+	app.setViewEngine('hbs');
+	useSwagger(app);
+
+	await app.listen(port).then(async () => {
+		const url = await app.getUrl();
+		logger.debug(`Your app is running on port ${port}`);
+		logger.debug(`Environment: ${nodeEnv}`);
+		logger.debug(`Documentation ${url}/docs`);
+	});
+}
+
+bootstrap();
