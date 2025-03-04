@@ -5,7 +5,7 @@ import { LessonComment } from "./lesson-comment.entity";
 import { Lesson } from "./lesson.entity";
 import { Note } from "./note.entity";
 import { Song } from "./song.entity";
-import { Workspaces } from "./Workspaces";
+import { Workspace } from "./workspace.entity";
 
 @Index("users_pkey", ["id"], { unique: true })
 @Entity("users", { schema: "public" })
@@ -46,6 +46,6 @@ export class User {
   @OneToMany(() => Song, (song) => song.createdBy)
   songs: Song[];
 
-  @OneToMany(() => Workspaces, (workspaces) => workspaces.createdBy)
-  workspaces: Workspaces[];
+  @OneToMany(() => Workspace, (workspace) => workspace.createdBy)
+  workspaces: Workspace[];
 }
