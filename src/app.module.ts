@@ -6,7 +6,6 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { providers } from './app.provider';
 import { UserModule } from '@modules/user/user.module';
-import { ProductModule } from '@modules/product/product.module';
 import { StorageModule } from 'src/modules/storage/storage.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { HelmetMiddleware } from '@middlewares/helmet.middleware';
@@ -25,7 +24,6 @@ import { LoggerMiddleware } from '@middlewares/logger.middleware';
 		DatabaseModule,
 		JwtModule,
 		UserModule,
-		ProductModule,
 		StorageModule,
 	],
 	controllers: [AppController],

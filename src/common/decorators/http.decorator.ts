@@ -1,4 +1,3 @@
-import { GlobalExceptionFilter } from '@common/filters/global-exception-filters.filter';
 import { AuthenticationGuard } from '@common/guards/authentication.guard';
 import { AuthorizationGuard } from '@common/guards/authorization.guard';
 import { UseFilters, UseGuards, applyDecorators } from '@nestjs/common';
@@ -65,9 +64,5 @@ export const Delete = (path?: string, options = { auth: true }) => {
 };
 
 export const Controller = (prefix: string) => {
-	return applyDecorators(
-		HttpController(prefix),
-		ApiTags(prefix),
-		UseFilters(GlobalExceptionFilter),
-	);
+	return applyDecorators(HttpController(prefix), ApiTags(prefix), UseFilters());
 };

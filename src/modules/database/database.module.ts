@@ -1,36 +1,71 @@
+import { ExamPart } from './entities/exam-part.entity';
+import { ExamSection } from './entities/exam-section.entity';
+import { GroupTask } from './entities/group-task.entity';
+import { LessonComment } from './entities/lesson-comment.entity';
+import { Lesson } from './entities/lesson.entity';
+import { Note } from './entities/note.entity';
+import { Project } from './entities/project.entity';
+import { QuestionChoice } from './entities/question-choice.entity';
+import { Question } from './entities/question.entity';
+import { Song } from './entities/song.entity';
+import { SubTask } from './entities/sub-task.entity';
+import { TaskComment } from './entities/task-comment.entity';
+import { Task } from './entities/task.entity';
+import { Workspace } from './entities/workspace.entity';
+import { Blog } from '@modules/database/entities/blog.entity';
+import { Exam } from '@modules/database/entities/exam.entity';
+import { User } from '@modules/database/entities/user.entity';
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Blog, BlogSchema } from '@common/schemas/blog-schema';
-import { Cart, CartSchema } from '@common/schemas/cart-schema';
-import { Comment, CommentSchema } from '@common/schemas/comment-schema';
-import { Course, CourseSchema } from '@common/schemas/course-schema';
-import { Creator, CreatorSchema } from '@common/schemas/creator-schema';
-import { Customer, CustomerSchema } from '@common/schemas/customer-schema';
-import { Payment, PaymentSchema } from '@common/schemas/payment.schema';
-import { Post, PostSchema } from '@common/schemas/post-schema';
-import { Product, ProductSchema } from '@common/schemas/product-schema';
-import { MongooseModule } from '@nestjs/mongoose';
-import { ConfigModule } from '../config/config.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
 	imports: [
-		// MongooseModule.forRoot('mongodb://root:example@localhost:27017/'),
-		MongooseModule.forRootAsync({
-			imports: [ConfigModule],
-			useFactory: async (configService: ConfigService) => ({
-			  uri: configService.get<string>('MONGODB_URI'),
-			}),
+		TypeOrmModule.forRootAsync({
 			inject: [ConfigService],
+			useFactory: (configService: ConfigService) => ({
+				type: 'postgres',
+				host: configService.get<string>('DB_HOST'),
+				port: configService.get<number>('DB_PORT'),
+				username: configService.get<string>('DB_USERNAME'),
+				password: configService.get<string>('DB_PASSWORD'),
+				database: configService.get<string>('DB_NAME'),
+				schema: configService.get<string>('DB_SCHEMA'),
+				autoLoadEntities: true,
+				migrationsTableName: `migrations`,
+				migrationsRun: true,
+				synchronize: true,
+				logging: true,
+				cache: {
+					duration: configService.get<number>('DB_CACHE_TIME'),
+					type: 'redis',
+					options: {
+						host: configService.get<number>('REDIS_HOST'),
+						port: configService.get<number>('REDIS_PORT'),
+						password: configService.get<number>('REDIS_PASSWORD'),
+					}
+				},
+				entities: [
+					User,
+					Blog,
+					Note,
+					Exam,
+					ExamSection,
+					ExamPart,
+					Question,
+					QuestionChoice,
+					LessonComment,
+					Lesson,
+					Song,
+					Workspace,
+					Project,
+					GroupTask,
+					Task,
+					SubTask,
+					TaskComment,
+				],
+			}),
 		}),
-		MongooseModule.forFeature([{ name: Blog.name, schema: BlogSchema }]),
-		MongooseModule.forFeature([{ name: Cart.name, schema: CartSchema }]),
-		MongooseModule.forFeature([{ name: Comment.name, schema: CommentSchema }]),
-		MongooseModule.forFeature([{ name: Course.name, schema: CourseSchema }]),
-		MongooseModule.forFeature([{ name: Creator.name, schema: CreatorSchema }]),
-		MongooseModule.forFeature([{ name: Customer.name, schema: CustomerSchema }]),
-		MongooseModule.forFeature([{ name: Payment.name, schema: PaymentSchema }]),
-		MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
-		MongooseModule.forFeature([{ name: Product.name, schema: ProductSchema }]),
-	]
+	],
 })
 export class DatabaseModule {}

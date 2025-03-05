@@ -1,4 +1,6 @@
 import { AppService } from './app.service';
+import { UndefinedExceptionFilter } from '@common/filters/undefined-exception.filter';
+import { TypeOrmFilter } from '@common/filters/typeorm.filter';
 import { FormatResponseInterceptor } from '@common/interceptors/format-response.interceptor';
 import { ClassSerializerInterceptor, Provider } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
@@ -18,6 +20,14 @@ export const providers: Provider[] = [
 	{
 		provide: APP_INTERCEPTOR,
 		useClass: FormatResponseInterceptor,
+	},
+	{
+		provide: APP_FILTER,
+		useClass: TypeOrmFilter,
+	},
+	{
+		provide: APP_FILTER,
+		useClass: UndefinedExceptionFilter,
 	},
 	{
 		provide: APP_FILTER,
