@@ -1,38 +1,41 @@
 import { JwtService } from '@modules/jwt';
 import {
-	CanActivate,
-	ExecutionContext,
-	Injectable,
-	UnauthorizedException,
-	ForbiddenException
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+  Injectable,
+  Logger,
+  UnauthorizedException,
 } from '@nestjs/common';
-import { Request } from 'express';
+
+import { Request } from '@common/models';
 
 @Injectable()
 export class AuthenticationGuard implements CanActivate {
-	constructor(private readonly jwtService: JwtService) {}
+  logger = new Logger('AuthenticationGuard');
+  constructor(private readonly jwtService: JwtService) {}
 
-	async canActivate(context: ExecutionContext): Promise<boolean> {
-		const request = context.switchToHttp().getRequest();
-		const token = this.extractTokenFromHeader(request);
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest<Request>();
+    const token = this.extractTokenFromHeader(request);
 
-		if (!token) {
-			throw new ForbiddenException();
-		}
+    if (!token) {
+      throw new ForbiddenException();
+    }
 
-		try {
-			request.user = await this.jwtService.verify(token);
-			request.user['sub'] = request.user['sub'].replace('auth0|', '')
-		} catch (error) {
-			throw new UnauthorizedException();
-		}
+    try {
+      request.user = await this.jwtService.verifyAccessToken(token);
+    } catch (error) {
+      this.logger.error(error);
+      throw new UnauthorizedException();
+    }
 
-		return true;
-	}
+    return true;
+  }
 
-	private extractTokenFromHeader(request: Request): string | undefined {
-		const { authorization = '' } = request.headers;
-		const [type, token] = authorization.split(' ') ?? [];
-		return type === 'Bearer' ? token : undefined;
-	}
+  private extractTokenFromHeader(request: Request): string | undefined {
+    const { authorization = '' } = request.headers;
+    const [type, token] = authorization.split(' ') ?? [];
+    return type === 'Bearer' ? token : undefined;
+  }
 }

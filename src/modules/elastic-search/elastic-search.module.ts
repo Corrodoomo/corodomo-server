@@ -9,25 +9,16 @@ import { ElasticsearchModule as BaseElasticsearchModule } from '@nestjs/elastics
 		BaseElasticsearchModule.registerAsync({
 			imports: [ConfigModule],
 			useFactory: (configService: ConfigService) => ({
-				node: 'http://localhost:9200',
+				node: configService.getOrThrow('ELASTICSEARCH_NODE'),
 				auth: {
-					username: 'elastic',
-					password: 'XlhktffqoSffrAq9MZf2DQ==',
+					username: configService.getOrThrow('ELASTICSEARCH_USERNAME'),
+					password: configService.getOrThrow('ELASTICSEARCH_PASSWORD'),
 				},
 			}),
 			inject: [ConfigService],
 		}),
 	],
 	exports: [LessonElasticSearchService],
-	providers: [
-		LessonElasticSearchService,
-		// {
-		// 	provide: 'POST_SEARCH_SERVICE',
-		// 	useFactory: (esService: ElasticsearchService) =>
-		// 		new ElasticsearchCustomService(esService, 'post'),
-		// 	inject: [ElasticsearchService],
-		// },
-	],
-	// exports: ['POST_SEARCH_SERVICE'],
+	providers: [LessonElasticSearchService],
 })
 export class ElasticSearchModule {}

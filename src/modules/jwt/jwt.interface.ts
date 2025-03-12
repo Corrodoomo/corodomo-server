@@ -5,5 +5,5 @@ export abstract class IJwtService {
 	 * @return Promise<JwtPayload>
 	 * @example const payload = await this.jwtService.verify(token);
 	 */
-	abstract verify(token: string): Promise<DecodedUser>;
+	abstract verify(token: string): Promise<Session>;
 }

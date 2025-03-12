@@ -1,25 +1,27 @@
-import { Column, Entity, Index, OneToMany } from "typeorm";
-import { Blog } from "./blog.entity";
-import { Exam } from "./exam.entity";
-import { LessonComment } from "./lesson-comment.entity";
-import { Lesson } from "./lesson.entity";
-import { Note } from "./note.entity";
-import { Song } from "./song.entity";
-import { Workspace } from "./workspace.entity";
-import { BaseEntity } from "./base.entity";
-import { GroupTask } from "./group-task.entity";
-import { TaskComment } from "./task-comment.entity";
+import { Column, Entity, Index, OneToMany } from 'typeorm';
 
-@Index("users_pkey", ["id"], { unique: true })
-@Entity("users", { schema: "public" })
+import { BaseEntity } from './base.entity';
+import { Blog } from './blog.entity';
+import { Exam } from './exam.entity';
+import { GroupTask } from './group-task.entity';
+import { LessonComment } from './lesson-comment.entity';
+import { Lesson } from './lesson.entity';
+import { Note } from './note.entity';
+import { Song } from './song.entity';
+import { TaskComment } from './task-comment.entity';
+import { Workspace } from './workspace.entity';
+import { Folder } from './folder.entity';
+
+@Index('users_pkey', ['id'], { unique: true })
+@Entity('users', { schema: 'public' })
 export class User extends BaseEntity {
-  @Column("character varying", { name: "username"})
-  username: string;
+  @Column('character varying', { name: 'email' })
+  email: string;
 
-  @Column("character varying", { name: "password" })
+  @Column('character varying', { name: 'password' })
   password: string;
 
-  @Column("character varying", { name: "role" })
+  @Column('character varying', { name: 'role', default: 'learner' })
   role: string;
 
   @OneToMany(() => Blog, (blog) => blog.createdBy)
@@ -48,4 +50,7 @@ export class User extends BaseEntity {
 
   @OneToMany(() => TaskComment, (taskComment) => taskComment.createdBy)
   taskComments: TaskComment[];
+
+  @OneToMany(() => Folder, (folder) => folder.createdBy)
+  folders: Folder[];
 }

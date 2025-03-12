@@ -1,4 +1,4 @@
-export class InsertResult<T extends object = {}> {
+export class InsertResult<T> {
 	inserted: number;
 	items?: T[];
 }
