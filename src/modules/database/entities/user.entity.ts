@@ -1,0 +1,56 @@
+import { Column, Entity, Index, OneToMany } from 'typeorm';
+
+import { BaseEntity } from './base.entity';
+import { Blog } from './blog.entity';
+import { Exam } from './exam.entity';
+import { GroupTask } from './group-task.entity';
+import { LessonComment } from './lesson-comment.entity';
+import { Lesson } from './lesson.entity';
+import { Note } from './note.entity';
+import { Song } from './song.entity';
+import { TaskComment } from './task-comment.entity';
+import { Workspace } from './workspace.entity';
+import { Folder } from './folder.entity';
+
+@Index('users_pkey', ['id'], { unique: true })
+@Entity('users', { schema: 'public' })
+export class User extends BaseEntity {
+  @Column('character varying', { name: 'email' })
+  email: string;
+
+  @Column('character varying', { name: 'password' })
+  password: string;
+
+  @Column('character varying', { name: 'role', default: 'learner' })
+  role: string;
+
+  @OneToMany(() => Blog, (blog) => blog.createdBy)
+  blogs: Blog[];
+
+  @OneToMany(() => Exam, (exam) => exam.createdBy)
+  exams: Exam[];
+
+  @OneToMany(() => LessonComment, (lessonComment) => lessonComment.createdBy)
+  lessonComments: LessonComment[];
+
+  @OneToMany(() => Lesson, (lesson) => lesson.createdBy)
+  lessons: Lesson[];
+
+  @OneToMany(() => Note, (note) => note.createdBy)
+  notes: Note[];
+
+  @OneToMany(() => Song, (song) => song.createdBy)
+  songs: Song[];
+
+  @OneToMany(() => Workspace, (workspace) => workspace.createdBy)
+  workspaces: Workspace[];
+
+  @OneToMany(() => GroupTask, (groupTask) => groupTask.createdBy)
+  groupTasks: GroupTask[];
+
+  @OneToMany(() => TaskComment, (taskComment) => taskComment.createdBy)
+  taskComments: TaskComment[];
+
+  @OneToMany(() => Folder, (folder) => folder.createdBy)
+  folders: Folder[];
+}
