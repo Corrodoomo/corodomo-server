@@ -24,7 +24,12 @@ export class AuthenticationGuard implements CanActivate {
     }
 
     try {
-      request.user = await this.jwtService.verifyAccessToken(token);
+      if (request.originalUrl === '/api/v1/users/refresh') {
+        request.user = await this.jwtService.verifyRefreshToken(token);
+      }
+      else {
+        request.user = await this.jwtService.verifyAccessToken(token);
+      }
     } catch (error) {
       this.logger.error(error);
       throw new UnauthorizedException();

@@ -19,3 +19,4 @@ export * from './workspace.entity';
 export * from './subtitle.entity';
 export * from './folder.entity';
 export * from './quiz.entity';
+export * from './vocabulary.entity';

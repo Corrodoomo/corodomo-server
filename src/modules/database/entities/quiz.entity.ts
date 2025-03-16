@@ -3,8 +3,8 @@ import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { Lesson } from './lesson.entity';
 
-@Index('quizes_pkey', ['id'], { unique: true })
-@Entity('quizes', { schema: 'public' })
+@Index('quizzes_pkey', ['id'], { unique: true })
+@Entity('quizzes', { schema: 'public' })
 export class Quiz extends BaseEntity {
   @Column('character varying', { name: 'question' })
   question: string;

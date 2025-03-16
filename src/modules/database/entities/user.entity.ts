@@ -3,6 +3,7 @@ import { Column, Entity, Index, OneToMany } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { Blog } from './blog.entity';
 import { Exam } from './exam.entity';
+import { Folder } from './folder.entity';
 import { GroupTask } from './group-task.entity';
 import { LessonComment } from './lesson-comment.entity';
 import { Lesson } from './lesson.entity';
@@ -10,7 +11,6 @@ import { Note } from './note.entity';
 import { Song } from './song.entity';
 import { TaskComment } from './task-comment.entity';
 import { Workspace } from './workspace.entity';
-import { Folder } from './folder.entity';
 
 @Index('users_pkey', ['id'], { unique: true })
 @Entity('users', { schema: 'public' })
@@ -23,6 +23,9 @@ export class User extends BaseEntity {
 
   @Column('character varying', { name: 'role', default: 'learner' })
   role: string;
+
+  @Column('boolean', { name: 'email_verified', default: false })
+  emailVerified: string;
 
   @OneToMany(() => Blog, (blog) => blog.createdBy)
   blogs: Blog[];

@@ -3,9 +3,10 @@ import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
 
 import { MetadataKey } from '@common/constants';
+import { SignedInUserDto } from '@common/dtos/user.dto';
+import { Messages } from '@common/enums';
 
 import { CacheService } from './cache.service';
-import { Messages } from '@common/enums';
 
 export class UserCacheService extends CacheService {
   constructor(
@@ -13,6 +14,14 @@ export class UserCacheService extends CacheService {
     private readonly configService: ConfigService
   ) {
     super(redis);
+  }
+
+  async getItem(key: string): Promise<SignedInUserDto> {
+    const value = await this.get(key);
+
+    const [accessToken, refreshToken] = (value || '').split(':');
+
+    return { accessToken, refreshToken };
   }
 
   async setItem(key: string, value: string) {

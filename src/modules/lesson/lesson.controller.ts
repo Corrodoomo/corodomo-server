@@ -1,10 +1,12 @@
-import { Body, Controller, Param, Query } from '@nestjs/common';
+import { Body, Controller, Param, Query, Req } from '@nestjs/common';
 
-import { Get, Post, Put } from '@common/decorators';
-import { InsertResult, UpdateResult } from '@common/dtos';
-import { PaginateQueryDto } from '@common/dtos/common.dto';
-import { IdDto } from '@common/dtos/id.dto';
+import { Get, Post, Put, Roles } from '@common/decorators';
+import { InsertResult, UpdateResultDto } from '@common/dtos';
+import { PaginatedDto, PaginateQueryDto } from '@common/dtos/common.dto';
+import { LessonIdDto } from '@common/dtos/id.dto';
 import { CreateLessonDto } from '@common/dtos/lesson.dto';
+import { SystemRoles } from '@common/enums';
+import { Request } from '@common/models';
 
 import { LessonService } from './lesson.service';
 
@@ -13,17 +15,18 @@ export class LessonController {
   constructor(private readonly lessonService: LessonService) {}
 
   @Post('/', { model: InsertResult })
-  create(@Body() body: CreateLessonDto) {
-    return this.lessonService.create(body);
+  @Roles([SystemRoles.LEARNER])
+  create(@Body() body: CreateLessonDto, @Req() request: Request) {
+    return this.lessonService.create(request.user.id, body);
   }
 
-  @Get('/', { auth: false })
+  @Get('/', { model: PaginatedDto })
   get(@Query() query: PaginateQueryDto) {
     return this.lessonService.get(query);
   }
 
-  @Put('/:id/watched', { auth: false, model: UpdateResult })
-  watch(@Param() params: IdDto): Promise<UpdateResult> {
-    return this.lessonService.watch(params.id);
+  @Put('/:lessonId/watched', { model: UpdateResultDto })
+  watch(@Param() params: LessonIdDto): Promise<UpdateResultDto> {
+    return this.lessonService.watch(params.lessonId);
   }
 }

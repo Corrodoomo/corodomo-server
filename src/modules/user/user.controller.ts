@@ -1,7 +1,9 @@
-import { Body, Controller } from '@nestjs/common';
+import { Body, Controller, Req } from '@nestjs/common';
 
-import { Post } from '@common/decorators';
-import { SignedInUserDto, SignedUpUserDto, SignInUserDto } from '@common/dtos/user.dto';
+import { Post, Roles } from '@common/decorators';
+import { SignedInUserDto, SignedUpUserDto, SignInUserDto } from '@common/dtos';
+import { SystemRoles } from '@common/enums';
+import { Request } from '@common/models';
 
 import { UserService } from './user.service';
 
@@ -17,5 +19,17 @@ export class UserController {
   @Post('signup', { auth: false, model: SignedUpUserDto })
   signUp(@Body() body: SignInUserDto) {
     return this.userService.signUp(body.email, body.password);
+  }
+
+  @Post('signout', { model: SignedUpUserDto })
+  @Roles([SystemRoles.LEARNER])
+  signOut(@Req() request: Request) {
+    return this.userService.signOut(request.user.id);
+  }
+
+  @Post('refresh', { model: SignedUpUserDto })
+  @Roles([SystemRoles.LEARNER])
+  refresh(@Req() request: Request) {
+    return this.userService.refresh(request.user.id);
   }
 }
