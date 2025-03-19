@@ -26,10 +26,6 @@ declare global {
       NODE_ENV: Env;
       /** Port của app */
       PORT: number;
-      /** Tên schema của database */
-      MONGO_URI: string;
-      /** Mã bí mật jwt */
-      AUTH0_SECRET_KEY: string;
     }
   }
 }

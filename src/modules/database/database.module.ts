@@ -22,6 +22,7 @@ import { Subtitle } from './entities/subtitle.entity';
 import { TaskComment } from './entities/task-comment.entity';
 import { Task } from './entities/task.entity';
 import { Workspace } from './entities/workspace.entity';
+import { Vocabulary } from './entities/vocabulary.entity';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { Workspace } from './entities/workspace.entity';
           QuestionChoice,
           LessonComment,
           Lesson,
+          Vocabulary,
           Quiz,
           Subtitle,
           Song,

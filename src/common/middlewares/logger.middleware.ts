@@ -1,9 +1,9 @@
 import { Injectable, Logger, NestMiddleware } from '@nestjs/common';
 import { NextFunction, Response } from 'express';
 import { isEmpty } from 'lodash';
+import { v4 } from 'uuid';
 
 import { Request } from '@common/models';
-import { v4 } from 'uuid';
 
 @Injectable()
 export class LoggerMiddleware implements NestMiddleware {
@@ -42,9 +42,9 @@ export class LoggerMiddleware implements NestMiddleware {
       }
     });
 
-	// Create time id to calc time end of a request
-	req.timeId = v4();
-	console.time(req.timeId);
+    // Create time id to calc time end of a request
+    req.timeId = `[${method}] - ${host} - ${originalUrl} - ${ip} - ${v4()}`;
+    console.time(req.timeId);
 
     next();
   }

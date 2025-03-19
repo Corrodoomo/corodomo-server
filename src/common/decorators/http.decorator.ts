@@ -91,11 +91,19 @@ export const ApiExceptionResponse = () => {
   );
 };
 
-export const Get = (path?: string, options = { auth: true }) => {
-  if (options.auth)
-    return applyDecorators(HttpGet(path), ApiBearerAuth(), UseGuards(AuthenticationGuard, AuthorizationGuard));
+export const Get = (path?: string, options?: HttpOption) => {
+  const defaultOptions = { auth: true, model: '', ...options };
 
-  return applyDecorators(HttpGet(path), ApiBearerAuth());
+  if (defaultOptions.auth)
+    return applyDecorators(
+      HttpGet(path),
+      ApiBearerAuth(),
+      ApiExceptionResponse(),
+      ApiOkResponse(defaultOptions.model),
+      UseGuards(AuthenticationGuard, AuthorizationGuard)
+    );
+
+  return applyDecorators(HttpGet(path), ApiBearerAuth(), ApiExceptionResponse(), ApiOkResponse(defaultOptions.model));
 };
 
 export const Post = (path?: string, options?: HttpOption) => {

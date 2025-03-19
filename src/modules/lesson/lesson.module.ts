@@ -1,3 +1,4 @@
+import { OpenAIService } from '@modules/openai/openai.service';
 import { Module } from '@nestjs/common';
 
 import { LessonController } from './lesson.controller';
@@ -8,6 +9,6 @@ import { LessonService } from './lesson.service';
   imports: [],
   exports: [LessonService],
   controllers: [LessonController],
-  providers: [LessonService, LessonRepository],
+  providers: [LessonService, LessonRepository, OpenAIService],
 })
 export class LessonModule {}

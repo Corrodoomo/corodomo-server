@@ -10,9 +10,11 @@ import { ElasticSearchModule } from '@modules/elastic-search/elastic-search.modu
 import { FolderModule } from '@modules/folder/folder.module';
 import { JwtModule } from '@modules/jwt';
 import { LessonModule } from '@modules/lesson/lesson.module';
+import { OpenAIModule } from '@modules/openai/openai.module';
 import { QuizModule } from '@modules/quiz/quiz.module';
 import { SubtitleModule } from '@modules/subtitle/subtitle.module';
 import { UserModule } from '@modules/user/user.module';
+import { VocabularyModule } from '@modules/vocabulary/vocabulary.module';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
@@ -40,7 +42,9 @@ import { ThrottlerModule } from '@nestjs/throttler';
     FolderModule,
     QuizModule,
     SubtitleModule,
+    VocabularyModule,
     ElasticSearchModule,
+    OpenAIModule,
   ],
   exports: [],
   controllers: [AppController],

@@ -1,19 +1,20 @@
 import { LessonRepository } from '@modules/lesson/lesson.repository';
-import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
+import { LessonService } from '@modules/lesson/lesson.service';
+import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { isEmpty } from 'lodash';
 import { YoutubeTranscript } from 'youtube-transcript';
 
 import { InsertResult } from '@common/dtos';
+import { Messages } from '@common/enums';
 
 import { SubtitleRepository } from './subtitle.repository';
-import { ChatterService } from '@modules/chatter/chatter.service';
 
 @Injectable()
 export class SubtitleService {
   constructor(
     private readonly subtitleRepository: SubtitleRepository,
     private readonly lessonRepository: LessonRepository,
-    private readonly chatterService: ChatterService,
+    private readonly lessonService: LessonService
   ) {}
 
   /**
@@ -21,47 +22,40 @@ export class SubtitleService {
    * @param lesson
    */
   async create(lessonId: string, userId: string) {
-    console.log('123123', lessonId, userId);
     // Find lesson
-    const lesson = await this.lessonRepository.findOne({ where: { id: lessonId } });
+    const lesson = await this.lessonRepository.getRawOne(lessonId, [
+      'id',
+      'tag',
+      'full_subtitles AS "fullSubtitles"',
+      'youtube_url AS "youtubeUrl"',
+      'created_by AS "createdBy"',
+    ]);
 
     // Check lesson
     if (isEmpty(lesson)) {
       throw new BadRequestException();
     }
 
-    // // Check permission
-    // if (lesson.createdBy.id !== userId) {
-    //   throw new ForbiddenException();
-    // }
+    // Check permission
+    if (String(lesson.createdBy) !== userId) {
+      throw new ForbiddenException();
+    }
+
+    // Subtitles are created
+    if (!isEmpty(lesson.fullSubtitles)) {
+      throw new InternalServerErrorException(Messages.ITEM_EXISTED);
+    }
 
     // Fetch youtube transcript
-    const transcripts = await YoutubeTranscript.fetchTranscript('https://www.youtube.com/watch?v=GNHIHdFAZTg');
+    const transcripts = await YoutubeTranscript.fetchTranscript(lesson.youtubeUrl);
 
-    // Sử dụng reduce để tính tổng
-    const duration = transcripts.reduce((accumulator, current) => accumulator + current.duration, 0); // 0 là giá trị khởi tạo của accumulator
-
-    // Save full subtitles of youtube video
-    const fullSubtitles = transcripts.reduce((accumulator, current) => accumulator + `. ${current.text}`, ''); // 0 là giá trị khởi tạo của accumulator
-
-    const topic = await this.chatterService.topic(fullSubtitles);
-
-    // // Update lesson
-    // await this.lessonRepository.update({ id: lessonId }, { duration, fullSubtitles });
-
-    // // Save subtitle
-    // const subtitle = transcripts.map((transcript) => ({
-    //   text: transcript.text,
-    //   duration: transcript.duration,
-    //   offset: transcript.offset,
-    //   language: transcript.lang,
-    //   lesson,
-    // }));
-
-    // // Save subtitle
-    // await this.subtitleRepository.save(subtitle);
+    // Update lessson and subtitle
+    await Promise.all([
+      this.lessonService.classify(lessonId, transcripts),
+      this.subtitleRepository.updateByTranscripts(lessonId, transcripts),
+    ]);
 
     // Return result
-    return topic;
+    return new InsertResult(1);
   }
 }

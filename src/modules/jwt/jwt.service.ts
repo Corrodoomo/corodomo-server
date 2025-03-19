@@ -24,6 +24,13 @@ export class JwtService {
     });
   }
 
+  verifyRefreshToken(token: string) {
+    return this.jwtService.verify<Session>(token, {
+      secret: this.configService.getOrThrow('REFRESH_SECRET_KEY'),
+      algorithms: ['HS256'],
+    });
+  }
+
   signRefreshToken(user: Record<string, string>) {
     return this.jwtService.signAsync(user, {
       secret: this.configService.getOrThrow('REFRESH_SECRET_KEY'),

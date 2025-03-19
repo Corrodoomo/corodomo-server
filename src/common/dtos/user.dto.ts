@@ -28,7 +28,7 @@ export class SignedInUserDto {
   accessToken: string;
 
   @ApiProperty()
-  refreshToken: string;
+  refreshToken?: string;
 }
 
 export class SignedUpUserDto extends InsertResult {

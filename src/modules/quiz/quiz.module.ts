@@ -1,4 +1,4 @@
-import { ChatterModule } from '@modules/chatter/chatter.module';
+import { OpenAIModule } from '@modules/openai/openai.module';
 import { LessonRepository } from '@modules/lesson/lesson.repository';
 import { Module } from '@nestjs/common';
 
@@ -7,7 +7,7 @@ import { QuizRepository } from './quiz.repository';
 import { QuizService } from './quiz.service';
 
 @Module({
-  imports: [ChatterModule],
+  imports: [OpenAIModule],
   providers: [QuizService, QuizRepository, LessonRepository],
   controllers: [QuizController],
 })

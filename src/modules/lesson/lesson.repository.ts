@@ -10,8 +10,8 @@ export class LessonRepository extends Repository<Lesson> {
 
   /**
    * Update watched count
-   * @param lessonId 
-   * @returns 
+   * @param lessonId
+   * @returns
    */
   public updateWatchedCount(lessonId: string) {
     return this.createQueryBuilder()
@@ -19,5 +19,15 @@ export class LessonRepository extends Repository<Lesson> {
       .set({ watchedCount: () => 'watchedCount + 1' }) // Sử dụng hàm SQL trực tiếp để tăng watchedCount
       .where('id = :id', { id: lessonId })
       .execute();
+  }
+
+  /**
+   * Get raw one
+   * @param id 
+   * @param select 
+   * @returns 
+   */
+  public getRawOne(id: string, select: string[] = []) {
+    return this.createQueryBuilder().select(select).where('id = :id').setParameters({ id }).getRawOne<Lesson>();
   }
 }
