@@ -46,12 +46,16 @@ export class FolderService {
    * @returns
    */
   public async update(folderId: string, folder: CreateFolderDto, userId: string) {
-    console.log('folderIdfolderId', folderId, folder, userId);
     // Find folder of user
     const myFolder = await this.folderRepository.findOne({
       where: { id: folderId, createdBy: { id: userId } },
       cache: true,
     });
+
+    // If empty, invalid permisison
+    if (isEmpty(myFolder)) {
+      throw new ForbiddenException(Messages.INVALID_ACCESS_RESOURCE);
+    }
 
     // If empty, invalid permisison
     if (isEmpty(myFolder)) {
