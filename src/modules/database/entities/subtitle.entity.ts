@@ -21,7 +21,7 @@ export class Subtitle extends BaseEntity {
   @Column('character varying', { name: 'language' })
   language: string;
 
-  @ManyToOne(() => Lesson, (lesson) => lesson.subtitles)
+  @ManyToOne(() => Lesson, (lesson) => lesson.subtitles, { nullable: false })
   @JoinColumn([{ name: 'lesson_id', referencedColumnName: 'id' }])
   lesson: Lesson;
 }

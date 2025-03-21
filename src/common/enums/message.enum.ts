@@ -4,4 +4,6 @@ export enum Messages {
   DUPLICATED_SESSION = 'Duplicated session',
   ITEM_EXISTED = 'Items were created',
   ITEM_NOT_FOUND = 'Item is not found',
+  INVALID_ACCESS_RESOURCE = 'Invalid access permission with resources',
+  LIMIT_DURATION_VIDEO = 'Limit duration video is 10 minutes'
 }

@@ -28,7 +28,7 @@ export class Project extends BaseEntity {
   @OneToMany(() => GroupTask, (groupTask) => groupTask.project)
   groupTasks: GroupTask[];
 
-  @ManyToOne(() => Workspace, (workspace) => workspace.projects)
+  @ManyToOne(() => Workspace, (workspace) => workspace.projects, { nullable: false })
   @JoinColumn([{ name: "workspace_id", referencedColumnName: "id" }])
   workspace: Workspace;
 }

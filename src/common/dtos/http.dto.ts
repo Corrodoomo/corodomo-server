@@ -88,3 +88,16 @@ export class UpdateResultDto {
     this.updated = updated;
   }
 }
+
+export class DeleteResultDto {
+  /**
+   * Contains inserted entity id.
+   * Has entity-like structure (not just column database name and values).
+   */
+  @ApiProperty({ example: 1 })
+  deleted: number;
+
+  constructor(deleted: number) {
+    this.deleted = deleted;
+  }
+}

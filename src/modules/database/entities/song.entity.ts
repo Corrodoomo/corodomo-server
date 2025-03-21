@@ -17,7 +17,7 @@ export class Song extends BaseEntity {
 	})
 	duration: number;
 
-	@ManyToOne(() => User, (user) => user.songs)
+	@ManyToOne(() => User, (user) => user.songs, { nullable: false })
 	@JoinColumn([{ name: 'created_by', referencedColumnName: 'id' }])
 	createdBy: User;
 }

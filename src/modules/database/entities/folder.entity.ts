@@ -10,7 +10,7 @@ export class Folder extends BaseEntity {
   @Column('character varying', { name: 'name' })
   name: string;
 
-  @ManyToOne(() => User, (users) => users.folders)
+  @ManyToOne(() => User, (users) => users.folders, { nullable: false })
   @JoinColumn([{ name: 'created_by', referencedColumnName: 'id' }])
   createdBy: User;
 

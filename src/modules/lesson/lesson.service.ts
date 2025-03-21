@@ -1,8 +1,8 @@
+import { LessonEsService } from '@modules/elastic-search/services/lesson-es.service';
 import { OpenAIService } from '@modules/openai/openai.service';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { isNil } from 'lodash';
 import { paginate, PaginateQuery } from 'nestjs-paginate';
-import { TranscriptResponse } from 'youtube-transcript';
 
 import { YOUTUBE_THUMBNAIL_PREFIX } from '@common/constants';
 import { CreateLessonDto, InsertResultDto, InsertResultWithId, UpdateResultDto } from '@common/dtos';
@@ -13,6 +13,7 @@ import { LessonRepository } from './lesson.repository';
 export class LessonService {
   constructor(
     private readonly lessonRepository: LessonRepository,
+    private readonly lessonEsService: LessonEsService,
     private readonly openaiService: OpenAIService
   ) {}
 
@@ -40,6 +41,9 @@ export class LessonService {
       },
       thumbnail: YOUTUBE_THUMBNAIL_PREFIX.replace('{videoId}', youtubeId),
     });
+
+    // Create lesson in Elastic search
+    await this.lessonEsService.indexDocument(createdLesson);
 
     // Return result
     return new InsertResultDto(createdLesson, 1);
@@ -74,17 +78,7 @@ export class LessonService {
    * @param transcripts
    * @returns
    */
-  public async classify(lessonId: string, transcripts: TranscriptResponse[]) {
-    // Calc duration video and full subtitles
-    const { duration, fullSubtitles } = transcripts.reduce(
-      (accumulator, current) => {
-        accumulator.duration += current.duration; // Sum duration
-        accumulator.fullSubtitles += `. ${current.text}`; // Add fullSubtitles
-        return accumulator;
-      },
-      { duration: 0, fullSubtitles: '' }
-    );
-
+  public async classify(lessonId: string, fullSubtitles: string, duration: number) {
     // Tag and level generated
     const [tag, level] = await Promise.all([
       this.openaiService.tag(fullSubtitles),

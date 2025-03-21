@@ -28,7 +28,7 @@ export class OpenAIService {
       Given the following Youtube video description: '${message}'. 
       Please classify this video based on its description. Based on this, please classify it into one of the following topics: ${LESSON_TAGS.join(',')}. 
       If it's difficult to classify into these categories, reply with { 'topic': 'others' }. 
-      Provide the classification result in the following JSON stringify: { 'topic': '?' }.
+      Only reply the classification result in the following JSON stringify: { 'topic': '?' }.
     `;
 
     const response = await this.openai.chat.completions.create({
@@ -121,6 +121,67 @@ export class OpenAIService {
       Classify important 50 words and types of nouns, adjectives, verbs in the following text.
       If 50 words are not enough, try to list as many as possible.
       Only reply with the following JSON stringify: [ { 'word': '?', 'type': '?' } ].
+    `;
+
+    const response = await this.openai.chat.completions.create({
+      model: this.configService.getOrThrow('OPEN_AI_MODEL'), // Bạn có thể thay đổi model tùy ý
+      messages: [
+        {
+          role: 'user',
+          content,
+        },
+      ],
+    });
+
+    const result = response.choices[0].message.content?.replace('```json', '').replace('```', '');
+
+    this.logger.debug(`Vocabulary Generate - ${result}`);
+
+    const vocabularies: OpenAIVocabularyDto[] = JSON.parse(result || '');
+
+    return vocabularies;
+  }
+
+  /**
+   * Chat with chatter
+   * @param message
+   * @returns
+   */
+  async minimap(message: string): Promise<OpenAIVocabularyDto[]> {
+    const content = `
+      Content description: ${message}
+      Classify 50 words on a vocabulary learning roadmap in the following text.
+      Only reply with the following JSON stringify example: 
+      {
+        "vocabularies": {
+          "groups": {
+            "adjectives": {
+              "emotions": {
+                "words": ["happy", "sad", "angry", "excited"]
+               },
+               "describes": {
+                  "words": ["beautiful", "tall", "smart"]
+                }
+            },
+            "verbs": {
+              "foods": {
+                "words": ["eat", "cook"]
+              },
+              "sports": {
+                "words": ["run", "Jump"]
+              }
+            },
+            "nouns": {
+              "colors": {
+                "words": ["red", "blue", "green", "yellow"]
+              },
+              "places": {
+                "words": ["school", "park", "restaurant", "library"]
+              }
+            }
+          }
+        }
+      }
     `;
 
     const response = await this.openai.chat.completions.create({

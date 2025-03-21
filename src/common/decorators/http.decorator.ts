@@ -18,8 +18,8 @@ import {
   ApiOkResponse as BaseApiOkResponse,
   getSchemaPath,
 } from '@nestjs/swagger';
-import { DeleteResult } from 'typeorm';
 
+import { DeleteResultDto } from '@common/dtos';
 import { AuthenticationGuard } from '@common/guards/authentication.guard';
 import { AuthorizationGuard } from '@common/guards/authorization.guard';
 import { HttpOption } from '@common/types';
@@ -124,7 +124,7 @@ export const Post = (path?: string, options?: HttpOption) => {
 export const Put = (path?: string, options?: HttpOption) => {
   const defaultOptions = { auth: true, model: '', ...options };
 
-  if (options?.auth)
+  if (defaultOptions?.auth)
     return applyDecorators(
       HttpPut(path),
       ApiBearerAuth(),
@@ -136,23 +136,27 @@ export const Put = (path?: string, options?: HttpOption) => {
   return applyDecorators(HttpPut(path), ApiBearerAuth(), ApiExceptionResponse(), ApiOkResponse(defaultOptions.model));
 };
 
-export const Delete = (path?: string, options = { auth: true }) => {
-  if (options.auth)
+export const Delete = (path?: string, options?: HttpOption) => {
+  const defaultOptions = { auth: true, model: '', ...options };
+
+  if (defaultOptions.auth)
     return applyDecorators(
       HttpDelete(path),
       ApiBearerAuth(),
-      BaseApiOkResponse({ type: DeleteResult }),
+      ApiExceptionResponse(),
+      ApiOkResponse(DeleteResultDto),
       UseGuards(AuthenticationGuard, AuthorizationGuard)
     );
 
   return applyDecorators(
     HttpDelete(path),
     ApiBearerAuth(),
-    BaseApiOkResponse({ type: DeleteResult }),
+    ApiExceptionResponse(),
+    ApiOkResponse(DeleteResultDto),
     UseGuards(AuthenticationGuard, AuthorizationGuard)
   );
 };
 
 export const Controller = (prefix: string) => {
-  return applyDecorators(HttpController(prefix), ApiTags(prefix), UseFilters());
+  return applyDecorators(HttpController(prefix), ApiTags(prefix));
 };

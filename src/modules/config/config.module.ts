@@ -39,12 +39,12 @@ import * as Joi from 'joi';
         REDIS_PREFIX: Joi.string().optional(),
 
         // ElasticSearch Config
-        ELASTICSEARCH_NODE: Joi.string().required(),
+        ELASTIC_NODE: Joi.string().required(),
         STACK_VERSION: Joi.string().required(),
         ES_PORT: Joi.number().required(),
         KIBANA_PORT: Joi.number().required(),
-        ELASTICSEARCH_USERNAME: Joi.string().required(),
-        ELASTICSEARCH_PASSWORD: Joi.string().required(),
+        ELASTIC_USERNAME: Joi.string().required(),
+        ELASTIC_PASSWORD: Joi.string().required(),
         KIBANA_USERNAME: Joi.string().required(),
         KIBANA_PASSWORD: Joi.string().required(),
 

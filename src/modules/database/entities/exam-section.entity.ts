@@ -25,7 +25,7 @@ export class ExamSection extends BaseEntity {
   @OneToMany(() => ExamPart, (examPart) => examPart.examSection)
   examParts: ExamPart[];
 
-  @ManyToOne(() => Exam, (exams) => exams.examSections)
+  @ManyToOne(() => Exam, (exams) => exams.examSections, { nullable: false })
   @JoinColumn([{ name: "exam_id", referencedColumnName: "id" }])
   exam: Exam;
 }

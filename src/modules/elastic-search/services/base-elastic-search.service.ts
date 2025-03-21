@@ -8,10 +8,9 @@ export class BaseElasticsearchService {
 		protected readonly index: string, // Gán index khi khởi tạo service
 	) {}
 
-	async indexDocument(id: string, body: any) {
+	async indexDocument(body: any) {
 		return this.elasticsearchService.index({
-			index: this.index, // Sử dụng index được truyền từ Generic
-			id,
+			index: this.index,
 			body,
 		});
 	}

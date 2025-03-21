@@ -38,7 +38,7 @@ export class Task extends BaseEntity {
   @OneToMany(() => TaskComment, (taskComment) => taskComment.task)
   taskComments: TaskComment[];
 
-  @ManyToOne(() => GroupTask, (groupTask) => groupTask.tasks)
+  @ManyToOne(() => GroupTask, (groupTask) => groupTask.tasks, { nullable: false })
   @JoinColumn([{ name: "group_task_id", referencedColumnName: "id" }])
   groupTask: GroupTask;
 }

@@ -1,6 +1,8 @@
 export const MetadataKey = {
   REDIS: 'REDIS',
   USER_REDIS: 'USER_REDIS',
+  LESSON_ELASTIC_SEARCH: 'LESSON_ELASTIC_SEARCH',
+  MINIMAP_ELASTIC_SEARCH: 'MINIMAP_ELASTIC_SEARCH',
 };
 
 export const YOUTUBE_THUMBNAIL_PREFIX = 'https://img.youtube.com/vi/{videoId}/maxresdefault.jpg';
@@ -32,3 +34,5 @@ export const LESSON_TAGS = [
   'toefl',
   'others',
 ];
+
+export const LIMIT_DURATION_VIDEO = 650;

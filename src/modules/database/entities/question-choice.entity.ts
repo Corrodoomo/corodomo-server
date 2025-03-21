@@ -11,7 +11,7 @@ export class QuestionChoice extends BaseEntity {
   @Column("character varying", { name: "option" })
   option: string;
 
-  @ManyToOne(() => Question, (question) => question.questionChoices)
+  @ManyToOne(() => Question, (question) => question.questionChoices, { nullable: false })
   @JoinColumn([{ name: "question_id", referencedColumnName: "id" }])
   question: Question;
 }

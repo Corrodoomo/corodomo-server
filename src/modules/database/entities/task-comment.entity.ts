@@ -9,11 +9,11 @@ export class TaskComment extends BaseEntity {
   @Column("character varying", { name: "content", nullable: true })
   content: string | null;
   
-  @ManyToOne(() => User, (user) => user.taskComments)
+  @ManyToOne(() => User, (user) => user.taskComments, { nullable: false })
   @JoinColumn([{ name: "created_by", referencedColumnName: "id" }])
   createdBy: User;
 
-  @ManyToOne(() => Task, (task) => task.taskComments)
+  @ManyToOne(() => Task, (task) => task.taskComments, { nullable: false })
   @JoinColumn([{ name: "task_id", referencedColumnName: "id" }])
   task: Task;
 }

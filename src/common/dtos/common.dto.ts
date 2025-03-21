@@ -186,3 +186,16 @@ export class PaginatedDto<T> {
   })
   links: LinksDto;
 }
+
+export class ItemsDto<T> {
+  @ApiProperty({
+    description: 'The list of data items',
+    type: [Object], // Đảm bảo type chính xác của T nếu có thể
+    example: [{}], // Ví dụ mẫu dữ liệu cho T
+  })
+  items: T[];
+
+  constructor(items: T[]) {
+    this.items = items;
+  }
+}
