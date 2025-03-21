@@ -7,6 +7,7 @@ import { Quiz } from './quiz.entity';
 import { Subtitle } from './subtitle.entity';
 import { User } from './user.entity';
 import { Vocabulary } from './vocabulary.entity';
+import { NotedVocabulary } from './noted-vocabulary.entity';
 
 @Index('lessons_pkey', ['id'], { unique: true })
 @Entity('lessons', { schema: 'public' })
@@ -22,6 +23,12 @@ export class Lesson extends BaseEntity {
 
   @Column('character varying', { name: 'tag', nullable: true })
   tag: string;
+
+  @Column('character varying', { name: 'note', nullable: true })
+  note: string;
+
+  @Column('character varying', { name: 'minimap_id', nullable: true })
+  minimapId: string;
 
   @Column('int', { name: 'level', nullable: true })
   level: string;
@@ -56,6 +63,9 @@ export class Lesson extends BaseEntity {
 
   @OneToMany(() => Vocabulary, (vocabulary) => vocabulary.lesson)
   vocabularies: Vocabulary[];
+
+  @OneToMany(() => NotedVocabulary, (notedVocabulary) => notedVocabulary.lesson)
+  notedVocabularies: NotedVocabulary[];
 
   @ManyToOne(() => User, (user) => user.lessons, { nullable: false })
   @JoinColumn([{ name: 'created_by', referencedColumnName: 'id' }])

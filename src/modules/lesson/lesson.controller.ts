@@ -21,11 +21,13 @@ export class LessonController {
   }
 
   @Get('/', { model: PaginatedDto })
+  @Roles([SystemRoles.LEARNER])
   get(@Query() query: PaginateQueryDto) {
     return this.lessonService.get(query);
   }
 
   @Put('/:lessonId/watched', { model: UpdateResultDto })
+  @Roles([SystemRoles.LEARNER])
   watch(@Param() params: LessonIdDto): Promise<UpdateResultDto> {
     return this.lessonService.watch(params.lessonId);
   }

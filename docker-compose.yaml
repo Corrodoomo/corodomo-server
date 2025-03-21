@@ -1,110 +1,112 @@
 services:
-    corodomo_postgres:
-        image: postgres
-        container_name: corodomo_pgdb
-        restart: always
-        ports:
-            - '5432:5432'
-        environment:
-            POSTGRES_USER: corodomo_admin
-            POSTGRES_PASSWORD: corodomo_2931
-        networks:
-            - pgnetwork
-        volumes:
-            - corodomo_pgdata:/var/lib/postgresql/data
+  corodomo_postgres:
+    image: postgres
+    container_name: corodomo_pgdb
+    restart: always
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      PGDATA: /data/postgres
+    networks:
+      - pgnetwork
+    volumes:
+      - ./src/databases/resources:/var/lib/data/resources
+      - ./src/databases/resources/backup.sql:/docker-entrypoint-initdb.d/backup.sql
 
-    corodomo_pgadmin:
-        image: dpage/pgadmin4
-        container_name: corodomo_pgadmin_container
-        restart: always
-        ports:
-            - '5050:80'
-        environment:
-            PGADMIN_DEFAULT_EMAIL: corodomo@mail.com
-            PGADMIN_DEFAULT_PASSWORD: corodomo
-        networks:
-            - pgnetwork
-        volumes:
-            - corodomo_pgadmin:/var/lib/pgadmin
+  corodomo_pgadmin:
+    image: dpage/pgadmin4
+    container_name: corodomo_pgadmin_container
+    restart: always
+    ports:
+      - '5050:80'
+    environment:
+      PGADMIN_DEFAULT_EMAIL: corodomo@mail.com
+      PGADMIN_DEFAULT_PASSWORD: corodomo
+    networks:
+      - pgnetwork
+    volumes:
+      - corodomo_pgadmin:/var/lib/pgadmin
 
-    codoromo_redis:
-        container_name: codoromo_redis_container
-        image: redis:7-alpine
-        restart: always
-        command: redis-server --save 20 1 --loglevel warning --requirepass codoromo
-        ports:
-            - 6379:6379
-        volumes:
-            - .docker/redis:/data
-        networks:
-            - pgnetwork
+  codoromo_redis:
+    container_name: codoromo_redis_container
+    image: redis:7-alpine
+    restart: always
+    command: redis-server --save 20 1 --loglevel warning --requirepass ${REDIS_PASSWORD}
+    ports:
+      - 6379:6379
+    volumes:
+      - .docker/redis:/data
+    networks:
+      - pgnetwork
 
-    elasticsearch:
-        container_name: elasticsearch
-        image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
-        restart: always
-        volumes:
-            - elastic-data:/usr/share/elasticsearch/data
-        ports:
-            - ${ES_PORT}:9200
-        environment:
-            discovery.type: 'single-node'
-            bootstrap.memory_lock: true
-            xpack.security.enabled: false
-            xpack.security.enrollment.enabled: false
-            ELASTIC_USERNAME: ${ELASTIC_USERNAME}
-            ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
-            ES_JAVA_OPTS: '-Xms128m -Xmx512m'
-        healthcheck:
-            test:
-                [
-                    'CMD-SHELL',
-                    'curl -s --fail http://localhost:9200/_cluster/health | grep -q
-                    ''"status":"green"'' || curl -s --fail http://localhost:9200/_cluster/health |
-                    grep -q ''"status":"yellow"''',
-                ]
-            interval: 10s
-            timeout: 10s
-            retries: 120
-        ulimits:
-            memlock:
-                soft: -1
-                hard: -1
-        networks:
-            - pgnetwork
+  elasticsearch:
+    container_name: elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    restart: always
+    volumes:
+      - elastic-data:/usr/share/elasticsearch/data
+    ports:
+      - ${ES_PORT}:9200
+    environment:
+      discovery.type: 'single-node'
+      bootstrap.memory_lock: true
+      xpack.security.enabled: false
+      xpack.security.enrollment.enabled: false
+      ELASTIC_USERNAME: ${ELASTIC_USERNAME}
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
+      ES_JAVA_OPTS: '-Xms128m -Xmx512m'
+    healthcheck:
+      test: [
+          'CMD-SHELL',
+          'curl -s --fail http://localhost:9200/_cluster/health | grep -q
+          ''"status":"green"'' || curl -s --fail http://localhost:9200/_cluster/health |
+          grep -q ''"status":"yellow"''',
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    networks:
+      - pgnetwork
 
-    kibana:
-        container_name: kibana
-        image: docker.elastic.co/kibana/kibana:${STACK_VERSION}
-        labels:
-            co.elastic.logs/module: kibana
-        volumes:
-            - kibanadata:/usr/share/kibana/data
-        ports:
-            - ${KIBANA_PORT}:5601
-        restart: always
-        environment:
-            ELASTICSEARCH_HOSTS: http://elasticsearch:9200
-            ELASTIC_USERNAME: ${KIBANA_USERNAME}
-            ELASTIC_PASSWORD: ${KIBANA_PASSWORD}
-        depends_on:
-            - elasticsearch
-        healthcheck:
-            test: ['CMD-SHELL', 'curl -s --fail http://localhost:5601/api/status']
-            interval: 10s
-            timeout: 10s
-            retries: 120
-        networks:
-            - pgnetwork
+  kibana:
+    container_name: kibana
+    image: docker.elastic.co/kibana/kibana:${STACK_VERSION}
+    labels:
+      co.elastic.logs/module: kibana
+    volumes:
+      - kibanadata:/usr/share/kibana/data
+    ports:
+      - ${KIBANA_PORT}:5601
+    restart: always
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+      ELASTIC_USERNAME: ${KIBANA_USERNAME}
+      ELASTIC_PASSWORD: ${KIBANA_PASSWORD}
+    depends_on:
+      - elasticsearch
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -s --fail http://localhost:5601/api/status']
+      interval: 10s
+      timeout: 10s
+      retries: 120
+    networks:
+      - pgnetwork
 
 networks:
-    pgnetwork:
-        driver: bridge
+  pgnetwork:
+    driver: bridge
 
 volumes:
-    corodomo_pgdata:
-    corodomo_pgadmin:
-    elastic-data:
-        driver: local
-    kibanadata:
-        driver: local
+  corodomo_pgdata:
+  corodomo_pgadmin:
+  elastic-data:
+    driver: local
+  kibanadata:
+    driver: local

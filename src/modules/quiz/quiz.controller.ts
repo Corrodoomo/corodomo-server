@@ -8,7 +8,7 @@ import { Request } from '@common/models';
 
 import { QuizService } from './quiz.service';
 
-@Controller('quizes')
+@Controller('quizzes')
 export class QuizController {
   constructor(private readonly quizService: QuizService) {}
 

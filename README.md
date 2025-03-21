@@ -73,3 +73,5 @@ amazing backers. If you'd like to join them, please
 ## License
 
 Nest is [MIT licensed](LICENSE).
+
+docker exec -t <container_name_or_id> pg_dump -U <postgres_user> -E UTF8 <database_name> > backup.sql

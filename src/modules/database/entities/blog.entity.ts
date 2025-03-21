@@ -11,7 +11,7 @@ export class Blog extends BaseEntity {
   @Column("character varying", { name: "content" })
   content: string;
 
-  @ManyToOne(() => User, (users) => users.blogs)
+  @ManyToOne(() => User, (users) => users.blogs, { nullable: false })
   @JoinColumn([{ name: "created_by", referencedColumnName: "id" }])
   createdBy: User;
 }

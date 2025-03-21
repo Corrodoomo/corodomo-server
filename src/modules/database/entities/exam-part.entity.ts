@@ -16,7 +16,7 @@ export class ExamPart extends BaseEntity {
   @Column("character varying", { name: "title" })
   title: string;
 
-  @ManyToOne(() => ExamSection, (examSections) => examSections.examParts)
+  @ManyToOne(() => ExamSection, (examSections) => examSections.examParts, { nullable: false })
   @JoinColumn([{ name: "exam_section_id", referencedColumnName: "id" }])
   examSection: ExamSection;
 

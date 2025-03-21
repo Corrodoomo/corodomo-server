@@ -11,7 +11,7 @@ export class Note extends BaseEntity {
   @Column("character varying", { name: "status", default: 'pending' })
   status: string;
 
-  @ManyToOne(() => User, (user) => user.notes)
+  @ManyToOne(() => User, (user) => user.notes, { nullable: false })
   @JoinColumn([{ name: "created_by", referencedColumnName: "id" }])
   createdBy: User;
 }

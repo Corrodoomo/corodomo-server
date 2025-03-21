@@ -15,7 +15,7 @@ export class Question extends BaseEntity {
 	@OneToMany(() => QuestionChoice, (questionChoice) => questionChoice.question)
 	questionChoices: QuestionChoice[];
 
-	@ManyToOne(() => ExamPart, (examPart) => examPart.questions)
+	@ManyToOne(() => ExamPart, (examPart) => examPart.questions, { nullable: false })
 	@JoinColumn([{ name: 'exam_part_id', referencedColumnName: 'id' }])
 	examPart: ExamPart;
 }

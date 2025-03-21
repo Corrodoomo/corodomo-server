@@ -13,6 +13,7 @@ import { GroupTask } from './entities/group-task.entity';
 import { LessonComment } from './entities/lesson-comment.entity';
 import { Lesson } from './entities/lesson.entity';
 import { Note } from './entities/note.entity';
+import { NotedVocabulary } from './entities/noted-vocabulary.entity';
 import { Project } from './entities/project.entity';
 import { QuestionChoice } from './entities/question-choice.entity';
 import { Question } from './entities/question.entity';
@@ -21,8 +22,8 @@ import { SubTask } from './entities/sub-task.entity';
 import { Subtitle } from './entities/subtitle.entity';
 import { TaskComment } from './entities/task-comment.entity';
 import { Task } from './entities/task.entity';
-import { Workspace } from './entities/workspace.entity';
 import { Vocabulary } from './entities/vocabulary.entity';
+import { Workspace } from './entities/workspace.entity';
 
 @Module({
   imports: [
@@ -62,6 +63,7 @@ import { Vocabulary } from './entities/vocabulary.entity';
           QuestionChoice,
           LessonComment,
           Lesson,
+          NotedVocabulary,
           Vocabulary,
           Quiz,
           Subtitle,

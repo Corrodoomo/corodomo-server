@@ -23,7 +23,7 @@ export class SubTask extends BaseEntity {
   @Column("timestamp without time zone", { name: "ended_at" })
   endedAt: Date;
 
-  @ManyToOne(() => Task, (task) => task.subTasks)
+  @ManyToOne(() => Task, (task) => task.subTasks, { nullable: false })
   @JoinColumn([{ name: "task_id", referencedColumnName: "id" }])
   task: Task;
 }

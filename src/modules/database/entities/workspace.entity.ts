@@ -22,7 +22,7 @@ export class Workspace extends BaseEntity {
   @OneToMany(() => Project, (projects) => projects.workspace)
   projects: Project[];
 
-  @ManyToOne(() => User, (users) => users.workspaces)
+  @ManyToOne(() => User, (users) => users.workspaces, { nullable: false })
   @JoinColumn([{ name: "created_by", referencedColumnName: "id" }])
   createdBy: User;
 }

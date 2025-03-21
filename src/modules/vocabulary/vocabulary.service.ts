@@ -1,3 +1,4 @@
+import { MinimapElasticSearchService } from '@modules/elastic-search/services/minimap-es.service';
 import { LessonRepository } from '@modules/lesson/lesson.repository';
 import { OpenAIService } from '@modules/openai/openai.service';
 import { BadRequestException, Injectable } from '@nestjs/common';
@@ -12,7 +13,8 @@ export class VocabularyService {
   constructor(
     private readonly vocabularyRepository: VocabularyRepository,
     private readonly lessonRepository: LessonRepository,
-    private readonly openaiService: OpenAIService
+    private readonly openaiService: OpenAIService,
+    private readonly minimapEsService: MinimapElasticSearchService
   ) {}
 
   /**
@@ -30,12 +32,21 @@ export class VocabularyService {
     }
 
     // Generate vocabularies
-    const vocabularies = await this.openaiService.vocabulary(lesson.fullSubtitles);
+    const [vocabularies, minimap] = await Promise.all([
+      this.openaiService.vocabulary(lesson.fullSubtitles),
+      this.openaiService.minimap(lesson.fullSubtitles),
+    ]);
+
+    // Save document to elastic search
+    const document = await this.minimapEsService.indexDocument(minimap);
 
     // Save them to db
-    await this.vocabularyRepository.save(vocabularies);
+    await Promise.all([
+      this.vocabularyRepository.save(vocabularies.map((vocabulary) => ({ ...vocabulary, lesson: { id: lessonId } }))),
+      this.lessonRepository.update({ id: lessonId }, { minimapId: document._id }),
+    ]);
 
     // Return result
-    return new InsertResultDto(vocabularies, vocabularies.length);
+    return new InsertResultDto(minimap, minimap.length);
   }
 }

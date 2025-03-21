@@ -15,7 +15,7 @@ export class Quiz extends BaseEntity {
   @Column('character', { name: 'answer' })
   answer: string;
 
-  @ManyToOne(() => Lesson, (lesson) => lesson.quizes)
+  @ManyToOne(() => Lesson, (lesson) => lesson.quizes, { nullable: false })
   @JoinColumn([{ name: 'lesson_id', referencedColumnName: 'id' }])
   lesson: Lesson;
 }
