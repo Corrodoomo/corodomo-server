@@ -1,5 +1,5 @@
-import { LessonRepository } from '@modules/lesson/lesson.repository';
-import { LessonService } from '@modules/lesson/lesson.service';
+import { LessonRepository } from '@app/apis/lesson/lesson.repository';
+import { LessonService } from '@app/apis/lesson/lesson.service';
 import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { isEmpty } from 'lodash';
 import { YoutubeTranscript } from 'youtube-transcript';

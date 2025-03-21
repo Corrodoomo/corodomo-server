@@ -1,4 +1,4 @@
-import { LessonRepository } from '@modules/lesson/lesson.repository';
+import { LessonRepository } from '@app/apis/lesson/lesson.repository';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { isEmpty } from 'lodash';
 

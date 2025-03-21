@@ -1,5 +1,5 @@
-import { LessonRepository } from '@modules/lesson/lesson.repository';
-import { LessonService } from '@modules/lesson/lesson.service';
+import { LessonRepository } from '@app/apis/lesson/lesson.repository';
+import { LessonService } from '@app/apis/lesson/lesson.service';
 import { OpenAIService } from '@modules/openai/openai.service';
 import { YoutubeService } from '@modules/youtube/youtube.service';
 import { Module } from '@nestjs/common';

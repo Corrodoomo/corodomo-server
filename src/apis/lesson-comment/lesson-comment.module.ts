@@ -1,4 +1,4 @@
-import { LessonRepository } from '@modules/lesson/lesson.repository';
+import { LessonRepository } from '@app/apis/lesson/lesson.repository';
 import { Module } from '@nestjs/common';
 
 import { LessonCommentController } from './lesson-comment.controller';

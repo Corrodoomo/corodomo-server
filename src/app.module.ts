@@ -7,21 +7,21 @@ import { ConfigModule } from '@modules/config/config.module';
 import { CronModule } from '@modules/cron';
 import { DatabaseModule } from '@modules/database/database.module';
 import { ElasticSearchModule } from '@modules/elastic-search/elastic-search.module';
-import { FolderModule } from '@modules/folder/folder.module';
+import { FolderModule } from '@app/apis/folder/folder.module';
 import { JwtModule } from '@modules/jwt';
-import { LessonModule } from '@modules/lesson/lesson.module';
-import { NotedVocabularyModule } from '@modules/noted-vocabulary/noted-vocabulary.module';
+import { LessonModule } from '@app/apis/lesson/lesson.module';
+import { NotedVocabularyModule } from '@app/apis/noted-vocabulary/noted-vocabulary.module';
 import { OpenAIModule } from '@modules/openai/openai.module';
-import { QuizModule } from '@modules/quiz/quiz.module';
-import { SubtitleModule } from '@modules/subtitle/subtitle.module';
-import { UserModule } from '@modules/user/user.module';
-import { VocabularyModule } from '@modules/vocabulary/vocabulary.module';
+import { QuizModule } from '@app/apis/quiz/quiz.module';
+import { SubtitleModule } from '@app/apis/subtitle/subtitle.module';
+import { UserModule } from '@app/apis/user/user.module';
+import { VocabularyModule } from '@app/apis/vocabulary/vocabulary.module';
 import { YoutubeModule } from '@modules/youtube/youtube.module';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 
-import { LessonCommentModule } from './modules/lesson-comment/lesson-comment.module';
+import { LessonCommentModule } from './apis/lesson-comment/lesson-comment.module';
 
 @Module({
   imports: [

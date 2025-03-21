@@ -1,5 +1,5 @@
 import { OpenAIModule } from '@modules/openai/openai.module';
-import { LessonRepository } from '@modules/lesson/lesson.repository';
+import { LessonRepository } from '@app/apis/lesson/lesson.repository';
 import { Module } from '@nestjs/common';
 
 import { QuizController } from './quiz.controller';

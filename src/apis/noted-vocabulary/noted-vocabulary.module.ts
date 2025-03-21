@@ -3,7 +3,7 @@ import { Module } from '@nestjs/common';
 import { NotedVocabularyController } from './noted-vocabulary.controller';
 import { NotedVocabularyRepository } from './noted-vocabulary.repository';
 import { NotedVocabularyService } from './noted-vocabulary.service';
-import { LessonRepository } from '@modules/lesson/lesson.repository';
+import { LessonRepository } from '@app/apis/lesson/lesson.repository';
 
 @Module({
   providers: [NotedVocabularyService, NotedVocabularyRepository, LessonRepository],

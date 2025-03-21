@@ -1,4 +1,4 @@
-import { LessonRepository } from '@modules/lesson/lesson.repository';
+import { LessonRepository } from '@app/apis/lesson/lesson.repository';
 import { OpenAIService } from '@modules/openai/openai.service';
 import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { isEmpty } from 'lodash';

@@ -1,5 +1,5 @@
 import { MinimapEsService } from '@modules/elastic-search/services/minimap-es.service';
-import { LessonRepository } from '@modules/lesson/lesson.repository';
+import { LessonRepository } from '@app/apis/lesson/lesson.repository';
 import { OpenAIService } from '@modules/openai/openai.service';
 import { BadRequestException, Injectable } from '@nestjs/common';
 
