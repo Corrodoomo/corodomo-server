@@ -64,7 +64,7 @@ export class QuizService {
     }
 
     // Get content
-    const result = await this.openaiService.quiz(this.substring(lesson.fullSubtitles));
+    const result = await this.openaiService.quiz(this.substring(lesson.fullSubtitles), lesson.language);
 
     // Mapping quizzes
     const quizzes = result.map((quiz) => ({

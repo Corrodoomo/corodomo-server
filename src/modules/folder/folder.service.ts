@@ -1,5 +1,5 @@
 import { Folder } from '@modules/database/entities';
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { isEmpty } from 'lodash';
 
 import { CreateFolderDto, DeleteResultDto, InsertResultDto, UpdateResultDto } from '@common/dtos';
@@ -47,18 +47,15 @@ export class FolderService {
    */
   public async update(folderId: string, folder: CreateFolderDto, userId: string) {
     // Find folder of user
-    const myFolder = await this.folderRepository.findOne({
-      where: { id: folderId, createdBy: { id: userId } },
-      cache: true,
-    });
+    const myFolder = await this.folderRepository.getRawOne(folderId, ['id', 'created_by as "createdBy"']);
 
     // If empty, invalid permisison
     if (isEmpty(myFolder)) {
-      throw new ForbiddenException(Messages.INVALID_ACCESS_RESOURCE);
+      throw new BadRequestException(Messages.ITEM_NOT_FOUND);
     }
 
     // If empty, invalid permisison
-    if (isEmpty(myFolder)) {
+    if (myFolder.createdBy !== userId) {
       throw new ForbiddenException(Messages.INVALID_ACCESS_RESOURCE);
     }
 
@@ -76,13 +73,15 @@ export class FolderService {
    */
   public async delete(folderId: string, userId: string) {
     // Find folder of user
-    const myFolder = await this.folderRepository.findOne({
-      where: { id: folderId, createdBy: { id: userId } },
-      cache: true,
-    });
+    const myFolder = await this.folderRepository.getRawOne(folderId, ['id', 'created_by as "createdBy"']);
 
     // If empty, invalid permisison
     if (isEmpty(myFolder)) {
+      throw new BadRequestException(Messages.ITEM_NOT_FOUND);
+    }
+
+    // If empty, invalid permisison
+    if (myFolder.createdBy !== userId) {
       throw new ForbiddenException(Messages.INVALID_ACCESS_RESOURCE);
     }
 

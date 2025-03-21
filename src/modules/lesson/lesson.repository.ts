@@ -1,9 +1,12 @@
 import { Lesson } from '@modules/database/entities';
 import { Injectable } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource } from 'typeorm';
+
+import { LessonTagDto } from '@common/dtos';
+import { BaseRepository } from '@common/repository';
 
 @Injectable()
-export class LessonRepository extends Repository<Lesson> {
+export class LessonRepository extends BaseRepository<Lesson> {
   constructor(private dataSource: DataSource) {
     super(Lesson, dataSource.createEntityManager());
   }
@@ -22,12 +25,10 @@ export class LessonRepository extends Repository<Lesson> {
   }
 
   /**
-   * Get raw one
-   * @param id 
-   * @param select 
-   * @returns 
+   * Get distinc tags
+   * @returns
    */
-  public getRawOne(id: string, select: string[] = []) {
-    return this.createQueryBuilder().select(select).where('id = :id').setParameters({ id }).getRawOne<Lesson>();
+  public getDistinctTags() {
+    return this.createQueryBuilder('lesson').select('tag').distinct(true).getRawMany<LessonTagDto>();
   }
 }

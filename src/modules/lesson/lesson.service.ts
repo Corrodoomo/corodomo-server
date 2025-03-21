@@ -1,11 +1,23 @@
 import { LessonEsService } from '@modules/elastic-search/services/lesson-es.service';
+import { MinimapEsService } from '@modules/elastic-search/services/minimap-es.service';
 import { OpenAIService } from '@modules/openai/openai.service';
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { isNil } from 'lodash';
-import { paginate, PaginateQuery } from 'nestjs-paginate';
+import { YoutubeService } from '@modules/youtube/youtube.service';
+import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
+import { isEmpty } from 'lodash';
+import { FilterOperator, paginate, PaginateQuery } from 'nestjs-paginate';
 
-import { YOUTUBE_THUMBNAIL_PREFIX } from '@common/constants';
-import { CreateLessonDto, InsertResultDto, InsertResultWithId, UpdateResultDto } from '@common/dtos';
+import { LIMIT_DURATION_VIDEO } from '@common/constants';
+import {
+  CreateLessonDto,
+  DeleteResultDto,
+  InsertResultDto,
+  ListTagsDto,
+  UpdateNoteDto,
+  UpdateRawResultDto,
+  UpdateResultDto,
+} from '@common/dtos';
+import { ItemDto } from '@common/dtos/common.dto';
+import { Messages } from '@common/enums';
 
 import { LessonRepository } from './lesson.repository';
 
@@ -14,7 +26,9 @@ export class LessonService {
   constructor(
     private readonly lessonRepository: LessonRepository,
     private readonly lessonEsService: LessonEsService,
-    private readonly openaiService: OpenAIService
+    private readonly minimapEsService: MinimapEsService,
+    private readonly openaiService: OpenAIService,
+    private readonly youtubeService: YoutubeService
   ) {}
 
   /**
@@ -22,24 +36,29 @@ export class LessonService {
    * @param lesson
    * @returns
    */
-  public async create(userId: string, lesson: CreateLessonDto): Promise<InsertResultWithId> {
-    const youtubeId = new URLSearchParams(new URL(lesson.youtubeUrl).search).get('v');
+  public async create(userId: string, lesson: CreateLessonDto) {
+    // Get metadata youtube
+    const metadata = await this.youtubeService.getMetadata(lesson.youtubeUrl);
+    const duration = Number(metadata.videoDetails.lengthSeconds);
 
-    // Check if youtube not null or undefined
-    if (isNil(youtubeId)) {
-      throw new BadRequestException();
+    // Duration limit
+    if (duration > LIMIT_DURATION_VIDEO) {
+      throw new BadRequestException(Messages.LIMIT_DURATION_VIDEO);
     }
 
     // Create lesson
     const createdLesson = await this.lessonRepository.save({
       ...lesson,
+      title: metadata.videoDetails.title,
+      duration,
+      tag: metadata.videoDetails.category,
+      thumbnail: metadata.videoDetails.thumbnails[metadata.videoDetails.thumbnails.length - 1].url,
       folder: {
         id: lesson.folderId,
       },
       createdBy: {
         id: userId,
       },
-      thumbnail: YOUTUBE_THUMBNAIL_PREFIX.replace('{videoId}', youtubeId),
     });
 
     // Create lesson in Elastic search
@@ -50,14 +69,69 @@ export class LessonService {
   }
 
   /**
+   * Delete lesson by id
+   * @param lesson
+   * @returns
+   */
+  public async delete(userId: string, lessonId: string) {
+    // Get lesson by id
+    const lesson = await this.lessonRepository.getRawOne(lessonId);
+
+    // Error if lesson not found
+    if (isEmpty(lesson)) {
+      throw new BadRequestException(Messages.ITEM_NOT_FOUND);
+    }
+
+    // Error if permission invalid
+    if (lesson.createdBy !== userId) {
+      throw new ForbiddenException(Messages.INVALID_ACCESS_RESOURCE);
+    }
+
+    // Delete casade. It will delete all records have a FK lesson_id
+    await this.lessonRepository.delete(lessonId);
+
+    // Return result
+    return new DeleteResultDto(1);
+  }
+
+  /**
+   * Get list of lesson tags
+   */
+  public async getListTags() {
+    // Get tag list
+    const tags = await this.lessonRepository.getDistinctTags();
+
+    // Return result
+    return new ListTagsDto(tags);
+  }
+
+  /**
    * Get lesson pagination
    * @param query
    * @returns
    */
   public async get(query: PaginateQuery) {
     return paginate(query, this.lessonRepository, {
-      sortableColumns: ['tag'],
-      select: ['id', 'tag', 'language', 'duration', 'watchedCount', 'createdAt', 'youtubeUrl'],
+      sortableColumns: ['id', 'tag', 'level', 'title'],
+      searchableColumns: ['tag', 'language', 'level', 'title'],
+      select: [
+        'id',
+        'title',
+        'level',
+        'note',
+        'tag',
+        'language',
+        'level',
+        'watchedAt',
+        'watchedCount',
+        'youtubeUrl',
+        'thumbnail',
+        'duration',
+      ],
+      filterableColumns: {
+        language: [FilterOperator.EQ],
+        level: [FilterOperator.EQ],
+      },
     });
   }
 
@@ -67,8 +141,10 @@ export class LessonService {
    * @returns
    */
   public async watch(lessonId: string): Promise<UpdateResultDto> {
+    // Update watchedAt and watchedCount
     await this.lessonRepository.updateWatchedCount(lessonId);
 
+    // Return result
     return new UpdateResultDto(1);
   }
 
@@ -78,14 +154,79 @@ export class LessonService {
    * @param transcripts
    * @returns
    */
-  public async classify(lessonId: string, fullSubtitles: string, duration: number) {
+  public async classify(lessonId: string, fullSubtitles: string) {
     // Tag and level generated
-    const [tag, level] = await Promise.all([
-      this.openaiService.tag(fullSubtitles),
-      this.openaiService.level(fullSubtitles),
-    ]);
+    const level = await this.openaiService.level(fullSubtitles);
 
     // Update lesson
-    return this.lessonRepository.update({ id: lessonId }, { duration, fullSubtitles, tag, level });
+    return this.lessonRepository.update({ id: lessonId }, { fullSubtitles, level });
+  }
+
+  /**
+   * Create a note lesson
+   * @param lessonId
+   * @param userId
+   * @param body
+   * @returns
+   */
+  public async note(lessonId: string, userId: string, body: UpdateNoteDto) {
+    // Check lesson
+    const lesson = await this.lessonRepository.getRawOne(lessonId, ['id', 'created_by as "createdBy"']);
+
+    // Check if lesson not found
+    if (isEmpty(lesson)) {
+      throw new BadRequestException(Messages.ITEM_NOT_FOUND);
+    }
+
+    // Check if no permission
+    if (lesson.createdBy !== userId) {
+      throw new ForbiddenException(Messages.INVALID_ACCESS_RESOURCE);
+    }
+
+    // Update note
+    await this.lessonRepository.update({ id: lessonId }, { note: body.content });
+
+    lesson.note = body.content;
+
+    // Return result
+    return new UpdateRawResultDto(lesson, 1);
+  }
+
+  /**
+   * Get detail for learn
+   * @param lessonId
+   * @returns
+   */
+  public async getDetail(lessonId: string) {
+    // Get lesson by id
+    const lesson = await this.lessonRepository.findOne({
+      where: { id: lessonId },
+      select: ['id', 'tag', 'duration', 'language', 'level', 'note', 'watchedCount'],
+      relations: ['notedVocabularies', 'comments', 'subtitles'],
+    });
+
+    // Return result
+    return new ItemDto(lesson);
+  }
+
+  /**
+   * Get minimaps
+   * @param lessonId
+   * @returns
+   */
+  public async getMinimaps(lessonId: string) {
+    // Get lesson by id
+    const lesson = await this.lessonRepository.getById(lessonId, ['id', 'minimapId']);
+
+    // Error if lesson not found
+    if (isEmpty(lesson)) {
+      throw new BadRequestException(Messages.ITEM_NOT_FOUND);
+    }
+
+    // Get minimap in elastic search
+    const { _id, _source } = await this.minimapEsService.getById(lesson.minimapId);
+
+    // Return result
+    return new ItemDto({ id: _id, source: _source });
   }
 }

@@ -40,7 +40,7 @@ import { Workspace } from './entities/workspace.entity';
         autoLoadEntities: true,
         migrationsTableName: `migrations`,
         migrationsRun: true,
-        synchronize: true,
+        synchronize: false,
         logging: true,
         cache: {
           duration: configService.getOrThrow<number>('DB_CACHE_TIME'),

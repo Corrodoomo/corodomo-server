@@ -11,6 +11,7 @@ import { Note } from './note.entity';
 import { Song } from './song.entity';
 import { TaskComment } from './task-comment.entity';
 import { Workspace } from './workspace.entity';
+import { NotedVocabulary } from './noted-vocabulary.entity';
 
 @Index('users_pkey', ['id'], { unique: true })
 @Entity('users', { schema: 'public' })
@@ -56,4 +57,7 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Folder, (folder) => folder.createdBy)
   folders: Folder[];
+
+  @OneToMany(() => NotedVocabulary, (notedVocabulary) => notedVocabulary.createdBy)
+  notedVocabularies: NotedVocabulary[];
 }

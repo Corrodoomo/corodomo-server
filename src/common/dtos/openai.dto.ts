@@ -25,11 +25,6 @@ export class OpenAIQuizDto {
   correctAnswer: string;
 }
 
-export class OpenAITopicDto {
-  @ApiProperty()
-  topic: string;
-}
-
 export class OpenAILevelDto {
   @ApiProperty()
   level: string;

@@ -4,7 +4,6 @@ import { BadRequestException, ForbiddenException, Injectable, InternalServerErro
 import { isEmpty } from 'lodash';
 import { YoutubeTranscript } from 'youtube-transcript';
 
-import { LIMIT_DURATION_VIDEO } from '@common/constants';
 import { InsertResult } from '@common/dtos';
 import { Messages } from '@common/enums';
 
@@ -51,22 +50,11 @@ export class SubtitleService {
     const transcripts = await YoutubeTranscript.fetchTranscript(lesson.youtubeUrl);
 
     // Calc duration video and full subtitles
-    const { duration, fullSubtitles } = transcripts.reduce(
-      (accumulator, current) => {
-        accumulator.duration += current.duration; // Sum duration
-        accumulator.fullSubtitles += `. ${current.text}`; // Add fullSubtitles
-        return accumulator;
-      },
-      { duration: 0, fullSubtitles: '' }
-    );
-
-    if (duration > LIMIT_DURATION_VIDEO) {
-      throw new BadRequestException(Messages.LIMIT_DURATION_VIDEO);
-    }
+    const fullSubtitles = transcripts.reduce((accumulator, current) => accumulator + `. ${current.text}`, '');
 
     // Update lessson and subtitle
     await Promise.all([
-      this.lessonService.classify(lessonId, fullSubtitles, duration),
+      this.lessonService.classify(lessonId, fullSubtitles),
       this.subtitleRepository.updateByTranscripts(lessonId, transcripts),
     ]);
 

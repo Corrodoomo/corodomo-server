@@ -20,7 +20,7 @@ export class QuizController {
 
   @Get('lesson/:lessonId', { model: ListQuizDto })
   @Roles([SystemRoles.LEARNER])
-  getByLessonId(@Param() params: LessonIdDto): Promise<ListQuizDto> {
+  getByLessonId(@Param() params: LessonIdDto) {
     return this.quizService.getByLessonId(params.lessonId);
   }
 }

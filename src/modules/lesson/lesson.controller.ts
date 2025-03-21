@@ -1,10 +1,10 @@
-import { Body, Controller, Param, Query, Req } from '@nestjs/common';
+import { Body, Param, Query, Req } from '@nestjs/common';
 
-import { Get, Post, Put, Roles } from '@common/decorators';
+import { Controller, Delete, Get, Post, Put, Roles } from '@common/decorators';
 import { InsertResult, UpdateResultDto } from '@common/dtos';
 import { PaginatedDto, PaginateQueryDto } from '@common/dtos/common.dto';
 import { LessonIdDto } from '@common/dtos/id.dto';
-import { CreateLessonDto } from '@common/dtos/lesson.dto';
+import { CreateLessonDto, ListTagsDto, UpdateNoteDto } from '@common/dtos/lesson.dto';
 import { SystemRoles } from '@common/enums';
 import { Request } from '@common/models';
 
@@ -20,10 +20,40 @@ export class LessonController {
     return this.lessonService.create(request.user.id, body);
   }
 
+  @Delete('/:lessonId', { model: InsertResult })
+  @Roles([SystemRoles.LEARNER])
+  delete(@Param() param: LessonIdDto, @Req() request: Request) {
+    return this.lessonService.delete(request.user.id, param.lessonId);
+  }
+
   @Get('/', { model: PaginatedDto })
   @Roles([SystemRoles.LEARNER])
   get(@Query() query: PaginateQueryDto) {
     return this.lessonService.get(query);
+  }
+
+  @Get('/list_tags', { model: ListTagsDto })
+  @Roles([SystemRoles.LEARNER])
+  getListOfTags() {
+    return this.lessonService.getListTags();
+  }
+
+  @Get('/:lessonId/video_course', { model: PaginatedDto })
+  @Roles([SystemRoles.LEARNER])
+  getDetail(@Param() params: LessonIdDto) {
+    return this.lessonService.getDetail(params.lessonId);
+  }
+
+  @Get('/:lessonId/minimap', { model: PaginatedDto })
+  @Roles([SystemRoles.LEARNER])
+  getMinimaps(@Param() params: LessonIdDto) {
+    return this.lessonService.getMinimaps(params.lessonId);
+  }
+
+  @Put('/:lessonId/note', { model: PaginatedDto })
+  @Roles([SystemRoles.LEARNER])
+  note(@Param() params: LessonIdDto, @Body() body: UpdateNoteDto, @Req() req: Request) {
+    return this.lessonService.note(params.lessonId, req.user.id, body);
   }
 
   @Put('/:lessonId/watched', { model: UpdateResultDto })

@@ -89,6 +89,27 @@ export class UpdateResultDto {
   }
 }
 
+export class UpdateRawResultDto<T> {
+  /**
+   * Contains inserted entity id.
+   * Has entity-like structure (not just column database name and values).
+   */
+  @ApiProperty({ example: 1 })
+  updated: number;
+
+  /**
+   * Contains inserted entity id.
+   * Has entity-like structure (not just column database name and values).
+   */
+  @ApiProperty({ example: { id: '15b3e50e-1f94-4762-962d-ff3168bcc745' } })
+  raw: T;
+
+  constructor(raw: T, updated: number) {
+    this.updated = updated;
+    this.raw = raw;
+  }
+}
+
 export class DeleteResultDto {
   /**
    * Contains inserted entity id.

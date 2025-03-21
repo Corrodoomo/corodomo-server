@@ -9,3 +9,13 @@ export class LessonIdDto {
   @IsUUID()
   lessonId: string;
 }
+
+export class CommentIdDto {
+  @IsUUID()
+  commentId: string;
+}
+
+export class NotedVocabularyIdDto {
+  @IsUUID()
+  notedVocabularyId: string;
+}

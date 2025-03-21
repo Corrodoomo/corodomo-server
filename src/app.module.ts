@@ -10,14 +10,18 @@ import { ElasticSearchModule } from '@modules/elastic-search/elastic-search.modu
 import { FolderModule } from '@modules/folder/folder.module';
 import { JwtModule } from '@modules/jwt';
 import { LessonModule } from '@modules/lesson/lesson.module';
+import { NotedVocabularyModule } from '@modules/noted-vocabulary/noted-vocabulary.module';
 import { OpenAIModule } from '@modules/openai/openai.module';
 import { QuizModule } from '@modules/quiz/quiz.module';
 import { SubtitleModule } from '@modules/subtitle/subtitle.module';
 import { UserModule } from '@modules/user/user.module';
 import { VocabularyModule } from '@modules/vocabulary/vocabulary.module';
+import { YoutubeModule } from '@modules/youtube/youtube.module';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
+
+import { LessonCommentModule } from './modules/lesson-comment/lesson-comment.module';
 
 @Module({
   imports: [
@@ -41,10 +45,12 @@ import { ThrottlerModule } from '@nestjs/throttler';
     SubtitleModule,
     FolderModule,
     QuizModule,
-    SubtitleModule,
     VocabularyModule,
     ElasticSearchModule,
     OpenAIModule,
+    NotedVocabularyModule,
+    YoutubeModule,
+    LessonCommentModule,
   ],
   exports: [],
   controllers: [AppController],

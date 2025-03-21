@@ -2,8 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OpenAI } from 'openai';
 
-import { LESSON_TAGS } from '@common/constants';
-import { OpenAILevelDto, OpenAIQuizDto, OpenAITopicDto, OpenAIVocabularyDto } from '@common/dtos';
+import { OpenAILevelDto, OpenAIQuizDto, OpenAIVocabularyDto } from '@common/dtos';
+import { LANGUAGES } from '@common/constants';
 
 @Injectable()
 export class OpenAIService {
@@ -23,43 +23,12 @@ export class OpenAIService {
    * @param message
    * @returns
    */
-  async tag(message: string): Promise<string> {
+  async quiz(message: string, language: string): Promise<OpenAIQuizDto[]> {
     const content = `
-      Given the following Youtube video description: '${message}'. 
-      Please classify this video based on its description. Based on this, please classify it into one of the following topics: ${LESSON_TAGS.join(',')}. 
-      If it's difficult to classify into these categories, reply with { 'topic': 'others' }. 
-      Only reply the classification result in the following JSON stringify: { 'topic': '?' }.
-    `;
-
-    const response = await this.openai.chat.completions.create({
-      model: this.configService.getOrThrow('OPEN_AI_MODEL'), // Bạn có thể thay đổi model tùy ý
-      messages: [
-        {
-          role: 'user',
-          content,
-        },
-      ],
-    });
-
-    const result = response.choices[0].message.content?.replace('```json', '').replace('```', '');
-
-    this.logger.debug(`Tag Generate - ${result}`);
-
-    const topics: OpenAITopicDto = JSON.parse(result || '');
-
-    return topics.topic;
-  }
-
-  /**
-   * Chat with chatter
-   * @param message
-   * @returns
-   */
-  async quiz(message: string): Promise<OpenAIQuizDto[]> {
-    const content = `
-      Give 10 vocabulary or grammar quiz in the following passage: ${message}. 
+      Give 10 vocabulary or grammar quiz in the following passage: ${message}.
+      'question' and 'choices' must be ${LANGUAGES[language]} language.
       Only reply with the following JSON stringify: ['{ 'question': '?', 'choices': { 'A': '?', 'B': '?', 'C': '?', 'D': '?' }, 'correctAnswer': '?' }'...] 
-      to save the database
+      to save the database.
     `;
 
     const response = await this.openai.chat.completions.create({

@@ -5,7 +5,6 @@ import {
   Get as HttpGet,
   Post as HttpPost,
   Put as HttpPut,
-  UseFilters,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -103,7 +102,7 @@ export const Get = (path?: string, options?: HttpOption) => {
       UseGuards(AuthenticationGuard, AuthorizationGuard)
     );
 
-  return applyDecorators(HttpGet(path), ApiBearerAuth(), ApiExceptionResponse(), ApiOkResponse(defaultOptions.model));
+  return applyDecorators(HttpGet(path), ApiExceptionResponse(), ApiOkResponse(defaultOptions.model));
 };
 
 export const Post = (path?: string, options?: HttpOption) => {
@@ -118,7 +117,7 @@ export const Post = (path?: string, options?: HttpOption) => {
       UseGuards(AuthenticationGuard, AuthorizationGuard)
     );
 
-  return applyDecorators(HttpPost(path), ApiExceptionResponse(), ApiOkResponse(defaultOptions.model), ApiBearerAuth());
+  return applyDecorators(HttpPost(path), ApiExceptionResponse(), ApiOkResponse(defaultOptions.model));
 };
 
 export const Put = (path?: string, options?: HttpOption) => {
@@ -133,7 +132,7 @@ export const Put = (path?: string, options?: HttpOption) => {
       UseGuards(AuthenticationGuard, AuthorizationGuard)
     );
 
-  return applyDecorators(HttpPut(path), ApiBearerAuth(), ApiExceptionResponse(), ApiOkResponse(defaultOptions.model));
+  return applyDecorators(HttpPut(path), ApiExceptionResponse(), ApiOkResponse(defaultOptions.model));
 };
 
 export const Delete = (path?: string, options?: HttpOption) => {
@@ -150,7 +149,6 @@ export const Delete = (path?: string, options?: HttpOption) => {
 
   return applyDecorators(
     HttpDelete(path),
-    ApiBearerAuth(),
     ApiExceptionResponse(),
     ApiOkResponse(DeleteResultDto),
     UseGuards(AuthenticationGuard, AuthorizationGuard)
