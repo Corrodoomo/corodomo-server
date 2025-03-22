@@ -1,6 +1,6 @@
-import { Body, Controller, Param, Put, Req } from '@nestjs/common';
+import { Body, Controller, Param, Req } from '@nestjs/common';
 
-import { Delete, Post, Roles } from '@common/decorators';
+import { Delete, Post, Put, Roles } from '@common/decorators';
 import { NotedVocabularyIdDto } from '@common/dtos/id.dto';
 import { CreateNotedVocabularyDto, UpdateNotedVocabularyDto } from '@common/dtos/noted-vocabulary.dto';
 import { SystemRoles } from '@common/enums';

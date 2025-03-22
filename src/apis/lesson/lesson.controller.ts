@@ -4,7 +4,7 @@ import { Controller, Delete, Get, Post, Put, Roles } from '@common/decorators';
 import { InsertResult, UpdateResultDto } from '@common/dtos';
 import { PaginatedDto, PaginateQueryDto } from '@common/dtos/common.dto';
 import { LessonIdDto } from '@common/dtos/id.dto';
-import { CreateLessonDto, ListTagsDto, UpdateNoteDto } from '@common/dtos/lesson.dto';
+import { CreateLessonDto, ListTagsDto } from '@common/dtos/lesson.dto';
 import { SystemRoles } from '@common/enums';
 import { Request } from '@common/models';
 
@@ -40,20 +40,14 @@ export class LessonController {
 
   @Get('/:lessonId/video_course', { model: PaginatedDto })
   @Roles([SystemRoles.LEARNER])
-  getDetail(@Param() params: LessonIdDto) {
-    return this.lessonService.getDetail(params.lessonId);
+  getDetail(@Param() params: LessonIdDto, @Req() req: Request) {
+    return this.lessonService.getDetail(params.lessonId, req.user.id);
   }
 
   @Get('/:lessonId/minimap', { model: PaginatedDto })
   @Roles([SystemRoles.LEARNER])
   getMinimaps(@Param() params: LessonIdDto) {
     return this.lessonService.getMinimaps(params.lessonId);
-  }
-
-  @Put('/:lessonId/note', { model: PaginatedDto })
-  @Roles([SystemRoles.LEARNER])
-  note(@Param() params: LessonIdDto, @Body() body: UpdateNoteDto, @Req() req: Request) {
-    return this.lessonService.note(params.lessonId, req.user.id, body);
   }
 
   @Put('/:lessonId/watched', { model: UpdateResultDto })

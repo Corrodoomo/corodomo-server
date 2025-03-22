@@ -21,3 +21,4 @@ export * from './folder.entity';
 export * from './quiz.entity';
 export * from './vocabulary.entity';
 export * from './noted-vocabulary.entity';
+export * from './lesson-note.entity';

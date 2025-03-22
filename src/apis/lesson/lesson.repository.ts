@@ -31,4 +31,12 @@ export class LessonRepository extends BaseRepository<Lesson> {
   public getDistinctTags() {
     return this.createQueryBuilder('lesson').select('tag').distinct(true).getRawMany<LessonTagDto>();
   }
+
+  public async getLessonForUser(lessonId: string, userId: string) {
+    return this.findOne({
+      where: { id: lessonId, notes: { createdBy: { id: userId } } },
+      select: ['id', 'tag', 'duration', 'language', 'level', 'watchedCount'],
+      relations: ['notes', 'comments', 'notedVocabularies', 'subtitles'],
+    });
+  }
 }

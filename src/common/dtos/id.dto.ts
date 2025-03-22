@@ -19,3 +19,8 @@ export class NotedVocabularyIdDto {
   @IsUUID()
   notedVocabularyId: string;
 }
+
+export class LessonNoteIdDto {
+  @IsUUID()
+  lessonNoteId: string;
+}

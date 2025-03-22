@@ -19,15 +19,6 @@ export class CreateLessonDto {
   folderId: string;
 }
 
-export class UpdateNoteDto {
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsString()
-  @MinLength(1)
-  @MaxLength(255)
-  content: string;
-}
-
 export class LessonTagDto {
   @ApiProperty()
   tag: string;

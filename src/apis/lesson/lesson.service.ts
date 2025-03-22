@@ -7,15 +7,7 @@ import { isEmpty } from 'lodash';
 import { FilterOperator, paginate, PaginateQuery } from 'nestjs-paginate';
 
 import { LIMIT_DURATION_VIDEO } from '@common/constants';
-import {
-  CreateLessonDto,
-  DeleteResultDto,
-  InsertResultDto,
-  ListTagsDto,
-  UpdateNoteDto,
-  UpdateRawResultDto,
-  UpdateResultDto,
-} from '@common/dtos';
+import { CreateLessonDto, DeleteResultDto, InsertResultDto, ListTagsDto, UpdateResultDto } from '@common/dtos';
 import { ItemDto } from '@common/dtos/common.dto';
 import { Messages } from '@common/enums';
 
@@ -75,7 +67,11 @@ export class LessonService {
    */
   public async delete(userId: string, lessonId: string) {
     // Get lesson by id
-    const lesson = await this.lessonRepository.getRawOne(lessonId);
+    const lesson = await this.lessonRepository.getRawOne(lessonId, [
+      'id',
+      'minimap_id as "minimapId"',
+      'created_by as "createdBy"',
+    ]);
 
     // Error if lesson not found
     if (isEmpty(lesson)) {
@@ -87,8 +83,14 @@ export class LessonService {
       throw new ForbiddenException(Messages.INVALID_ACCESS_RESOURCE);
     }
 
-    // Delete casade. It will delete all records have a FK lesson_id
-    await this.lessonRepository.delete(lessonId);
+    // Delete process
+    await Promise.all([
+      // Delete casade. It will delete all records have a FK lesson_id
+      await this.lessonRepository.delete(lessonId),
+      // Delete all data in elastic search
+      await this.lessonEsService.deleteByLessonId('19f66779-7024-4447-bd39-99e6eb571925'),
+      await this.minimapEsService.deleteDocument('l3YDpZUBSz-XFdOgJyFD'),
+    ]);
 
     // Return result
     return new DeleteResultDto(1);
@@ -154,42 +156,12 @@ export class LessonService {
    * @param transcripts
    * @returns
    */
-  public async classify(lessonId: string, fullSubtitles: string) {
+  public async classify(lessonId: string, fullSubtitles: string, language: string) {
     // Tag and level generated
-    const level = await this.openaiService.level(fullSubtitles);
+    const level = await this.openaiService.level(fullSubtitles, language);
 
     // Update lesson
     return this.lessonRepository.update({ id: lessonId }, { fullSubtitles, level });
-  }
-
-  /**
-   * Create a note lesson
-   * @param lessonId
-   * @param userId
-   * @param body
-   * @returns
-   */
-  public async note(lessonId: string, userId: string, body: UpdateNoteDto) {
-    // Check lesson
-    const lesson = await this.lessonRepository.getRawOne(lessonId, ['id', 'created_by as "createdBy"']);
-
-    // Check if lesson not found
-    if (isEmpty(lesson)) {
-      throw new BadRequestException(Messages.ITEM_NOT_FOUND);
-    }
-
-    // Check if no permission
-    if (lesson.createdBy !== userId) {
-      throw new ForbiddenException(Messages.INVALID_ACCESS_RESOURCE);
-    }
-
-    // Update note
-    await this.lessonRepository.update({ id: lessonId }, { note: body.content });
-
-    lesson.note = body.content;
-
-    // Return result
-    return new UpdateRawResultDto(lesson, 1);
   }
 
   /**
@@ -197,13 +169,9 @@ export class LessonService {
    * @param lessonId
    * @returns
    */
-  public async getDetail(lessonId: string) {
+  public async getDetail(lessonId: string, userId: string) {
     // Get lesson by id
-    const lesson = await this.lessonRepository.findOne({
-      where: { id: lessonId },
-      select: ['id', 'tag', 'duration', 'language', 'level', 'note', 'watchedCount'],
-      relations: ['notedVocabularies', 'comments', 'subtitles'],
-    });
+    const lesson = await this.lessonRepository.getLessonForUser(lessonId, userId);
 
     // Return result
     return new ItemDto(lesson);

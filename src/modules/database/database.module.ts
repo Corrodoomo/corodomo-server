@@ -24,6 +24,7 @@ import { TaskComment } from './entities/task-comment.entity';
 import { Task } from './entities/task.entity';
 import { Vocabulary } from './entities/vocabulary.entity';
 import { Workspace } from './entities/workspace.entity';
+import { LessonNote } from './entities/lesson-note.entity';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { Workspace } from './entities/workspace.entity';
           QuestionChoice,
           LessonComment,
           Lesson,
+          LessonNote,
           NotedVocabulary,
           Vocabulary,
           Quiz,

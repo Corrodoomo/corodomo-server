@@ -26,6 +26,7 @@ export class SubtitleService {
     const lesson = await this.lessonRepository.getRawOne(lessonId, [
       'id',
       'tag',
+      'language',
       'full_subtitles AS "fullSubtitles"',
       'youtube_url AS "youtubeUrl"',
       'created_by AS "createdBy"',
@@ -54,7 +55,7 @@ export class SubtitleService {
 
     // Update lessson and subtitle
     await Promise.all([
-      this.lessonService.classify(lessonId, fullSubtitles),
+      this.lessonService.classify(lessonId, fullSubtitles, lesson.language),
       this.subtitleRepository.updateByTranscripts(lessonId, transcripts),
     ]);
 

@@ -1,4 +1,4 @@
-import { Column, Entity, Index, OneToMany } from 'typeorm';
+import { Column, Entity, Index, OneToMany, OneToOne } from 'typeorm';
 
 import { BaseEntity } from './base.entity';
 import { Blog } from './blog.entity';
@@ -6,12 +6,13 @@ import { Exam } from './exam.entity';
 import { Folder } from './folder.entity';
 import { GroupTask } from './group-task.entity';
 import { LessonComment } from './lesson-comment.entity';
+import { LessonNote } from './lesson-note.entity';
 import { Lesson } from './lesson.entity';
 import { Note } from './note.entity';
+import { NotedVocabulary } from './noted-vocabulary.entity';
 import { Song } from './song.entity';
 import { TaskComment } from './task-comment.entity';
 import { Workspace } from './workspace.entity';
-import { NotedVocabulary } from './noted-vocabulary.entity';
 
 @Index('users_pkey', ['id'], { unique: true })
 @Entity('users', { schema: 'public' })
@@ -60,4 +61,7 @@ export class User extends BaseEntity {
 
   @OneToMany(() => NotedVocabulary, (notedVocabulary) => notedVocabulary.createdBy)
   notedVocabularies: NotedVocabulary[];
+
+  @OneToOne(() => LessonNote, (lessonNote) => lessonNote.createdBy)
+  lessonNotes: LessonNote[];
 }

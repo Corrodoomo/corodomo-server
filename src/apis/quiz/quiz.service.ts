@@ -22,11 +22,11 @@ export class QuizService {
    * @returns
    */
   substring(fullSubtitles: string) {
-    if (fullSubtitles.length <= 600) return fullSubtitles;
+    if (fullSubtitles.length <= 2100) return fullSubtitles;
 
-    const start = fullSubtitles.substring(0, 200);
-    const middle = fullSubtitles.substring(fullSubtitles.length / 2, fullSubtitles.length / 2 + 200);
-    const end = fullSubtitles.substring(fullSubtitles.length - 200, fullSubtitles.length);
+    const start = fullSubtitles.substring(0, 700);
+    const middle = fullSubtitles.substring(fullSubtitles.length / 2, fullSubtitles.length / 2 + 700);
+    const end = fullSubtitles.substring(fullSubtitles.length - 700, fullSubtitles.length);
 
     return `${start}. ${middle}. ${end}`;
   }
@@ -41,6 +41,7 @@ export class QuizService {
     const lesson = await this.lessonRepository.getRawOne(lessonId, [
       'id',
       'tag',
+      'language',
       'full_subtitles as "fullSubtitles"',
       'created_by as "createdBy"',
     ]);

@@ -1,6 +1,6 @@
 import { BaseEntity } from '@modules/database/entities';
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { FindOptionsSelect, FindOptionsSelectByString, Repository } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
 @Injectable()
@@ -20,8 +20,9 @@ export class BaseRepository<T extends BaseEntity> extends Repository<T> {
    * @param id
    * @returns
    */
-  public getById(id: string, select: string[] = ['table.id']) {
-    return this.createQueryBuilder('table').select(select).where('id = :id').setParameters({ id }).cache(true).getOne();
+  public getById(id: string, select: FindOptionsSelect<T> | FindOptionsSelectByString<T> = ['id']) {
+    const where: any = { id };
+    return this.findOne({ where, cache: true, select });
   }
 
   /**

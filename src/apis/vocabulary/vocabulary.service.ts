@@ -1,5 +1,5 @@
-import { MinimapEsService } from '@modules/elastic-search/services/minimap-es.service';
 import { LessonRepository } from '@app/apis/lesson/lesson.repository';
+import { MinimapEsService } from '@modules/elastic-search/services/minimap-es.service';
 import { OpenAIService } from '@modules/openai/openai.service';
 import { BadRequestException, Injectable } from '@nestjs/common';
 
@@ -25,7 +25,10 @@ export class VocabularyService {
    */
   public async generateForLesson(lessonId: string) {
     // Get lesson from id
-    const lesson = await this.lessonRepository.findOne({ where: { id: lessonId }, select: ['id', 'fullSubtitles'] });
+    const lesson = await this.lessonRepository.findOne({
+      where: { id: lessonId },
+      select: ['id', 'fullSubtitles', 'language'],
+    });
 
     // Check if lesson not existed
     if (!lesson) {
@@ -34,8 +37,8 @@ export class VocabularyService {
 
     // Generate vocabularies
     const [vocabularies, minimap] = await Promise.all([
-      this.openaiService.vocabulary(lesson.fullSubtitles),
-      this.openaiService.minimap(lesson.fullSubtitles),
+      this.openaiService.vocabulary(lesson.fullSubtitles, lesson.language),
+      this.openaiService.minimap(lesson.fullSubtitles, lesson.language),
     ]);
 
     // Save document to elastic search
@@ -48,7 +51,7 @@ export class VocabularyService {
     ]);
 
     // Return result
-    return new InsertResultDto(minimap, minimap.length);
+    return new InsertResultDto({ minimap, vocabularies }, vocabularies.length + minimap.length);
   }
 
   /**
