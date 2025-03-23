@@ -21,6 +21,7 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 
+import { BlogModule } from './apis/blog/blog.module';
 import { LessonCommentModule } from './apis/lesson-comment/lesson-comment.module';
 import { LessonNoteModule } from './apis/lesson-note/lesson-note.module';
 
@@ -56,6 +57,7 @@ import { LessonNoteModule } from './apis/lesson-note/lesson-note.module';
     NotedVocabularyModule,
     LessonCommentModule,
     LessonNoteModule,
+    BlogModule,
   ],
   exports: [],
   controllers: [AppController],

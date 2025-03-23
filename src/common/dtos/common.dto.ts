@@ -208,11 +208,48 @@ export class ItemDto<T> {
   @ApiProperty({
     description: 'The list of data items',
     type: [Object], // Đảm bảo type chính xác của T nếu có thể
-    example: [{}], // Ví dụ mẫu dữ liệu cho T
+    example: '{ id: "123" }', // Ví dụ mẫu dữ liệu cho T
   })
   data: T;
 
   constructor(item: T) {
     this.data = item;
   }
+}
+
+export class BaseRecordDto {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty()
+  createdAt: string;
+
+  @ApiProperty()
+  updatedAt: string;
+}
+
+export class BelongToLessonAndUserDto extends BaseRecordDto {
+  @ApiProperty()
+  lesson: {
+    id: string;
+  };
+
+  @ApiProperty()
+  createdBy: {
+    id: string;
+  };
+}
+
+export class BelongToLessonDto extends BaseRecordDto {
+  @ApiProperty()
+  lesson: {
+    id: string;
+  };
+}
+
+export class BelongToUserDto extends BaseRecordDto {
+  @ApiProperty()
+  createdBy: {
+    id: string;
+  };
 }

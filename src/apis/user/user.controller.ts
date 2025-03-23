@@ -1,7 +1,8 @@
 import { Body, Controller, Req } from '@nestjs/common';
 
-import { Post, Roles } from '@common/decorators';
-import { SignedInUserDto, SignedUpUserDto, SignInUserDto } from '@common/dtos';
+import { ApiPost, Roles } from '@common/decorators';
+import { ApiOkInsertResultExample, ApiOkResponseExample } from '@common/decorators/example.decorator';
+import { SignedInUserDto, SignInUserDto, SignedUpUserDto, SignedOutUserDto, RefreshUserDto } from '@common/dtos';
 import { SystemRoles } from '@common/enums';
 import { Request } from '@common/models';
 
@@ -11,24 +12,28 @@ import { UserService } from './user.service';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post('signin', { auth: false, model: SignedInUserDto })
+  @ApiPost('signin', { auth: false })
+  @ApiOkResponseExample(SignedInUserDto)
   signIn(@Body() body: SignInUserDto) {
     return this.userService.signIn(body.email, body.password);
   }
 
-  @Post('signup', { auth: false, model: SignedUpUserDto })
+  @ApiPost('signup', { auth: false })
+  @ApiOkInsertResultExample(SignedUpUserDto)
   signUp(@Body() body: SignInUserDto) {
     return this.userService.signUp(body.email, body.password);
   }
 
-  @Post('signout', { model: SignedUpUserDto })
+  @ApiPost('signout')
   @Roles([SystemRoles.LEARNER])
+  @ApiOkResponseExample(SignedOutUserDto)
   signOut(@Req() request: Request) {
     return this.userService.signOut(request.user.id);
   }
 
-  @Post('refresh', { model: SignedUpUserDto })
+  @ApiPost('refresh')
   @Roles([SystemRoles.LEARNER])
+  @ApiOkResponseExample(RefreshUserDto)
   refresh(@Req() request: Request) {
     return this.userService.refresh(request.user.id);
   }

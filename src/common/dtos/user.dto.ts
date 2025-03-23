@@ -1,9 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
 import { IsEmail, IsNotEmpty, IsString, IsStrongPassword, MaxLength, MinLength } from 'class-validator';
 
-import { InsertResult } from './http.dto';
-import { IdDto } from './id.dto';
+import { BaseRecordDto } from './common.dto';
 
 export class SignInUserDto {
   @ApiProperty({ example: 'david21@example.co' })
@@ -31,13 +29,23 @@ export class SignedInUserDto {
   refreshToken?: string;
 }
 
-export class SignedUpUserDto extends InsertResult {
+export class RefreshUserDto {
   @ApiProperty()
-  @Type(() => IdDto)
-  raw: IdDto;
+  accessToken: string;
+}
 
-  constructor(id: string) {
-    super(1);
-    this.raw = { id };
-  }
+export class SignedOutUserDto {
+  @ApiProperty()
+  message: string;
+}
+
+export class SignedUpUserDto extends BaseRecordDto {
+  @ApiProperty()
+  email: string;
+
+  @ApiProperty()
+  role: string;
+
+  @ApiProperty()
+  emailVerified: string;
 }

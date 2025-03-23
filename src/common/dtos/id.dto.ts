@@ -24,3 +24,8 @@ export class LessonNoteIdDto {
   @IsUUID()
   lessonNoteId: string;
 }
+
+export class BlogIdDto {
+  @IsUUID()
+  blogId: string;
+}

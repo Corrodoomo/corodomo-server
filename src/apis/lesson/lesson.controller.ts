@@ -1,10 +1,18 @@
 import { Body, Param, Query, Req } from '@nestjs/common';
 
-import { Controller, Delete, Get, Post, Put, Roles } from '@common/decorators';
-import { InsertResult, UpdateResultDto } from '@common/dtos';
-import { PaginatedDto, PaginateQueryDto } from '@common/dtos/common.dto';
+import { ApiDelete, ApiGet, ApiPost, ApiPut, Controller, Roles } from '@common/decorators';
+import {
+  ApiOkDeleteResultExample,
+  ApiOkInsertResultExample,
+  ApiOkItemExample,
+  ApiOkItemsExample,
+  ApiOkPaginationExample,
+  ApiOkUpdateResultExample,
+} from '@common/decorators/example.decorator';
+import { OpenAIMinimapItemDto, UpdateResultDto } from '@common/dtos';
+import { PaginateQueryDto } from '@common/dtos/common.dto';
 import { LessonIdDto } from '@common/dtos/id.dto';
-import { CreateLessonDto, ListTagsDto } from '@common/dtos/lesson.dto';
+import { CreateLessonDto, LessonRecordDto, LessonVideoCourse, ListTagsDto } from '@common/dtos/lesson.dto';
 import { SystemRoles } from '@common/enums';
 import { Request } from '@common/models';
 
@@ -14,44 +22,51 @@ import { LessonService } from './lesson.service';
 export class LessonController {
   constructor(private readonly lessonService: LessonService) {}
 
-  @Post('/', { model: InsertResult })
+  @ApiPost('/')
   @Roles([SystemRoles.LEARNER])
+  @ApiOkInsertResultExample(LessonRecordDto)
   create(@Body() body: CreateLessonDto, @Req() request: Request) {
     return this.lessonService.create(request.user.id, body);
   }
 
-  @Delete('/:lessonId', { model: InsertResult })
+  @ApiDelete('/:lessonId')
   @Roles([SystemRoles.LEARNER])
+  @ApiOkDeleteResultExample()
   delete(@Param() param: LessonIdDto, @Req() request: Request) {
     return this.lessonService.delete(request.user.id, param.lessonId);
   }
 
-  @Get('/', { model: PaginatedDto })
+  @ApiGet('/')
   @Roles([SystemRoles.LEARNER])
+  @ApiOkPaginationExample(LessonRecordDto)
   get(@Query() query: PaginateQueryDto) {
     return this.lessonService.get(query);
   }
 
-  @Get('/list_tags', { model: ListTagsDto })
+  @ApiGet('/list_tags')
   @Roles([SystemRoles.LEARNER])
+  @ApiOkItemsExample(ListTagsDto)
   getListOfTags() {
     return this.lessonService.getListTags();
   }
 
-  @Get('/:lessonId/video_course', { model: PaginatedDto })
+  @ApiGet('/:lessonId/video_course')
   @Roles([SystemRoles.LEARNER])
+  @ApiOkItemExample(LessonVideoCourse)
   getDetail(@Param() params: LessonIdDto, @Req() req: Request) {
     return this.lessonService.getDetail(params.lessonId, req.user.id);
   }
 
-  @Get('/:lessonId/minimap', { model: PaginatedDto })
+  @ApiGet('/:lessonId/minimap')
   @Roles([SystemRoles.LEARNER])
+  @ApiOkItemExample(OpenAIMinimapItemDto)
   getMinimaps(@Param() params: LessonIdDto) {
     return this.lessonService.getMinimaps(params.lessonId);
   }
 
-  @Put('/:lessonId/watched', { model: UpdateResultDto })
+  @ApiPut('/:lessonId/watched')
   @Roles([SystemRoles.LEARNER])
+  @ApiOkUpdateResultExample()
   watch(@Param() params: LessonIdDto): Promise<UpdateResultDto> {
     return this.lessonService.watch(params.lessonId);
   }

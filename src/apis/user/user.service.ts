@@ -3,7 +3,8 @@ import { JwtService } from '@modules/jwt';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { isEmpty } from 'lodash';
 
-import { SignedInUserDto, SignedUpUserDto } from '@common/dtos/user.dto';
+import { InsertResultDto } from '@common/dtos';
+import { SignedInUserDto } from '@common/dtos/user.dto';
 import { Messages } from '@common/enums';
 import { BryptService } from '@common/services';
 
@@ -87,7 +88,7 @@ export class UserService {
    * @param password
    * @returns
    */
-  public async signUp(email: string, password: string): Promise<SignedUpUserDto> {
+  public async signUp(email: string, password: string) {
     // Get user by email
     const user = await this.userRepository.findByEmail(email);
 
@@ -100,10 +101,22 @@ export class UserService {
     const hash = await this.bryptService.hashPassword(password);
 
     // Insert user if valid
-    const savedUser = await this.userRepository.save({ email, password: hash });
+    const savedUser = await this.userRepository.save({
+      email,
+      password: hash,
+    });
 
     // Return result
-    return new SignedUpUserDto(savedUser.id);
+    return new InsertResultDto(
+      {
+        id: savedUser.id,
+        email,
+        emailVerified: savedUser.emailVerified,
+        updatedAt: savedUser.updatedAt,
+        createdAt: savedUser.createdAt,
+      },
+      1
+    );
   }
 
   /**

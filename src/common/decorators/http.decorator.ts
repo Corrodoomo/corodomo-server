@@ -1,160 +1,80 @@
 import {
   applyDecorators,
-  Controller as HttpController,
-  Delete as HttpDelete,
-  Get as HttpGet,
-  Post as HttpPost,
-  Put as HttpPut,
+  Controller as NestController,
+  Delete as NestDelete,
+  Get as NestGet,
+  Post as NestPost,
+  Put as NestPut,
   UseGuards,
 } from '@nestjs/common';
-import {
-  ApiBadGatewayResponse,
-  ApiBearerAuth,
-  ApiInternalServerErrorResponse,
-  ApiServiceUnavailableResponse,
-  ApiTags,
-  ApiUnauthorizedResponse,
-  ApiOkResponse as BaseApiOkResponse,
-  getSchemaPath,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
-import { DeleteResultDto } from '@common/dtos';
 import { AuthenticationGuard } from '@common/guards/authentication.guard';
 import { AuthorizationGuard } from '@common/guards/authorization.guard';
 import { HttpOption } from '@common/types';
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-export const ApiOkResponse = (model: string | Function) => {
-  return BaseApiOkResponse({
-    schema: {
-      properties: {
-        status: {
-          type: 'number',
-          example: 200,
-        },
-        timestamp: {
-          type: 'string',
-          example: '2021-08-01T00:00:00.000Z',
-        },
-        result: {
-          type: 'object',
-          $ref: getSchemaPath(model),
-        },
-      },
-    },
-  });
+import { ApiExceptionResponse } from './example.decorator';
+
+/**
+ * Api Get method decorator
+ * @param path
+ * @param options
+ * @returns
+ */
+export const ApiGet = (path?: string, options?: HttpOption) => {
+  const defaultOptions = { auth: true, ...options };
+  const decorators = [NestGet(path), ApiExceptionResponse()];
+
+  if (defaultOptions.auth) decorators.push(ApiBearerAuth(), UseGuards(AuthenticationGuard, AuthorizationGuard));
+
+  return applyDecorators(...decorators);
 };
 
-export const ApiExceptionResponse = () => {
-  return applyDecorators(
-    ApiUnauthorizedResponse({
-      description: 'Unauthorized',
-      schema: {
-        example: {
-          statusCode: 401,
-          message: 'Unauthorized',
-          error: 'Unauthorized',
-        },
-      },
-    }),
-    ApiBadGatewayResponse({
-      description: 'Bad Gateway',
-      schema: {
-        example: {
-          statusCode: 502,
-          message: 'Bad Gateway',
-          error: 'Bad Gateway',
-        },
-      },
-    }),
-    ApiInternalServerErrorResponse({
-      description: 'Internal Server Error',
-      schema: {
-        example: {
-          statusCode: 500,
-          message: 'Internal Server Error',
-          error: 'Internal Server Error',
-        },
-      },
-    }),
-    ApiServiceUnavailableResponse({
-      description: 'Service Unavailable',
-      schema: {
-        example: {
-          statusCode: 503,
-          message: 'Service Unavailable',
-          error: 'Service Unavailable',
-        },
-      },
-    })
-  );
+/**
+ * Api Post method decorator
+ * @param path
+ * @param options
+ * @returns
+ */
+export const ApiPost = (path?: string, options?: HttpOption) => {
+  const defaultOptions = { auth: true, ...options };
+  const decorators = [NestPost(path), ApiExceptionResponse()];
+
+  if (defaultOptions.auth) decorators.push(ApiBearerAuth(), UseGuards(AuthenticationGuard, AuthorizationGuard));
+
+  return applyDecorators(...decorators);
 };
 
-export const Get = (path?: string, options?: HttpOption) => {
-  const defaultOptions = { auth: true, model: '', ...options };
+/**
+ * Api Post method decorator
+ * @param path
+ * @param options
+ * @returns
+ */
+export const ApiPut = (path?: string, options?: HttpOption) => {
+  const defaultOptions = { auth: true, ...options };
+  const decorators = [NestPut(path), ApiExceptionResponse()];
 
-  if (defaultOptions.auth)
-    return applyDecorators(
-      HttpGet(path),
-      ApiBearerAuth(),
-      ApiExceptionResponse(),
-      ApiOkResponse(defaultOptions.model),
-      UseGuards(AuthenticationGuard, AuthorizationGuard)
-    );
+  if (defaultOptions.auth) decorators.push(ApiBearerAuth(), UseGuards(AuthenticationGuard, AuthorizationGuard));
 
-  return applyDecorators(HttpGet(path), ApiExceptionResponse(), ApiOkResponse(defaultOptions.model));
+  return applyDecorators(...decorators);
 };
 
-export const Post = (path?: string, options?: HttpOption) => {
-  const defaultOptions = { auth: true, model: '', ...options };
+/**
+ * Api Post method decorator
+ * @param path
+ * @param options
+ * @returns
+ */
+export const ApiDelete = (path?: string, options?: HttpOption) => {
+  const defaultOptions = { auth: true, ...options };
+  const decorators = [NestDelete(path), ApiExceptionResponse()];
 
-  if (defaultOptions?.auth)
-    return applyDecorators(
-      HttpPost(path),
-      ApiBearerAuth(),
-      ApiOkResponse(defaultOptions.model),
-      ApiExceptionResponse(),
-      UseGuards(AuthenticationGuard, AuthorizationGuard)
-    );
+  if (defaultOptions.auth) decorators.push(ApiBearerAuth(), UseGuards(AuthenticationGuard, AuthorizationGuard));
 
-  return applyDecorators(HttpPost(path), ApiExceptionResponse(), ApiOkResponse(defaultOptions.model));
-};
-
-export const Put = (path?: string, options?: HttpOption) => {
-  const defaultOptions = { auth: true, model: '', ...options };
-
-  if (defaultOptions?.auth)
-    return applyDecorators(
-      HttpPut(path),
-      ApiBearerAuth(),
-      ApiExceptionResponse(),
-      ApiOkResponse(defaultOptions.model),
-      UseGuards(AuthenticationGuard, AuthorizationGuard)
-    );
-
-  return applyDecorators(HttpPut(path), ApiExceptionResponse(), ApiOkResponse(defaultOptions.model));
-};
-
-export const Delete = (path?: string, options?: HttpOption) => {
-  const defaultOptions = { auth: true, model: '', ...options };
-
-  if (defaultOptions.auth)
-    return applyDecorators(
-      HttpDelete(path),
-      ApiBearerAuth(),
-      ApiExceptionResponse(),
-      ApiOkResponse(DeleteResultDto),
-      UseGuards(AuthenticationGuard, AuthorizationGuard)
-    );
-
-  return applyDecorators(
-    HttpDelete(path),
-    ApiExceptionResponse(),
-    ApiOkResponse(DeleteResultDto),
-    UseGuards(AuthenticationGuard, AuthorizationGuard)
-  );
+  return applyDecorators(...decorators);
 };
 
 export const Controller = (prefix: string) => {
-  return applyDecorators(HttpController(prefix), ApiTags(prefix));
+  return applyDecorators(NestController(prefix), ApiTags(prefix));
 };

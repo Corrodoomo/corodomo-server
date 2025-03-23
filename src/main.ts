@@ -5,7 +5,7 @@ import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import * as cors from 'cors';
 
-import { PaginationPipe } from '@common/pipes/pagination.pipe';
+import { PaginationPipe, TransformPropertyPipe } from '@common/pipes';
 
 import { AppModule } from './app.module';
 import { useSwagger } from './app.swagger';
@@ -23,7 +23,8 @@ async function bootstrap() {
         enableImplicitConversion: true,
       },
       whitelist: true,
-    })
+    }),
+    new TransformPropertyPipe()
   );
   const configService = app.get<ConfigService>(ConfigService);
   const port = configService.get<string>('PORT') || 5000;

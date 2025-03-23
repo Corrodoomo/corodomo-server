@@ -20,3 +20,25 @@ export const LEVEL_QUESTION_BY_LANGUAGES = {
   en: 'Rate this {language} passage on the CEFR scale (A1, A2, B1, B2, C1, C2)',
   kr: 'Rate this {language} passage on the TOPIK scale (TOPIK1, TOPIK2, TOPIK3, TOPIK4, TOPIK5, TOPIK6)',
 };
+
+export const BLOG_ACCESS_TYPE = ['read', 'write'];
+
+export const BLOG_TAGS = [
+  'study-w/m',
+  'motivation',
+  'pomodoro',
+  'study-tips',
+  'productivity',
+  'study-vibes',
+  'study-focus',
+  'mindset',
+  'learning-habits',
+  'planner',
+  'study-together',
+  'challenge',
+  'deep-focus',
+  'coding',
+  'AI',
+  'IT',
+  'others',
+];

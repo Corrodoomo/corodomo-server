@@ -1,23 +1,25 @@
 import { Controller, Param } from '@nestjs/common';
 
-import { Get, Post, Roles } from '@common/decorators';
-import { InsertResultDto } from '@common/dtos';
+import { ApiGet, ApiPost, Roles } from '@common/decorators';
 import { LessonIdDto } from '@common/dtos/id.dto';
 import { SystemRoles } from '@common/enums';
 
 import { VocabularyService } from './vocabulary.service';
+import { ApiOkInsertResultExample } from '@common/decorators/example.decorator';
+import { OpenAIVocabularyMinimapDto } from '@common/dtos/vocabulary.dto';
 
 @Controller('vocabularies')
 export class VocabularyController {
   constructor(private readonly vocabularyService: VocabularyService) {}
 
-  @Post('/lesson/:lessonId/generate', { model: InsertResultDto })
+  @ApiPost('/lesson/:lessonId/generate')
   @Roles([SystemRoles.LEARNER])
+  @ApiOkInsertResultExample(OpenAIVocabularyMinimapDto)
   generateForLesson(@Param() params: LessonIdDto) {
     return this.vocabularyService.generateForLesson(params.lessonId);
   }
 
-  @Get('/lesson/:lessonId/flashcards', { model: InsertResultDto })
+  @ApiGet('/lesson/:lessonId/flashcards')
   @Roles([SystemRoles.LEARNER])
   getFlashcards(@Param() params: LessonIdDto) {
     return this.vocabularyService.getFlashcards(params.lessonId);

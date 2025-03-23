@@ -26,4 +26,28 @@ export class FolderRepository extends BaseRepository<Folder> {
       createdBy,
     });
   }
+
+  /**
+   * Query lesson in folder
+   * @param userId
+   * @param folder
+   * @returns
+   */
+  public async queryLessonInFolder(userId: string) {
+    // Get list of folder for users
+    return this.createQueryBuilder('folder')
+      .leftJoinAndSelect('folder.lessons', 'lesson')
+      .where('folder.createdBy = :userId', { userId })
+      .select([
+        'folder.id',
+        'folder.name',
+        'lesson.id',
+        'lesson.title',
+        'lesson.thumbnail',
+        'lesson.duration',
+        'lesson.watchedAt',
+        'lesson.language',
+      ])
+      .getMany();
+  }
 }

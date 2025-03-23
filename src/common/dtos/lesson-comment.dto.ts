@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
+import { BelongToLessonAndUserDto } from './common.dto';
 
 export class CreateLessonCommentDto {
   @ApiPropertyOptional()
@@ -27,4 +28,12 @@ export class UpdateLessonCommentDto {
   @MinLength(1)
   @MaxLength(255)
   content: string;
+}
+
+export class LessonCommentRecordDto extends BelongToLessonAndUserDto {
+  @ApiProperty()
+  content: string;
+
+  @ApiProperty()
+  replyId: string;
 }

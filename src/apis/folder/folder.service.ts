@@ -1,4 +1,3 @@
-import { Folder } from '@modules/database/entities';
 import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { isEmpty } from 'lodash';
 
@@ -18,9 +17,27 @@ export class FolderService {
    * @param folder
    * @returns
    */
-  public async get(userId: string): Promise<ItemsDto<Folder>> {
+  public async get(userId: string) {
     // Get list of folder for users
-    const items = await this.folderRepository.find({ where: { createdBy: { id: userId } }, cache: true });
+    const items = await this.folderRepository.find({
+      where: { createdBy: { id: userId } },
+      select: ['id', 'name', 'createdAt', 'updatedAt'],
+      cache: true,
+    });
+
+    // Return items
+    return new ItemsDto(items);
+  }
+
+  /**
+   * Get lesson in folder
+   * @param userId
+   * @param folder
+   * @returns
+   */
+  public async getLessonInFolder(userId: string) {
+    // Get list of folder for users
+    const items = await this.folderRepository.queryLessonInFolder(userId);
 
     // Return items
     return new ItemsDto(items);
