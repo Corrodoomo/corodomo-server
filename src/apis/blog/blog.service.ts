@@ -1,10 +1,9 @@
-import { Blog } from '@modules/database/entities';
 import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { isEmpty } from 'lodash';
 
 import { DeleteResultDto, InsertResultDto, UpdateResultDto } from '@common/dtos';
-import { CreateBlogDto, UpdateBlogDto } from '@common/dtos/blog.dto';
-import { ItemDto, ItemsDto } from '@common/dtos/common.dto';
+import { CreateBlogDto, GroupBlogsDto, UpdateBlogDto } from '@common/dtos/blog.dto';
+import { ItemDto } from '@common/dtos/common.dto';
 import { Messages } from '@common/enums';
 
 import { BlogRepository } from './blog.repository';
@@ -12,33 +11,6 @@ import { BlogRepository } from './blog.repository';
 @Injectable()
 export class BlogService {
   constructor(private readonly blogRepository: BlogRepository) {}
-
-  /**
-   * Group blog by belongTo
-   * @param blogs
-   * @returns
-   */
-  public groupBlogs = (blogs: Blog[]) => {
-    // Create a map to store blogs
-    const map = new Map();
-
-    // Set all blogs to map
-    blogs.forEach((blog) => {
-      map.set(blog.id, blog);
-    });
-
-    // Loop through all blogs
-    blogs.forEach((blog) => {
-      if (blog.belongTo && map.has(blog.belongTo)) {
-        const parentBlog = map.get(blog.belongTo);
-        parentBlog.children = parentBlog.children || [];
-        parentBlog.children.push(blog);
-      }
-    });
-
-    // Return blogs
-    return blogs.filter((blog) => !blog.belongTo);
-  };
 
   /**
    * Get my blogs
@@ -51,7 +23,7 @@ export class BlogService {
     const blogs = await this.blogRepository.find({ where: { createdBy: { id: userId } } });
 
     // Return result
-    return new ItemsDto(this.groupBlogs(blogs));
+    return new GroupBlogsDto(blogs);
   }
 
   /**
@@ -121,7 +93,7 @@ export class BlogService {
     if (isEmpty(blog)) {
       throw new BadRequestException(Messages.ITEM_NOT_FOUND);
     }
-    
+
     // Split sharedFor to uuid string array
     const sharedFor = blog.sharedFor ? blog.sharedFor.split(',') : [];
 

@@ -38,6 +38,11 @@ export class LessonService {
       throw new BadRequestException(Messages.LIMIT_DURATION_VIDEO);
     }
 
+    // Duration limit
+    if (isEmpty(metadata.player_response.captions)) {
+      throw new BadRequestException(Messages.SUBTITLES_NOT_FOUND);
+    }
+
     // Create lesson
     const createdLesson = await this.lessonRepository.save({
       ...lesson,

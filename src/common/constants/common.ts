@@ -14,6 +14,8 @@ export const LANGUAGES = {
   kr: 'Korea',
 };
 
+export const LIST_LANGUAGES = Object.keys(LANGUAGES);
+
 export const LEVEL_QUESTION_BY_LANGUAGES = {
   cn: 'Rate this {language} passage on the HSK scale (HSK1, HSK2, HSK3, HSK4, HSK5, HSK6)',
   jp: 'Rate this {language} passage on the JLPT scale (N5, N4, N3, N2, N1)',

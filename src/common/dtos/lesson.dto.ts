@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsUrl, IsUUID, MaxLength, MinLength } from 'class-validator';
+import { IsIn, IsNotEmpty, IsUrl, IsUUID } from 'class-validator';
+
+import { LIST_LANGUAGES } from '@common/constants';
 
 import { LessonCommentRecordDto } from './lesson-comment.dto';
 import { LessonNoteRecordDto } from './lesson-note.dto';
@@ -14,9 +16,7 @@ export class CreateLessonDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  @IsString()
-  @MinLength(1)
-  @MaxLength(30)
+  @IsIn(LIST_LANGUAGES)
   language: string;
 
   @ApiProperty()

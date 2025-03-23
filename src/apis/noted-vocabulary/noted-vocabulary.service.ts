@@ -61,8 +61,6 @@ export class NotedVocabularyService {
       'created_by as "createdBy"',
     ]);
 
-    console.log('notedVocabulary', notedVocabulary);
-
     // Error if lesson not found
     if (isEmpty(notedVocabulary)) {
       throw new BadRequestException(Messages.ITEM_NOT_FOUND);
