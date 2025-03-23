@@ -4,9 +4,9 @@ import { ConfigService } from '@nestjs/config';
 import { ElasticsearchModule as BaseElasticsearchModule } from '@nestjs/elasticsearch';
 
 import { LessonEsService } from './services/lesson-es.service';
-import { MinimapElasticSearchService } from './services/minimap-es.service';
+import { MinimapEsService } from './services/minimap-es.service';
 
-const providers = [MinimapElasticSearchService, LessonEsService];
+const providers = [MinimapEsService, LessonEsService];
 
 @Global()
 @Module({

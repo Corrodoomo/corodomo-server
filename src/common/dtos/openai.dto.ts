@@ -25,11 +25,6 @@ export class OpenAIQuizDto {
   correctAnswer: string;
 }
 
-export class OpenAITopicDto {
-  @ApiProperty()
-  topic: string;
-}
-
 export class OpenAILevelDto {
   @ApiProperty()
   level: string;
@@ -41,4 +36,44 @@ export class OpenAIVocabularyDto {
 
   @ApiProperty()
   type: string;
+}
+
+export class OpenAIMinimapItemDto {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty({
+    example: `{
+        "vocabularies": {
+          "groups": {
+            "adjectives": {
+              "emotions": {
+                "words": ["happy", "sad", "angry", "excited"]
+               },
+               "describes": {
+                  "words": ["beautiful", "tall", "smart"]
+                }
+            },
+            "verbs": {
+              "foods": {
+                "words": ["eat", "cook"]
+              },
+              "sports": {
+                "words": ["run", "Jump"]
+              }
+            },
+            "nouns": {
+              "colors": {
+                "words": ["red", "blue", "green", "yellow"]
+              },
+              "places": {
+                "words": ["school", "park", "restaurant", "library"]
+              }
+            }
+          }
+        }
+      }
+`,
+  })
+  source: Record<string, unknown>;
 }

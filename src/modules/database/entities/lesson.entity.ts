@@ -3,15 +3,19 @@ import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany } from 'typeorm
 import { BaseEntity } from './base.entity';
 import { Folder } from './folder.entity';
 import { LessonComment } from './lesson-comment.entity';
+import { NotedVocabulary } from './noted-vocabulary.entity';
 import { Quiz } from './quiz.entity';
 import { Subtitle } from './subtitle.entity';
 import { User } from './user.entity';
 import { Vocabulary } from './vocabulary.entity';
-import { NotedVocabulary } from './noted-vocabulary.entity';
+import { LessonNote } from './lesson-note.entity';
 
 @Index('lessons_pkey', ['id'], { unique: true })
 @Entity('lessons', { schema: 'public' })
 export class Lesson extends BaseEntity {
+  @Column('character varying', { name: 'title' })
+  title: string;
+
   @Column('character varying', { name: 'youtube_url' })
   youtubeUrl: string;
 
@@ -24,13 +28,10 @@ export class Lesson extends BaseEntity {
   @Column('character varying', { name: 'tag', nullable: true })
   tag: string;
 
-  @Column('character varying', { name: 'note', nullable: true })
-  note: string;
-
   @Column('character varying', { name: 'minimap_id', nullable: true })
   minimapId: string;
 
-  @Column('int', { name: 'level', nullable: true })
+  @Column('character varying', { name: 'level', nullable: true })
   level: string;
 
   @Column('double precision', {
@@ -52,20 +53,23 @@ export class Lesson extends BaseEntity {
   @JoinColumn([{ name: 'folder_id', referencedColumnName: 'id' }])
   folder: Folder;
 
-  @OneToMany(() => LessonComment, (lessonComment) => lessonComment.lesson)
-  lessonComments: LessonComment[];
+  @OneToMany(() => LessonComment, (comment) => comment.lesson, { onDelete: 'CASCADE' })
+  comments: LessonComment[];
 
-  @OneToMany(() => Subtitle, (subtitle) => subtitle.lesson)
+  @OneToMany(() => Subtitle, (subtitle) => subtitle.lesson, { onDelete: 'CASCADE' })
   subtitles: Subtitle[];
 
-  @OneToMany(() => Quiz, (quiz) => quiz.lesson)
-  quizes: Quiz[];
+  @OneToMany(() => Quiz, (quiz) => quiz.lesson, { onDelete: 'CASCADE' })
+  quizzes: Quiz[];
 
-  @OneToMany(() => Vocabulary, (vocabulary) => vocabulary.lesson)
+  @OneToMany(() => Vocabulary, (vocabulary) => vocabulary.lesson, { onDelete: 'CASCADE' })
   vocabularies: Vocabulary[];
 
-  @OneToMany(() => NotedVocabulary, (notedVocabulary) => notedVocabulary.lesson)
+  @OneToMany(() => NotedVocabulary, (notedVocabulary) => notedVocabulary.lesson, { onDelete: 'CASCADE' })
   notedVocabularies: NotedVocabulary[];
+
+  @OneToMany(() => LessonNote, (note) => note.lesson, { onDelete: 'CASCADE' })
+  notes: LessonNote[];
 
   @ManyToOne(() => User, (user) => user.lessons, { nullable: false })
   @JoinColumn([{ name: 'created_by', referencedColumnName: 'id' }])

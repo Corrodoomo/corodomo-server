@@ -1,6 +1,7 @@
 import { Quiz } from '@modules/database/entities';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
+import { BelongToLessonDto } from './common.dto';
 
 export class QuizDto {
   @ApiProperty()
@@ -19,14 +20,23 @@ export class QuizDto {
   createdAt: string;
 }
 
+export class QuizRecordDto extends BelongToLessonDto {
+  @ApiProperty()
+  question: string;
+
+  @ApiProperty()
+  choices: string[];
+
+  @ApiProperty()
+  answer: string;
+}
+
 export class ListQuizDto {
   @ApiProperty()
   @Type(() => QuizDto)
   quizzes: QuizDto[];
 
   constructor(quizzes: Quiz[]) {
-    console.log('quizzes', quizzes);
-    
     this.quizzes = quizzes.map(({ id, question, answer, choices, createdAt }) => ({
       id,
       question,

@@ -12,7 +12,7 @@ export class Folder extends BaseEntity {
 
   @ManyToOne(() => User, (users) => users.folders, { nullable: false })
   @JoinColumn([{ name: 'created_by', referencedColumnName: 'id' }])
-  createdBy: User;
+  createdBy: User | string;
 
   @OneToMany(() => Lesson, (lesson) => lesson.folder)
   lessons: Lesson[];

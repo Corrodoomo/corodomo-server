@@ -2,8 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OpenAI } from 'openai';
 
-import { LESSON_TAGS } from '@common/constants';
-import { OpenAILevelDto, OpenAIQuizDto, OpenAITopicDto, OpenAIVocabularyDto } from '@common/dtos';
+import { LANGUAGES, LEVEL_QUESTION_BY_LANGUAGES } from '@common/constants';
+import { OpenAILevelDto, OpenAIQuizDto, OpenAIVocabularyDto } from '@common/dtos';
 
 @Injectable()
 export class OpenAIService {
@@ -23,44 +23,15 @@ export class OpenAIService {
    * @param message
    * @returns
    */
-  async tag(message: string): Promise<string> {
+  async quiz(message: string, language: string): Promise<OpenAIQuizDto[]> {
     const content = `
-      Given the following Youtube video description: '${message}'. 
-      Please classify this video based on its description. Based on this, please classify it into one of the following topics: ${LESSON_TAGS.join(',')}. 
-      If it's difficult to classify into these categories, reply with { 'topic': 'others' }. 
-      Only reply the classification result in the following JSON stringify: { 'topic': '?' }.
-    `;
-
-    const response = await this.openai.chat.completions.create({
-      model: this.configService.getOrThrow('OPEN_AI_MODEL'), // Bạn có thể thay đổi model tùy ý
-      messages: [
-        {
-          role: 'user',
-          content,
-        },
-      ],
-    });
-
-    const result = response.choices[0].message.content?.replace('```json', '').replace('```', '');
-
-    this.logger.debug(`Tag Generate - ${result}`);
-
-    const topics: OpenAITopicDto = JSON.parse(result || '');
-
-    return topics.topic;
-  }
-
-  /**
-   * Chat with chatter
-   * @param message
-   * @returns
-   */
-  async quiz(message: string): Promise<OpenAIQuizDto[]> {
-    const content = `
-      Give 10 vocabulary or grammar quiz in the following passage: ${message}. 
+      Give 10 vocabulary or grammar quiz in the following ${LANGUAGES[language]} passage: ${message}.
       Only reply with the following JSON stringify: ['{ 'question': '?', 'choices': { 'A': '?', 'B': '?', 'C': '?', 'D': '?' }, 'correctAnswer': '?' }'...] 
-      to save the database
+      to save the database.
+      All the values of 'question', 'A', 'B', 'C' and 'D' in JSON stringify must be ${LANGUAGES[language]} language.
     `;
+
+    this.logger.debug('Request data =>', content);
 
     const response = await this.openai.chat.completions.create({
       model: this.configService.getOrThrow('OPEN_AI_MODEL'), // Bạn có thể thay đổi model tùy ý
@@ -84,12 +55,15 @@ export class OpenAIService {
    * @param message
    * @returns
    */
-  async level(message: string): Promise<string> {
+  async level(message: string, language: string): Promise<string> {
+    const question = LEVEL_QUESTION_BY_LANGUAGES[language].replace('{language}', LANGUAGES[language]);
     const content = `
-      Please rate the difficulty of the vocabulary, grammar and subject on a scale of 1 -> 10. in the following passage: ${message}. 
+      ${question}. In the following ${LANGUAGES[language]} passage: ${message}. 
       Only reply with the following JSON stringify: { 'level': '?' } 
       to save the database
     `;
+
+    this.logger.debug('Request data =>', content);
 
     const response = await this.openai.chat.completions.create({
       model: this.configService.getOrThrow('OPEN_AI_MODEL'), // Bạn có thể thay đổi model tùy ý
@@ -115,13 +89,16 @@ export class OpenAIService {
    * @param message
    * @returns
    */
-  async vocabulary(message: string): Promise<OpenAIVocabularyDto[]> {
+  async vocabulary(message: string, language: string): Promise<OpenAIVocabularyDto[]> {
     const content = `
-      Passage description: ${message}.
+      The ${LANGUAGES[language]} passage description: ${message}.
       Classify important 50 words and types of nouns, adjectives, verbs in the following text.
       If 50 words are not enough, try to list as many as possible.
       Only reply with the following JSON stringify: [ { 'word': '?', 'type': '?' } ].
+      Require all 'word' and 'type' must be ${LANGUAGES[language]} language.
     `;
+
+    this.logger.debug('Request data =>', content);
 
     const response = await this.openai.chat.completions.create({
       model: this.configService.getOrThrow('OPEN_AI_MODEL'), // Bạn có thể thay đổi model tùy ý
@@ -147,10 +124,11 @@ export class OpenAIService {
    * @param message
    * @returns
    */
-  async minimap(message: string): Promise<OpenAIVocabularyDto[]> {
+  async minimap(message: string, language: string): Promise<OpenAIVocabularyDto[]> {
     const content = `
-      Content description: ${message}
+      The ${LANGUAGES[language]} passage description: ${message}.
       Classify 50 words on a vocabulary learning roadmap in the following text.
+      Require all vocabularies must be ${LANGUAGES[language]} language.
       Only reply with the following JSON stringify example: 
       {
         "vocabularies": {
@@ -184,6 +162,8 @@ export class OpenAIService {
       }
     `;
 
+    this.logger.debug('Request data =>', content);
+
     const response = await this.openai.chat.completions.create({
       model: this.configService.getOrThrow('OPEN_AI_MODEL'), // Bạn có thể thay đổi model tùy ý
       messages: [
@@ -196,7 +176,7 @@ export class OpenAIService {
 
     const result = response.choices[0].message.content?.replace('```json', '').replace('```', '');
 
-    this.logger.debug(`Vocabulary Generate - ${result}`);
+    this.logger.debug(`Minimap Generate - ${result}`);
 
     const vocabularies: OpenAIVocabularyDto[] = JSON.parse(result || '');
 

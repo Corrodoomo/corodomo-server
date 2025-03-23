@@ -1,5 +1,6 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsEnum, IsNumber, IsObject, IsOptional, IsString } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
+import { IsEnum, IsNumber, IsObject, IsOptional, IsString } from 'class-validator';
 import { Column, SortBy } from 'nestjs-paginate/lib/helper';
 
 // DTO cho PaginateQuery
@@ -12,14 +13,16 @@ export class PaginateQueryDto {
   @IsNumber()
   limit?: number;
 
+  @ApiPropertyOptional({ example: 'id:DESC', type: String })
   @IsOptional()
-  @IsArray()
   @IsString({ each: true })
+  @Transform(({ value }) => (value ? value.split(':') : []), { toClassOnly: true })
   sortBy?: [string, string][];
 
+  @ApiPropertyOptional({ example: 'id,tag', type: String })
   @IsOptional()
-  @IsArray()
   @IsString({ each: true })
+  @Transform(({ value }) => (value ? value.split(',') : []), { toClassOnly: true })
   searchBy?: string[];
 
   @IsOptional()
@@ -32,9 +35,10 @@ export class PaginateQueryDto {
     [column: string]: string | string[];
   };
 
+  @ApiPropertyOptional({ example: 'id,tag', type: String })
   @IsOptional()
-  @IsArray()
   @IsString({ each: true })
+  @Transform(({ value }) => (value ? value.split(',') : []), { toClassOnly: true })
   select?: string[];
 
   @IsOptional()
@@ -193,9 +197,59 @@ export class ItemsDto<T> {
     type: [Object], // Đảm bảo type chính xác của T nếu có thể
     example: [{}], // Ví dụ mẫu dữ liệu cho T
   })
-  items: T[];
+  data: T[];
 
   constructor(items: T[]) {
-    this.items = items;
+    this.data = items;
   }
+}
+
+export class ItemDto<T> {
+  @ApiProperty({
+    description: 'The list of data items',
+    type: [Object], // Đảm bảo type chính xác của T nếu có thể
+    example: '{ id: "123" }', // Ví dụ mẫu dữ liệu cho T
+  })
+  data: T;
+
+  constructor(item: T) {
+    this.data = item;
+  }
+}
+
+export class BaseRecordDto {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty()
+  createdAt: string;
+
+  @ApiProperty()
+  updatedAt: string;
+}
+
+export class BelongToLessonAndUserDto extends BaseRecordDto {
+  @ApiProperty()
+  lesson: {
+    id: string;
+  };
+
+  @ApiProperty()
+  createdBy: {
+    id: string;
+  };
+}
+
+export class BelongToLessonDto extends BaseRecordDto {
+  @ApiProperty()
+  lesson: {
+    id: string;
+  };
+}
+
+export class BelongToUserDto extends BaseRecordDto {
+  @ApiProperty()
+  createdBy: {
+    id: string;
+  };
 }
