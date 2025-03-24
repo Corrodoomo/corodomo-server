@@ -3,8 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
 
 import { MetadataKey } from '@common/constants';
-import { SignedInUserDto } from '@common/dtos/user.dto';
 import { Messages } from '@common/enums';
+import { SignedInUserMapper } from '@common/mappers/user.mapper';
 
 import { CacheService } from './cache.service';
 
@@ -16,7 +16,7 @@ export class UserCacheService extends CacheService {
     super(redis);
   }
 
-  async getItem(key: string): Promise<SignedInUserDto> {
+  async getItem(key: string): Promise<SignedInUserMapper> {
     const value = await this.get(key);
 
     const [accessToken, refreshToken] = (value || '').split(':');

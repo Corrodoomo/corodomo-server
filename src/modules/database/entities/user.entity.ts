@@ -23,11 +23,14 @@ export class User extends BaseEntity {
   @Column('character varying', { name: 'password' })
   password: string;
 
+  @Column('character varying', { name: 'name' })
+  name: string;
+
   @Column('character varying', { name: 'role', default: 'learner' })
   role: string;
 
   @Column('boolean', { name: 'email_verified', default: false })
-  emailVerified: string;
+  emailVerified: boolean;
 
   @OneToMany(() => Blog, (blog) => blog.createdBy)
   blogs: Blog[];

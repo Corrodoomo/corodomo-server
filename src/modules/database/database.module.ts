@@ -11,6 +11,7 @@ import { ExamSection } from './entities/exam-section.entity';
 import { Folder } from './entities/folder.entity';
 import { GroupTask } from './entities/group-task.entity';
 import { LessonComment } from './entities/lesson-comment.entity';
+import { LessonNote } from './entities/lesson-note.entity';
 import { Lesson } from './entities/lesson.entity';
 import { Note } from './entities/note.entity';
 import { NotedVocabulary } from './entities/noted-vocabulary.entity';
@@ -24,7 +25,6 @@ import { TaskComment } from './entities/task-comment.entity';
 import { Task } from './entities/task.entity';
 import { Vocabulary } from './entities/vocabulary.entity';
 import { Workspace } from './entities/workspace.entity';
-import { LessonNote } from './entities/lesson-note.entity';
 
 @Module({
   imports: [

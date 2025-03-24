@@ -1,8 +1,10 @@
+import { AuthModule } from '@app/apis/auth/auth.module';
 import { FolderModule } from '@app/apis/folder/folder.module';
 import { LessonModule } from '@app/apis/lesson/lesson.module';
 import { NotedVocabularyModule } from '@app/apis/noted-vocabulary/noted-vocabulary.module';
 import { QuizModule } from '@app/apis/quiz/quiz.module';
 import { SubtitleModule } from '@app/apis/subtitle/subtitle.module';
+import { UserNewModule } from '@app/apis/user-new/user-new.module';
 import { UserModule } from '@app/apis/user/user.module';
 import { VocabularyModule } from '@app/apis/vocabulary/vocabulary.module';
 import { AppController } from '@app/app.controller';
@@ -58,6 +60,8 @@ import { LessonNoteModule } from './apis/lesson-note/lesson-note.module';
     LessonCommentModule,
     LessonNoteModule,
     BlogModule,
+    AuthModule,
+    UserNewModule,
   ],
   exports: [],
   controllers: [AppController],
