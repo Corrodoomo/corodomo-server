@@ -30,3 +30,14 @@ export class SignedUpUserMapper extends BaseRecordDto {
   @ApiProperty()
   emailVerified: string;
 }
+
+export class ProfiledUserMapper {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty()
+  name?: string;
+
+  @ApiProperty()
+  role?: string;
+}

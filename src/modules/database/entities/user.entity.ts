@@ -23,7 +23,7 @@ export class User extends BaseEntity {
   @Column('character varying', { name: 'password' })
   password: string;
 
-  @Column('character varying', { name: 'name' })
+  @Column('character varying', { name: 'name', nullable: true })
   name: string;
 
   @Column('character varying', { name: 'role', default: 'learner' })

@@ -1,14 +1,15 @@
 import { CreateUserDto } from '@app/apis/user-new/dtos/create-user.dto';
 import { User } from '@modules/database/entities';
 import { Body, Controller, UseGuards } from '@nestjs/common';
-import { ApiBody } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 
-import { ApiPost } from '@common/decorators';
+import { ApiGet, ApiPost } from '@common/decorators';
 import { ApiOkInsertResultExample, ApiOkResponseExample } from '@common/decorators/example.decorator';
 import { SignInUserDto } from '@common/dtos';
 import { Authorized } from '@common/guards/authorized.guard';
+import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
 import { LocalAuthGuard } from '@common/guards/local-auth.guard';
-import { SignedInUserMapper, SignedUpUserMapper } from '@common/mappers/user.mapper';
+import { ProfiledUserMapper, SignedInUserMapper, SignedUpUserMapper } from '@common/mappers/user.mapper';
 
 import { AuthService } from './auth.service';
 
@@ -34,5 +35,16 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   signIn(@Authorized() user: User) {
     return this.authService.signIn(user);
+  }
+
+  // Just for testing purpose
+  @ApiGet('profile', {
+    auth: false,
+  })
+  @ApiOkResponseExample(ProfiledUserMapper)
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  getProfile(@Authorized() user: User) {
+    return user;
   }
 }

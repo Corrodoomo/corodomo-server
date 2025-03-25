@@ -18,12 +18,14 @@ export class AuthService {
     private readonly brptService: BryptService
   ) {}
 
+  // Register user
   public async registerUser(body: CreateUserDto) {
     const user = await this.userNewsRepository.findByEmail(body.email);
     if (user) throw new ConflictException('User already exists');
     return this.userNewsService.create(body);
   }
 
+  // Sign in
   public async signIn(user: User): Promise<SignedInUserMapper> {
     const { accessToken, refreshToken } = await this.generateToken(user.id, user.email, user.role);
     return { accessToken, refreshToken };
