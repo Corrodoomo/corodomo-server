@@ -50,4 +50,11 @@ export class AuthService {
 
     return user;
   }
+
+  public async validateJWTUser(userId: string) {
+    const user = await this.userNewsRepository.findUserById(userId);
+    if (!user) throw new UnauthorizedException('User not found');
+    const curentUser = { id: user.id, email: user.email, role: user.role };
+    return curentUser;
+  }
 }

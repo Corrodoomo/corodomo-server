@@ -8,7 +8,7 @@ import { UserNewModule } from '@app/apis/user-new/user-new.module';
 import { UserModule } from '@app/apis/user/user.module';
 import { VocabularyModule } from '@app/apis/vocabulary/vocabulary.module';
 import { AppController } from '@app/app.controller';
-import { providers } from '@app/app.provider';
+import { AppService } from '@app/app.service';
 import { HelmetMiddleware } from '@middlewares/helmet.middleware';
 import { LoggerMiddleware } from '@middlewares/logger.middleware';
 import { CacheModule } from '@modules/cache/cache.module';
@@ -21,7 +21,10 @@ import { OpenAIModule } from '@modules/openai/openai.module';
 import { YoutubeModule } from '@modules/youtube/youtube.module';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
+
+import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
 
 import { BlogModule } from './apis/blog/blog.module';
 import { LessonCommentModule } from './apis/lesson-comment/lesson-comment.module';
@@ -65,7 +68,13 @@ import { LessonNoteModule } from './apis/lesson-note/lesson-note.module';
   ],
   exports: [],
   controllers: [AppController],
-  providers,
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

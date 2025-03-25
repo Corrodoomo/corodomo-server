@@ -13,4 +13,8 @@ export class UserNewsRepository extends BaseRepository<User> {
   public findByEmail(email: string) {
     return this.findOne({ where: { email } });
   }
+
+  public findUserById(id: string) {
+    return this.findOne({ where: { id } });
+  }
 }

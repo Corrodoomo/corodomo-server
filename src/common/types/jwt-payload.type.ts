@@ -1,4 +1,4 @@
-export type AuthJWTPayLoad = {
+export type JWTPayLoad = {
   id: string;
   email: string;
   role: string;
