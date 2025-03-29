@@ -8,6 +8,7 @@ import { InsertResult } from '@common/dtos';
 import { Messages } from '@common/enums';
 
 import { SubtitleRepository } from './subtitle.repository';
+import { Lesson } from '@modules/database/entities';
 
 @Injectable()
 export class SubtitleService {
@@ -23,7 +24,7 @@ export class SubtitleService {
    */
   async create(lessonId: string, userId: string) {
     // Find lesson
-    const lesson = await this.lessonRepository.getRawOne(lessonId, [
+    const lesson = await this.lessonRepository.getRawOne<Lesson>(lessonId, [
       'id',
       'tag',
       'language',
@@ -48,7 +49,7 @@ export class SubtitleService {
     }
 
     // Fetch youtube transcript
-    const transcripts = await YoutubeTranscript.fetchTranscript(lesson.youtubeUrl);
+    const transcripts = await YoutubeTranscript.fetchTranscript(lesson.youtubeUrl, { lang: lesson.language });
 
     // Calc duration video and full subtitles
     const fullSubtitles = transcripts.reduce((accumulator, current) => accumulator + `. ${current.text}`, '');

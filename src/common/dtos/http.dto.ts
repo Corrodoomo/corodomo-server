@@ -70,7 +70,7 @@ export class InsertResultDto<T> {
   @ApiProperty({ example: { id: '15b3e50e-1f94-4762-962d-ff3168bcc745' } })
   raw: T;
 
-  constructor(raw: T, inserted: number) {
+  constructor(raw: T, inserted: number = 1) {
     this.inserted = inserted;
     this.raw = raw;
   }
@@ -84,7 +84,7 @@ export class UpdateResultDto {
   @ApiProperty({ example: 1 })
   updated: number;
 
-  constructor(updated: number) {
+  constructor(updated: number = 1) {
     this.updated = updated;
   }
 }
@@ -118,7 +118,7 @@ export class DeleteResultDto {
   @ApiProperty({ example: 1 })
   deleted: number;
 
-  constructor(deleted: number) {
-    this.deleted = deleted;
+  constructor(deleted: number | null = 1) {
+    this.deleted = deleted || 1;
   }
 }

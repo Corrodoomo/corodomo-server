@@ -8,6 +8,8 @@ import { ItemsDto } from '@common/dtos/common.dto';
 import { Messages } from '@common/enums';
 
 import { VocabularyRepository } from './vocabulary.repository';
+import { isEmpty } from 'lodash';
+import { isNotEmpty } from 'class-validator';
 
 @Injectable()
 export class VocabularyService {
@@ -27,7 +29,7 @@ export class VocabularyService {
     // Get lesson from id
     const lesson = await this.lessonRepository.findOne({
       where: { id: lessonId },
-      select: ['id', 'fullSubtitles', 'language'],
+      select: ['id', 'fullSubtitles', 'language', 'minimapId'],
     });
 
     // Check if lesson not existed
@@ -35,23 +37,44 @@ export class VocabularyService {
       throw new BadRequestException(Messages.ITEM_NOT_FOUND);
     }
 
-    // Generate vocabularies
-    const [vocabularies, minimap] = await Promise.all([
-      this.openaiService.vocabulary(lesson.fullSubtitles, lesson.language),
-      this.openaiService.minimap(lesson.fullSubtitles, lesson.language),
-    ]);
+    let vocabularies;
+    let minimap;
 
-    // Save document to elastic search
-    const document = await this.minimapEsService.indexDocument(minimap);
+    // Skip this step if minimap is created
+    if (isNotEmpty(lesson.minimapId)) {
+      // Get minimap in eleastic search
+      const minimapInLesson = await this.minimapEsService.getById(lesson.minimapId);
 
-    // Save them to db
-    await Promise.all([
-      this.vocabularyRepository.save(vocabularies.map((vocabulary) => ({ ...vocabulary, lesson: { id: lessonId } }))),
-      this.lessonRepository.update({ id: lessonId }, { minimapId: document._id }),
-    ]);
+      // Skip this step if minimap is created in elastic search
+      if (isEmpty(minimapInLesson)) {
+        // Get minimap in eleastic search
+        minimap = await this.openaiService.minimap(lesson.fullSubtitles, lesson.language);
+
+        // Save document to elastic search
+        const document = await this.minimapEsService.indexDocument(minimap);
+
+        // Update minimap id
+        await this.lessonRepository.update({ id: lessonId }, { minimapId: document._id });
+      }
+    }
+
+    // Get vocabulary from id
+    const vocabulary = await this.vocabularyRepository.findOne({
+      where: { lesson: { id: lessonId } },
+      select: ['id'],
+    });
+
+    // Skip this step if vocabulary is created
+    if (isEmpty(vocabulary)) {
+      // Generate vocabularies
+      vocabularies = await this.openaiService.vocabulary(lesson.fullSubtitles, lesson.language);
+
+      // Save vocabulary to database
+      await this.vocabularyRepository.save(vocabularies.map((vocabulary) => ({ ...vocabulary, lesson: { id: lessonId } })));
+    }
 
     // Return result
-    return new InsertResultDto({ minimap, vocabularies }, vocabularies.length + minimap.length);
+    return new InsertResultDto({ minimap, vocabularies }, Number(vocabularies?.length) + Number(minimap?.length));
   }
 
   /**

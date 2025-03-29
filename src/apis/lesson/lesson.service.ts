@@ -6,7 +6,7 @@ import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/com
 import { isEmpty } from 'lodash';
 import { FilterOperator, paginate, PaginateQuery } from 'nestjs-paginate';
 
-import { LIMIT_DURATION_VIDEO } from '@common/constants';
+import { LIMIT_DURATION_VIDEO, YOUTUBE_TRANSCRIPT_LANGUAGES } from '@common/constants';
 import { CreateLessonDto, DeleteResultDto, InsertResultDto, ListTagsDto, UpdateResultDto } from '@common/dtos';
 import { ItemDto } from '@common/dtos/common.dto';
 import { Messages } from '@common/enums';
@@ -33,12 +33,28 @@ export class LessonService {
     const metadata = await this.youtubeService.getMetadata(lesson.youtubeUrl);
     const duration = Number(metadata.videoDetails.lengthSeconds);
 
+    // Caption tracks by langs
+    const captionTracks = metadata.player_response.captions?.playerCaptionsTracklistRenderer?.captionTracks;
+    
+    // Error if subtitles not found
+    if (isEmpty(captionTracks)) {
+      throw new BadRequestException(Messages.SUBTITLES_NOT_FOUND);
+    }
+
+    // Find caption track by lang
+    const captionTrackByLang = captionTracks?.find((captionTrack) => captionTrack.languageCode === YOUTUBE_TRANSCRIPT_LANGUAGES[lesson.language]);
+
+    // Error if subtitles not founds
+    if (isEmpty(captionTrackByLang)) {
+      throw new BadRequestException(Messages.LANG_SUBTITLES_NOT_FOUND);
+    }
+
     // Duration limit
     if (duration > LIMIT_DURATION_VIDEO) {
       throw new BadRequestException(Messages.LIMIT_DURATION_VIDEO);
     }
 
-    // Duration limit
+    // Transcript not allowed
     if (isEmpty(metadata.player_response.captions)) {
       throw new BadRequestException(Messages.SUBTITLES_NOT_FOUND);
     }
@@ -125,7 +141,6 @@ export class LessonService {
         'id',
         'title',
         'level',
-        'note',
         'tag',
         'language',
         'level',
@@ -147,8 +162,20 @@ export class LessonService {
    * @param query
    * @returns
    */
-  public async watch(lessonId: string): Promise<UpdateResultDto> {
-    // Update watchedAt and watchedCount
+  public async watch(lessonId: string) {
+    // // Lấy entity hiện tại
+    // const entity = await this.user.getById(lessonId);
+
+    // if (entity) {
+    //   // Thêm hoặc cập nhật thuộc tính trong đối tượng JSON
+    //   entity.less = {
+    //     ...entity.data,
+    //     ...newItem,  // Thêm hoặc thay thế thuộc tính
+    //   };
+
+    //   // Lưu lại vào cơ sở dữ liệu
+    //   await repository.save(entity);
+    // // Update watchedAt and watchedCount
     await this.lessonRepository.updateWatchedCount(lessonId);
 
     // Return result

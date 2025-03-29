@@ -1,5 +1,8 @@
 import { Column, Entity, Index, OneToMany, OneToOne } from 'typeorm';
 
+import { LessonRecentMapper } from '@common/mappers/user.mapper';
+import { ProjectRecent } from '@common/types/project.type';
+
 import { BaseEntity } from './base.entity';
 import { Blog } from './blog.entity';
 import { Exam } from './exam.entity';
@@ -12,6 +15,7 @@ import { Note } from './note.entity';
 import { NotedVocabulary } from './noted-vocabulary.entity';
 import { Song } from './song.entity';
 import { TaskComment } from './task-comment.entity';
+import { Task } from './task.entity';
 import { Workspace } from './workspace.entity';
 
 @Index('users_pkey', ['id'], { unique: true })
@@ -28,6 +32,12 @@ export class User extends BaseEntity {
 
   @Column('boolean', { name: 'email_verified', default: false })
   emailVerified: string;
+
+  @Column('jsonb', { name: 'project_recents', nullable: true })
+  projectRecents: ProjectRecent[];
+
+  @Column('jsonb', { name: 'lesson_recents', nullable: true })
+  lessonRecents: LessonRecentMapper[];
 
   @OneToMany(() => Blog, (blog) => blog.createdBy)
   blogs: Blog[];
@@ -64,4 +74,7 @@ export class User extends BaseEntity {
 
   @OneToOne(() => LessonNote, (lessonNote) => lessonNote.createdBy)
   lessonNotes: LessonNote[];
+
+  @OneToOne(() => Task, (task) => task.createdBy)
+  tasks: Task[];
 }
