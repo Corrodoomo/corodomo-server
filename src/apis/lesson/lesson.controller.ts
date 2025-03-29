@@ -67,7 +67,7 @@ export class LessonController {
   @ApiPut('/:lessonId/watched')
   @Roles([SystemRoles.LEARNER])
   @ApiOkUpdateResultExample()
-  watch(@Param() params: LessonIdDto): Promise<UpdateResultDto> {
-    return this.lessonService.watch(params.lessonId);
+  watch(@Param() params: LessonIdDto, @Req() req: Request): Promise<UpdateResultDto> {
+    return this.lessonService.watch(req.user.id, params.lessonId);
   }
 }

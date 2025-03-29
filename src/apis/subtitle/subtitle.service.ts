@@ -1,14 +1,15 @@
 import { LessonRepository } from '@app/apis/lesson/lesson.repository';
 import { LessonService } from '@app/apis/lesson/lesson.service';
+import { Lesson } from '@modules/database/entities';
 import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { isEmpty } from 'lodash';
 import { YoutubeTranscript } from 'youtube-transcript';
 
+import { YOUTUBE_TRANSCRIPT_LANGUAGES } from '@common/constants';
 import { InsertResult } from '@common/dtos';
 import { Messages } from '@common/enums';
 
 import { SubtitleRepository } from './subtitle.repository';
-import { Lesson } from '@modules/database/entities';
 
 @Injectable()
 export class SubtitleService {
@@ -49,7 +50,9 @@ export class SubtitleService {
     }
 
     // Fetch youtube transcript
-    const transcripts = await YoutubeTranscript.fetchTranscript(lesson.youtubeUrl, { lang: lesson.language });
+    const transcripts = await YoutubeTranscript.fetchTranscript(lesson.youtubeUrl, {
+      lang: YOUTUBE_TRANSCRIPT_LANGUAGES[lesson.language],
+    });
 
     // Calc duration video and full subtitles
     const fullSubtitles = transcripts.reduce((accumulator, current) => accumulator + `. ${current.text}`, '');

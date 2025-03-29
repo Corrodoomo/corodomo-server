@@ -7,11 +7,12 @@ import { Module } from '@nestjs/common';
 import { SubtitleController } from './subtitle.controller';
 import { SubtitleRepository } from './subtitle.repository';
 import { SubtitleService } from './subtitle.service';
+import { UsersRepository } from '../user/user.repository';
 
 @Module({
   imports: [],
   controllers: [SubtitleController],
-  providers: [SubtitleService, SubtitleRepository, LessonRepository, LessonService, OpenAIService, YoutubeService],
+  providers: [SubtitleService, SubtitleRepository, LessonRepository, LessonService, OpenAIService, YoutubeService, UsersRepository],
   exports: [SubtitleService, SubtitleRepository],
 })
 export class SubtitleModule {}

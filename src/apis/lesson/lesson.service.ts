@@ -11,6 +11,7 @@ import { CreateLessonDto, DeleteResultDto, InsertResultDto, ListTagsDto, UpdateR
 import { ItemDto } from '@common/dtos/common.dto';
 import { Messages } from '@common/enums';
 
+import { UsersRepository } from '../user/user.repository';
 import { LessonRepository } from './lesson.repository';
 
 @Injectable()
@@ -20,7 +21,8 @@ export class LessonService {
     private readonly lessonEsService: LessonEsService,
     private readonly minimapEsService: MinimapEsService,
     private readonly openaiService: OpenAIService,
-    private readonly youtubeService: YoutubeService
+    private readonly youtubeService: YoutubeService,
+    private readonly userRepository: UsersRepository
   ) {}
 
   /**
@@ -35,14 +37,16 @@ export class LessonService {
 
     // Caption tracks by langs
     const captionTracks = metadata.player_response.captions?.playerCaptionsTracklistRenderer?.captionTracks;
-    
+
     // Error if subtitles not found
     if (isEmpty(captionTracks)) {
       throw new BadRequestException(Messages.SUBTITLES_NOT_FOUND);
     }
 
     // Find caption track by lang
-    const captionTrackByLang = captionTracks?.find((captionTrack) => captionTrack.languageCode === YOUTUBE_TRANSCRIPT_LANGUAGES[lesson.language]);
+    const captionTrackByLang = captionTracks?.find(
+      (captionTrack) => captionTrack.languageCode === YOUTUBE_TRANSCRIPT_LANGUAGES[lesson.language]
+    );
 
     // Error if subtitles not founds
     if (isEmpty(captionTrackByLang)) {
@@ -162,20 +166,30 @@ export class LessonService {
    * @param query
    * @returns
    */
-  public async watch(lessonId: string) {
-    // // Lấy entity hiện tại
-    // const entity = await this.user.getById(lessonId);
+  public async watch(userId: string, lessonId: string) {
+    // Lấy entity hiện tại
+    const user = await this.userRepository.createQueryBuilder('user')
+      .select(['user.id', 'user.lessonRecents']).getRawMany();
 
-    // if (entity) {
-    //   // Thêm hoặc cập nhật thuộc tính trong đối tượng JSON
-    //   entity.less = {
-    //     ...entity.data,
-    //     ...newItem,  // Thêm hoặc thay thế thuộc tính
-    //   };
+    if (isEmpty(user)) {
+      throw new BadRequestException(Messages.ITEM_NOT_FOUND);
+    }
 
-    //   // Lưu lại vào cơ sở dữ liệu
-    //   await repository.save(entity);
-    // // Update watchedAt and watchedCount
+    const recent = {
+      lessonId,
+      accessedAt: new Date(),
+    };
+
+    console.log('user', user)
+
+    // await this.userRepository.update(
+    //   { id: userId }, 
+    //   {
+    //     lessonRecents: () => `lessonRecents || '[${JSON.stringify(recent)}]'::jsonb`
+    //   }
+    // );
+
+    // Update watchedAt and watchedCount
     await this.lessonRepository.updateWatchedCount(lessonId);
 
     // Return result

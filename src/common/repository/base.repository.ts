@@ -12,7 +12,12 @@ export class BaseRepository<T extends BaseEntity> extends Repository<T> {
    * @returns
    */
   public getRawOne<TRaw = T>(id: string, select: string[] = []) {
-    return this.createQueryBuilder().select(select).where('id = :id').setParameters({ id }).cache(true).getRawOne<TRaw>();
+    return this.createQueryBuilder()
+      .select(select)
+      .where('id = :id')
+      .setParameters({ id })
+      .cache(true)
+      .getRawOne<TRaw>();
   }
 
   /**

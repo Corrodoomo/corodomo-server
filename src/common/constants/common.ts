@@ -5,7 +5,7 @@ export const MetadataKey = {
   MINIMAP_ELASTIC_SEARCH: 'MINIMAP_ELASTIC_SEARCH',
 };
 
-export const LIMIT_DURATION_VIDEO = 900;
+export const LIMIT_DURATION_VIDEO = 1000;
 
 export const LANGUAGES = {
   cn: 'Chinese',
