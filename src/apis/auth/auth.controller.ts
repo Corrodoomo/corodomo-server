@@ -6,11 +6,12 @@ import { ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { ApiGet, ApiPost } from '@common/decorators';
 import { ApiOkInsertResultExample, ApiOkResponseExample } from '@common/decorators/example.decorator';
 import { Public } from '@common/decorators/public-route.decorator';
+import { Roles } from '@common/decorators/roles.decorator';
 import { SignInUserDto } from '@common/dtos';
+import { SystemRoles } from '@common/enums';
 import { Authorized } from '@common/guards/authorized.guard';
-import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
 import { LocalAuthGuard } from '@common/guards/local-auth.guard';
-import { ProfiledUserMapper, SignedInUserMapper, SignedUpUserMapper } from '@common/mappers/user.mapper';
+import { SignedInUserMapper, SignedUpUserMapper } from '@common/mappers/user.mapper';
 
 import { AuthService } from './auth.service';
 
@@ -41,23 +42,12 @@ export class AuthController {
   }
 
   // Just for testing purpose
-  @ApiGet('profile', {
-    auth: false,
-  })
-  @ApiOkResponseExample(ProfiledUserMapper)
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  getProfile(@Authorized() user: User) {
-    return user;
-  }
-
-  // Just for testing purpose
   @ApiGet('test', {
     auth: false,
   })
   // @ApiOkResponseExample(ProfiledUserMapper)
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @Roles(SystemRoles.LEARNER)
   getTest(@Authorized() user: User) {
     return `This route is protected with ${user.email}`;
   }

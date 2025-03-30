@@ -25,6 +25,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
 
 import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
+import { RolesGuard } from '@common/guards/role.guard';
 
 import { BlogModule } from './apis/blog/blog.module';
 import { LessonCommentModule } from './apis/lesson-comment/lesson-comment.module';
@@ -72,7 +73,11 @@ import { LessonNoteModule } from './apis/lesson-note/lesson-note.module';
     AppService,
     {
       provide: APP_GUARD,
-      useClass: JwtAuthGuard,
+      useClass: JwtAuthGuard, //@UseGuards(JwtAuthGuard)
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard, //@UseGuards(RolesGuard)
     },
   ],
 })

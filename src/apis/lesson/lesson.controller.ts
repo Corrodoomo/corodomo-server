@@ -1,6 +1,6 @@
 import { Body, Param, Query, Req } from '@nestjs/common';
 
-import { ApiDelete, ApiGet, ApiPost, ApiPut, Controller, Roles } from '@common/decorators';
+import { ApiDelete, ApiGet, ApiPost, ApiPut, Controller, RolesOld } from '@common/decorators';
 import {
   ApiOkDeleteResultExample,
   ApiOkInsertResultExample,
@@ -23,49 +23,49 @@ export class LessonController {
   constructor(private readonly lessonService: LessonService) {}
 
   @ApiPost('/')
-  @Roles([SystemRoles.LEARNER])
+  @RolesOld([SystemRoles.LEARNER])
   @ApiOkInsertResultExample(LessonRecordDto)
   create(@Body() body: CreateLessonDto, @Req() request: Request) {
     return this.lessonService.create(request.user.id, body);
   }
 
   @ApiDelete('/:lessonId')
-  @Roles([SystemRoles.LEARNER])
+  @RolesOld([SystemRoles.LEARNER])
   @ApiOkDeleteResultExample()
   delete(@Param() param: LessonIdDto, @Req() request: Request) {
     return this.lessonService.delete(request.user.id, param.lessonId);
   }
 
   @ApiGet('/')
-  @Roles([SystemRoles.LEARNER])
+  @RolesOld([SystemRoles.LEARNER])
   @ApiOkPaginationExample(LessonRecordDto)
   get(@Query() query: PaginateQueryDto) {
     return this.lessonService.get(query);
   }
 
   @ApiGet('/list_tags')
-  @Roles([SystemRoles.LEARNER])
+  @RolesOld([SystemRoles.LEARNER])
   @ApiOkItemsExample(ListTagsDto)
   getListOfTags() {
     return this.lessonService.getListTags();
   }
 
   @ApiGet('/:lessonId/video_course')
-  @Roles([SystemRoles.LEARNER])
+  @RolesOld([SystemRoles.LEARNER])
   @ApiOkItemExample(LessonVideoCourse)
   getDetail(@Param() params: LessonIdDto, @Req() req: Request) {
     return this.lessonService.getDetail(params.lessonId, req.user.id);
   }
 
   @ApiGet('/:lessonId/minimap')
-  @Roles([SystemRoles.LEARNER])
+  @RolesOld([SystemRoles.LEARNER])
   @ApiOkItemExample(OpenAIMinimapItemDto)
   getMinimaps(@Param() params: LessonIdDto) {
     return this.lessonService.getMinimaps(params.lessonId);
   }
 
   @ApiPut('/:lessonId/watched')
-  @Roles([SystemRoles.LEARNER])
+  @RolesOld([SystemRoles.LEARNER])
   @ApiOkUpdateResultExample()
   watch(@Param() params: LessonIdDto): Promise<UpdateResultDto> {
     return this.lessonService.watch(params.lessonId);

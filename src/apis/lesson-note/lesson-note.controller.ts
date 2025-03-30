@@ -1,6 +1,6 @@
 import { Body, Controller, Param, Req } from '@nestjs/common';
 
-import { ApiPost, ApiPut, Roles } from '@common/decorators';
+import { ApiPost, ApiPut, RolesOld } from '@common/decorators';
 import { ApiOkInsertResultExample, ApiOkUpdateResultExample } from '@common/decorators/example.decorator';
 import { LessonNoteIdDto } from '@common/dtos/id.dto';
 import { CreateLessonNoteDto, LessonNoteRecordDto, UpdateLessonNoteDto } from '@common/dtos/lesson-note.dto';
@@ -14,14 +14,14 @@ export class LessonNoteController {
   constructor(private readonly lessonNoteService: LessonNoteService) {}
 
   @ApiPost('/')
-  @Roles([SystemRoles.LEARNER])
+  @RolesOld([SystemRoles.LEARNER])
   @ApiOkInsertResultExample(LessonNoteRecordDto)
   create(@Body() body: CreateLessonNoteDto, @Req() req: Request) {
     return this.lessonNoteService.create(req.user.id, body);
   }
 
   @ApiPut('/:lessonNoteId')
-  @Roles([SystemRoles.LEARNER])
+  @RolesOld([SystemRoles.LEARNER])
   @ApiOkUpdateResultExample(LessonNoteRecordDto)
   update(@Param() param: LessonNoteIdDto, @Body() body: UpdateLessonNoteDto, @Req() req: Request) {
     return this.lessonNoteService.update(req.user.id, param.lessonNoteId, body);

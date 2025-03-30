@@ -1,6 +1,6 @@
 import { Body, Controller, Req } from '@nestjs/common';
 
-import { ApiPost, Roles } from '@common/decorators';
+import { ApiPost, RolesOld } from '@common/decorators';
 import { ApiOkInsertResultExample, ApiOkResponseExample } from '@common/decorators/example.decorator';
 import { SignInUserDto } from '@common/dtos';
 import { SystemRoles } from '@common/enums';
@@ -31,14 +31,14 @@ export class UserController {
   }
 
   @ApiPost('signout')
-  @Roles([SystemRoles.LEARNER])
+  @RolesOld([SystemRoles.LEARNER])
   @ApiOkResponseExample(SignedOutUserMapper)
   signOut(@Req() request: Request) {
     return this.userService.signOut(request.user.id);
   }
 
   @ApiPost('refresh')
-  @Roles([SystemRoles.LEARNER])
+  @RolesOld([SystemRoles.LEARNER])
   @ApiOkResponseExample(RefreshUserMapper)
   refresh(@Req() request: Request) {
     return this.userService.refresh(request.user.id);

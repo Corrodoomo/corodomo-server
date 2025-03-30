@@ -1,6 +1,6 @@
 import { Body, Controller, Param, Req } from '@nestjs/common';
 
-import { ApiDelete, ApiPost, ApiPut, Roles } from '@common/decorators';
+import { ApiDelete, ApiPost, ApiPut, RolesOld } from '@common/decorators';
 import {
   ApiOkDeleteResultExample,
   ApiOkInsertResultExample,
@@ -22,21 +22,21 @@ export class LessonCommentController {
   constructor(private readonly commentService: LessonCommentService) {}
 
   @ApiPost('/send')
-  @Roles([SystemRoles.LEARNER])
+  @RolesOld([SystemRoles.LEARNER])
   @ApiOkInsertResultExample(LessonCommentRecordDto)
   create(@Body() body: CreateLessonCommentDto, @Req() req: Request) {
     return this.commentService.create(req.user.id, body);
   }
 
   @ApiPut('/:commentId')
-  @Roles([SystemRoles.LEARNER])
+  @RolesOld([SystemRoles.LEARNER])
   @ApiOkUpdateResultExample(LessonCommentRecordDto)
   update(@Param() param: CommentIdDto, @Body() body: UpdateLessonCommentDto, @Req() req: Request) {
     return this.commentService.update(req.user.id, param.commentId, body);
   }
 
   @ApiDelete('/:commentId')
-  @Roles([SystemRoles.LEARNER])
+  @RolesOld([SystemRoles.LEARNER])
   @ApiOkDeleteResultExample()
   delete(@Param() param: CommentIdDto, @Req() req: Request) {
     return this.commentService.delete(req.user.id, param.commentId);
