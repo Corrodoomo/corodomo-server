@@ -13,14 +13,9 @@ import Redis from 'ioredis';
       useFactory: (config: ConfigService) => ({
         throttlers: [
           {
-            name: 'medium',
-            limit: config.getOrThrow<number>('MEDIUM_RATE_LIMITER_MAX'),
-            ttl: seconds(config.getOrThrow<number>('MEDIUM_RATE_LIMITER_TLL')),
-          },
-          {
             name: 'long',
-            limit: config.getOrThrow<number>('LONG_RATE_LIMITER_MAX'),
-            ttl: seconds(config.getOrThrow<number>('LONG_RATE_LIMITER_TLL')),
+            limit: config.getOrThrow<number>('RATE_LIMITER_MAX'),
+            ttl: seconds(config.getOrThrow<number>('RATE_LIMITER_TLL')),
           },
         ],
         storage: new ThrottlerStorageRedisService(

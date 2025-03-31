@@ -54,10 +54,8 @@ import * as Joi from 'joi';
         OPEN_AI_API_KEY: Joi.string().required(),
 
         // RATE LIMITER
-        MEDIUM_RATE_LIMITER_MAX: Joi.number().integer().required(),
-        MEDIUM_RATE_LIMITER_TLL: Joi.number().integer().required(),
-        LONG_RATE_LIMITER_MAX: Joi.number().integer().required(),
-        LONG_RATE_LIMITER_TLL: Joi.number().integer().required(),
+        RATE_LIMITER_MAX: Joi.number().integer().required(),
+        RATE_LIMITER_TLL: Joi.number().integer().required(),
       }),
     }),
   ],
