@@ -31,6 +31,14 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
+  public async refresh(user: User) {
+    const { accessToken, refreshToken } = await this.generateToken(user.id, user.email, user.role);
+
+    //TODO: Gắn lại ở cookies session
+
+    return { accessToken, refreshToken, id: user.id, name: user.name, role: user.role };
+  }
+
   // Generate token
   public async generateToken(id: string, email: string, role: string) {
     const [accessToken, refreshToken] = await Promise.all([
@@ -54,6 +62,17 @@ export class AuthService {
   public async validateJWTUser(userId: string) {
     const user = await this.userNewsRepository.findUserById(userId);
     if (!user) throw new UnauthorizedException('User not found');
+    const curentUser = { id: user.id, email: user.email, role: user.role };
+    return curentUser;
+  }
+
+  public async validateRefreshToken(userId: string, refreshToken: string) {
+    const user = await this.userNewsRepository.findUserById(userId);
+    if (!user) throw new UnauthorizedException('User not found');
+
+    const isRefreshTokenMatched = await this.jwtService.verifyRefreshToken(refreshToken);
+    if (!isRefreshTokenMatched) throw new UnauthorizedException('Invalid refresh token');
+
     const curentUser = { id: user.id, email: user.email, role: user.role };
     return curentUser;
   }
