@@ -1,4 +1,3 @@
-import { LessonRecent } from '@modules/database/entities/lesson-recent.entity';
 import { LessonEsService } from '@modules/elastic-search/services/lesson-es.service';
 import { MinimapEsService } from '@modules/elastic-search/services/minimap-es.service';
 import { LessonRecentRepository } from '@modules/lesson-recent/lesson-recent.repository';

@@ -25,10 +25,10 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: corodomo@mail.com
       PGADMIN_DEFAULT_PASSWORD: corodomo
-    networks:
-      - pgnetwork
     volumes:
       - corodomo_pgadmin:/var/lib/pgadmin
+    networks:
+      - pgnetwork
 
   codoromo_redis:
     container_name: codoromo_redis_container
@@ -38,7 +38,24 @@ services:
     ports:
       - 6379:6379
     volumes:
-      - .docker/redis:/data
+      - redis_data:/data
+    networks:
+      - pgnetwork
+
+  redis_insight:
+    container_name: redis-insight
+    image: redislabs/redisinsight:latest
+    ports:
+      - 5540:5540
+    volumes:
+      - redis_insight:/data
+    restart: always
+    healthcheck:
+      test: ['CMD-SHELL', 'curl --fail http://localhost:5540 || exit 1']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
     networks:
       - pgnetwork
 
@@ -109,4 +126,8 @@ volumes:
   elastic-data:
     driver: local
   kibanadata:
+    driver: local
+  redis_data:
+    driver: local
+  redis_insight:
     driver: local

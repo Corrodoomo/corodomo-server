@@ -27,7 +27,7 @@ async function bootstrap() {
     new TransformPropertyPipe()
   );
   const configService = app.get<ConfigService>(ConfigService);
-  const port = configService.get<string>('PORT') || 5000;
+  const port = configService.get<string>('PORT') ?? 5000;
   const nodeEnv = configService.get<string>('NODE_ENV');
 
   app.enableCors({
