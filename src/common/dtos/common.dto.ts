@@ -1,3 +1,4 @@
+import { TransformProperty } from '@common/decorators/transform.decorator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsEnum, IsNumber, IsObject, IsOptional, IsString } from 'class-validator';
@@ -7,16 +8,16 @@ import { Column, SortBy } from 'nestjs-paginate/lib/helper';
 export class PaginateQueryDto {
   @IsOptional()
   @IsNumber()
-  page?: number;
+  page?: number = 1;
 
   @IsOptional()
   @IsNumber()
-  limit?: number;
+  limit?: number = 10;
 
   @ApiPropertyOptional({ example: 'id:DESC', type: String })
   @IsOptional()
   @IsString({ each: true })
-  @Transform(({ value }) => (value ? value.split(':') : []), { toClassOnly: true })
+  @TransformProperty(({ value }) => (value ? [value.split(':')] : []))
   sortBy?: [string, string][];
 
   @ApiPropertyOptional({ example: 'id,tag', type: String })
@@ -53,8 +54,9 @@ export class PaginateQueryDto {
   @IsEnum(['before', 'after'])
   cursorDirection?: 'before' | 'after';
 
+  @IsOptional()
   @IsString()
-  path: string;
+  path: string = 'paginate_items';
 }
 
 export class MetaDto<T> {

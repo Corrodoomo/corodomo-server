@@ -24,6 +24,9 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { BlogModule } from './apis/blog/blog.module';
 import { LessonCommentModule } from './apis/lesson-comment/lesson-comment.module';
 import { LessonNoteModule } from './apis/lesson-note/lesson-note.module';
+import { TaskModule } from './apis/task/task.module';
+import { WorkspaceModule } from './apis/workspace/workspace.module';
+import { ProjectModule } from './apis/project/project.module';
 
 @Module({
   imports: [
@@ -58,6 +61,9 @@ import { LessonNoteModule } from './apis/lesson-note/lesson-note.module';
     LessonCommentModule,
     LessonNoteModule,
     BlogModule,
+    TaskModule,
+    WorkspaceModule,
+    ProjectModule,
   ],
   exports: [],
   controllers: [AppController],

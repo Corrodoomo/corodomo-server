@@ -10,6 +10,7 @@ import {
 } from '@nestjs/swagger';
 
 import { LinksDto, MetaDto } from '@common/dtos/common.dto';
+import { RawMeta } from '@common/mappers';
 
 /**
  * Create http response decorator for success response
@@ -66,6 +67,27 @@ export function createPaginationDto<T extends Type>(DTO: T) {
   Object.defineProperty(PaginationDto, 'name', { value: `PaginationDto_${DTO.name}` });
 
   return PaginationDto;
+}
+
+/**
+ * Create pagination dto
+ * @param type
+ * @returns
+ */
+export function createPaginationRawDto<T extends Type>(DTO: T) {
+  class PaginationRawDto {
+    @ApiProperty({
+      description: 'Pagination metadata',
+    })
+    meta: RawMeta;
+
+    @ApiProperty({ type: DTO, isArray: true })
+    data: T;
+  }
+
+  Object.defineProperty(PaginationRawDto, 'name', { value: `PaginationRawDto_${DTO.name}` });
+
+  return PaginationRawDto;
 }
 
 /**
@@ -218,6 +240,17 @@ export const ApiOkResponseExample = <T>(model: Type<T>) => {
  */
 export const ApiOkPaginationExample = <T>(model: Type<T>) => {
   const type = createPaginationDto(model);
+
+  return applyDecorators(ApiOkResponseExample(type));
+};
+
+/**
+ * Decorator ok pagination raw example
+ * @param model
+ * @returns
+ */
+export const ApiOkPaginationRawExample = <T>(model: Type<T>) => {
+  const type = createPaginationRawDto(model);
 
   return applyDecorators(ApiOkResponseExample(type));
 };

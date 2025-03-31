@@ -31,10 +31,10 @@ export class LessonTagDto {
 
 export class ListTagsDto {
   @ApiProperty({ type: [String] })
-  tags: string[];
+  data: string[];
 
   constructor(tags: LessonTagDto[]) {
-    this.tags = tags.map(({ tag }) => tag);
+    this.data = tags.map(({ tag }) => tag);
   }
 }
 

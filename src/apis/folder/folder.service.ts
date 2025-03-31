@@ -1,9 +1,12 @@
 import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { isEmpty } from 'lodash';
+import { PaginateQuery } from 'nestjs-paginate';
+import { paginateRaw } from 'nestjs-typeorm-paginate';
 
 import { CreateFolderDto, DeleteResultDto, InsertResultDto, UpdateResultDto } from '@common/dtos';
 import { ItemsDto } from '@common/dtos/common.dto';
 import { Messages } from '@common/enums';
+import { PaginateRawMapper } from '@common/mappers';
 
 import { FolderRepository } from './folder.repository';
 
@@ -12,21 +15,32 @@ export class FolderService {
   constructor(private readonly folderRepository: FolderRepository) {}
 
   /**
-   * Get folder
+   * Paginate folder
    * @param userId
    * @param folder
    * @returns
    */
-  public async get(userId: string) {
-    // Get list of folder for users
-    const items = await this.folderRepository.find({
-      where: { createdBy: { id: userId } },
-      select: ['id', 'name', 'createdAt', 'updatedAt'],
-      cache: true,
-    });
+  public async get(query: PaginateQuery) {
+    const qb = this.folderRepository
+      .createQueryBuilder('folder')
+      .select([
+        'folder.id as "id"',
+        'folder.name as "name"',
+        'folder.updated_at as "updatedAt"',
+        'folder.created_at as "createdAt"',
+      ])
+      .addSelect((subQuery) => {
+        return subQuery
+          .select('CAST(COUNT(lesson.id) AS INT)', 'amount') // Đếm số bài học
+          .from('lessons', 'lesson')
+          .where('lesson.folder_id = folder.id');
+      }, 'amount')
+      .orderBy('folder.name', 'ASC');
 
-    // Return items
-    return new ItemsDto(items);
+    // Paginate list of folders
+    const raw = await paginateRaw(qb, { page: query.page || 1, limit: query.limit || 10 });
+
+    return new PaginateRawMapper(raw);
   }
 
   /**

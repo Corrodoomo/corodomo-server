@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OpenAI } from 'openai';
 
-import { LANGUAGES, LEVEL_QUESTION_BY_LANGUAGES } from '@common/constants';
+import { LANGUAGES, OPEN_AI_LEVEL_QUESTION_BY_LANGUAGES, OPEN_AI_JSON_FORMAT_REQUIRED } from '@common/constants';
 import { OpenAILevelDto, OpenAIQuizDto, OpenAIVocabularyDto } from '@common/dtos';
 
 @Injectable()
@@ -25,13 +25,18 @@ export class OpenAIService {
    */
   async quiz(message: string, language: string): Promise<OpenAIQuizDto[]> {
     const content = `
-      Give 10 vocabulary or grammar quiz in the following ${LANGUAGES[language]} passage: ${message}.
-      Only reply with the following JSON stringify: ['{ 'question': '?', 'choices': { 'A': '?', 'B': '?', 'C': '?', 'D': '?' }, 'correctAnswer': '?' }'...] 
-      to save the database.
+      Let's assume you have a ${LANGUAGES[language]} paragraph like this: 
+      
+      ${message}
+
+      Give 10 vocabulary and grammar quizzes based on the above ${LANGUAGES[language]} passage.
+
+      Please respond with only the JSON result, like ['{ 'question': '?', 'choices': { 'A': '?', 'B': '?', 'C': '?', 'D': '?' }, 'correctAnswer': '?' }'...], without any explanations.
+      ${OPEN_AI_JSON_FORMAT_REQUIRED}
       All the values of 'question', 'A', 'B', 'C' and 'D' in JSON stringify must be ${LANGUAGES[language]} language.
     `;
 
-    this.logger.debug('Request data =>', content);
+    this.logger.debug('Quiz Request data =>', content);
 
     const response = await this.openai.chat.completions.create({
       model: this.configService.getOrThrow('OPEN_AI_MODEL'), // Bạn có thể thay đổi model tùy ý
@@ -43,9 +48,9 @@ export class OpenAIService {
       ],
     });
 
-    const result = response.choices[0].message.content?.replace('```json', '').replace('```', '');
+    this.logger.debug(`Quiz Generate - ${response.choices[0].message.content}`);
 
-    this.logger.debug(`Quiz Generate - ${result}`);
+    const result = response.choices[0].message.content?.replace('```json', '').replace('```', '');
 
     return JSON.parse(result || '');
   }
@@ -56,14 +61,18 @@ export class OpenAIService {
    * @returns
    */
   async level(message: string, language: string): Promise<string> {
-    const question = LEVEL_QUESTION_BY_LANGUAGES[language].replace('{language}', LANGUAGES[language]);
+    const question = OPEN_AI_LEVEL_QUESTION_BY_LANGUAGES[language].replace('{language}', LANGUAGES[language]);
     const content = `
-      ${question}. In the following ${LANGUAGES[language]} passage: ${message}. 
-      Only reply with the following JSON stringify: { 'level': '?' } 
-      to save the database
+      Let's assume you have a ${LANGUAGES[language]} paragraph like this: 
+
+      ${message}
+      
+      ${question}.
+      Please respond with only the JSON result, like { "level": "?" }, without any explanations.
+      ${OPEN_AI_JSON_FORMAT_REQUIRED}.
     `;
 
-    this.logger.debug('Request data =>', content);
+    this.logger.debug('Level Request data =>', content);
 
     const response = await this.openai.chat.completions.create({
       model: this.configService.getOrThrow('OPEN_AI_MODEL'), // Bạn có thể thay đổi model tùy ý
@@ -75,9 +84,9 @@ export class OpenAIService {
       ],
     });
 
-    const result = response.choices[0].message.content?.replace('```json', '').replace('```', '');
+    this.logger.debug(`Level Generate - ${response.choices[0].message.content}`);
 
-    this.logger.debug(`Level Generate - ${result}`);
+    const result = response.choices[0].message.content?.replace('```json', '').replace('```', '');
 
     const levels: OpenAILevelDto = JSON.parse(result || '');
 
@@ -94,11 +103,12 @@ export class OpenAIService {
       The ${LANGUAGES[language]} passage description: ${message}.
       Classify important 50 words and types of nouns, adjectives, verbs in the following text.
       If 50 words are not enough, try to list as many as possible.
-      Only reply with the following JSON stringify: [ { 'word': '?', 'type': '?' } ].
+      Please respond with only the JSON result, like [ { 'word': '?', 'type': '?' } ]., without any explanations
       Require all 'word' and 'type' must be ${LANGUAGES[language]} language.
+      ${OPEN_AI_JSON_FORMAT_REQUIRED}.
     `;
 
-    this.logger.debug('Request data =>', content);
+    this.logger.debug('Vocabulary Request data =>', content);
 
     const response = await this.openai.chat.completions.create({
       model: this.configService.getOrThrow('OPEN_AI_MODEL'), // Bạn có thể thay đổi model tùy ý
@@ -110,9 +120,9 @@ export class OpenAIService {
       ],
     });
 
-    const result = response.choices[0].message.content?.replace('```json', '').replace('```', '');
+    this.logger.debug(`Vocabulary Generate - ${response.choices[0].message.content}`);
 
-    this.logger.debug(`Vocabulary Generate - ${result}`);
+    const result = response.choices[0].message.content?.replace('```json', '').replace('```', '');
 
     const vocabularies: OpenAIVocabularyDto[] = JSON.parse(result || '');
 
@@ -126,43 +136,19 @@ export class OpenAIService {
    */
   async minimap(message: string, language: string): Promise<OpenAIVocabularyDto[]> {
     const content = `
-      The ${LANGUAGES[language]} passage description: ${message}.
-      Classify 50 words on a vocabulary learning roadmap in the following text.
-      Require all vocabularies must be ${LANGUAGES[language]} language.
-      Only reply with the following JSON stringify example: 
-      {
-        "vocabularies": {
-          "groups": {
-            "adjectives": {
-              "emotions": {
-                "words": ["happy", "sad", "angry", "excited"]
-               },
-               "describes": {
-                  "words": ["beautiful", "tall", "smart"]
-                }
-            },
-            "verbs": {
-              "foods": {
-                "words": ["eat", "cook"]
-              },
-              "sports": {
-                "words": ["run", "Jump"]
-              }
-            },
-            "nouns": {
-              "colors": {
-                "words": ["red", "blue", "green", "yellow"]
-              },
-              "places": {
-                "words": ["school", "park", "restaurant", "library"]
-              }
-            }
-          }
-        }
-      }
+      Let's assume you have a ${LANGUAGES[language]} paragraph like this: 
+
+      ${message}
+
+      Classify 50 words on a vocabulary learning roadmap based on the above paragraph.
+      Require vocabularies must be ${LANGUAGES[language]} language.
+
+      Please respond with only the JSON result, like: {"vocabularies":{"groups":{"adjectives":{"emotions":{"words":["happy","sad","angry","excited"]},"describes":{"words":["beautiful","tall","smart"]}},"verbs":{"foods":{"words":["eat","cook"]},"sports":{"words":["run","Jump"]}},"nouns":{"colors":{"words":["red","blue","green","yellow"]},"places":{"words":["school","park","restaurant","library"]}}}}}, without any explanations.
+
+      ${OPEN_AI_JSON_FORMAT_REQUIRED}.
     `;
 
-    this.logger.debug('Request data =>', content);
+    this.logger.debug('Minimap Request data =>', content);
 
     const response = await this.openai.chat.completions.create({
       model: this.configService.getOrThrow('OPEN_AI_MODEL'), // Bạn có thể thay đổi model tùy ý
@@ -174,9 +160,9 @@ export class OpenAIService {
       ],
     });
 
-    const result = response.choices[0].message.content?.replace('```json', '').replace('```', '');
+    this.logger.debug(`Minimap Generate - ${response.choices[0].message.content}`);
 
-    this.logger.debug(`Minimap Generate - ${result}`);
+    const result = response.choices[0].message.content?.replace('```json', '').replace('```', '');
 
     const vocabularies: OpenAIVocabularyDto[] = JSON.parse(result || '');
 

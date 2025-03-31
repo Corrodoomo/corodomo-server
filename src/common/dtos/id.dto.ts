@@ -29,3 +29,13 @@ export class BlogIdDto {
   @IsUUID()
   blogId: string;
 }
+
+export class WorkspaceIdDto {
+  @IsUUID()
+  workspaceId: string;
+}
+
+export class ProjectIdDto {
+  @IsUUID()
+  projectId: string;
+}

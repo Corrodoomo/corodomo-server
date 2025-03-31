@@ -1,3 +1,4 @@
+import { LessonRecentRepository } from '@modules/lesson-recent/lesson-recent.repository';
 import { OpenAIService } from '@modules/openai/openai.service';
 import { YoutubeService } from '@modules/youtube/youtube.service';
 import { Module } from '@nestjs/common';
@@ -8,8 +9,8 @@ import { LessonService } from './lesson.service';
 
 @Module({
   imports: [],
-  exports: [LessonService, YoutubeService],
+  exports: [LessonService, YoutubeService, LessonRecentRepository],
   controllers: [LessonController],
-  providers: [LessonService, LessonRepository, OpenAIService, YoutubeService],
+  providers: [LessonService, LessonRepository, OpenAIService, YoutubeService, LessonRecentRepository],
 })
 export class LessonModule {}
