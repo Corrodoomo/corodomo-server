@@ -1,5 +1,6 @@
 import { LessonRepository } from '@app/apis/lesson/lesson.repository';
 import { LessonService } from '@app/apis/lesson/lesson.service';
+import { LessonRecentRepository } from '@modules/lesson-recent/lesson-recent.repository';
 import { OpenAIService } from '@modules/openai/openai.service';
 import { YoutubeService } from '@modules/youtube/youtube.service';
 import { Module } from '@nestjs/common';
@@ -7,12 +8,19 @@ import { Module } from '@nestjs/common';
 import { SubtitleController } from './subtitle.controller';
 import { SubtitleRepository } from './subtitle.repository';
 import { SubtitleService } from './subtitle.service';
-import { UsersRepository } from '../user/user.repository';
 
 @Module({
   imports: [],
   controllers: [SubtitleController],
-  providers: [SubtitleService, SubtitleRepository, LessonRepository, LessonService, OpenAIService, YoutubeService, UsersRepository],
+  providers: [
+    SubtitleService,
+    SubtitleRepository,
+    LessonRepository,
+    LessonService,
+    OpenAIService,
+    YoutubeService,
+    LessonRecentRepository,
+  ],
   exports: [SubtitleService, SubtitleRepository],
 })
 export class SubtitleModule {}

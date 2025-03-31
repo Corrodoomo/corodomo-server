@@ -1,5 +1,7 @@
+import { LessonRecent } from '@modules/database/entities/lesson-recent.entity';
 import { LessonEsService } from '@modules/elastic-search/services/lesson-es.service';
 import { MinimapEsService } from '@modules/elastic-search/services/minimap-es.service';
+import { LessonRecentRepository } from '@modules/lesson-recent/lesson-recent.repository';
 import { OpenAIService } from '@modules/openai/openai.service';
 import { YoutubeService } from '@modules/youtube/youtube.service';
 import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
@@ -11,7 +13,6 @@ import { CreateLessonDto, DeleteResultDto, InsertResultDto, ListTagsDto, UpdateR
 import { ItemDto } from '@common/dtos/common.dto';
 import { Messages } from '@common/enums';
 
-import { UsersRepository } from '../user/user.repository';
 import { LessonRepository } from './lesson.repository';
 
 @Injectable()
@@ -22,7 +23,7 @@ export class LessonService {
     private readonly minimapEsService: MinimapEsService,
     private readonly openaiService: OpenAIService,
     private readonly youtubeService: YoutubeService,
-    private readonly userRepository: UsersRepository
+    private readonly lessonRecentRepository: LessonRecentRepository
   ) {}
 
   /**
@@ -167,27 +168,24 @@ export class LessonService {
    * @returns
    */
   public async watch(userId: string, lessonId: string) {
-    // Lấy entity hiện tại
-    const user = await this.userRepository.createQueryBuilder('user')
-      .select(['user.id', 'user.lessonRecents']).getRawMany();
+    // Get lesson recent by user id and lesson id
+    let lessonRecent = await this.lessonRecentRepository.findOne({
+      where: { accessor: { id: userId }, lesson: { id: lessonId } },
+    });
 
-    if (isEmpty(user)) {
-      throw new BadRequestException(Messages.ITEM_NOT_FOUND);
+    // Init lesson recent if not found
+    if (isEmpty(lessonRecent)) {
+      lessonRecent = this.lessonRecentRepository.create({
+        accessor: { id: userId },
+        lesson: { id: lessonId },
+      });
     }
 
-    const recent = {
-      lessonId,
-      accessedAt: new Date(),
-    };
+    // Update accessed date
+    lessonRecent.accessedAt = new Date();
 
-    console.log('user', user)
-
-    // await this.userRepository.update(
-    //   { id: userId }, 
-    //   {
-    //     lessonRecents: () => `lessonRecents || '[${JSON.stringify(recent)}]'::jsonb`
-    //   }
-    // );
+    // Update to database
+    await this.lessonRecentRepository.save(lessonRecent);
 
     // Update watchedAt and watchedCount
     await this.lessonRepository.updateWatchedCount(lessonId);
