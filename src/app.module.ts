@@ -16,39 +16,31 @@ import { DatabaseModule } from '@modules/database/database.module';
 import { ElasticSearchModule } from '@modules/elastic-search/elastic-search.module';
 import { JwtModule } from '@modules/jwt';
 import { OpenAIModule } from '@modules/openai/openai.module';
+import { RateLimitModule } from '@modules/rate-limit/rate-limit.module';
 import { YoutubeModule } from '@modules/youtube/youtube.module';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { ThrottlerModule } from '@nestjs/throttler';
 
 import { BlogModule } from './apis/blog/blog.module';
 import { LessonCommentModule } from './apis/lesson-comment/lesson-comment.module';
 import { LessonNoteModule } from './apis/lesson-note/lesson-note.module';
+import { ProjectModule } from './apis/project/project.module';
 import { TaskModule } from './apis/task/task.module';
 import { WorkspaceModule } from './apis/workspace/workspace.module';
-import { ProjectModule } from './apis/project/project.module';
 
 @Module({
   imports: [
-    ThrottlerModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => [
-        {
-          ttl: config.getOrThrow('THROTTLE_TTL'),
-          limit: config.getOrThrow('THROTTLE_LIMIT'),
-        },
-      ],
-    }),
+    // Config Module
+    ConfigModule,
+
     // Service Modules
     CacheModule,
-    ConfigModule,
     CronModule,
     DatabaseModule,
     JwtModule,
     YoutubeModule,
     ElasticSearchModule,
     OpenAIModule,
+    RateLimitModule,
 
     // API Modules
     UserModule,

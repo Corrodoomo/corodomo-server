@@ -1,8 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IPaginationMeta, Pagination } from 'nestjs-typeorm-paginate';
 
-import { LinksDto, MetaDto } from '@common/dtos/common.dto';
-
 export class BaseRecordMapper {
   @ApiProperty()
   id: string;

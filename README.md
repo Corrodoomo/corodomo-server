@@ -66,13 +66,20 @@ amazing backers. If you'd like to join them, please
 
 ## Stay in touch
 
--   Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
--   Website - [https://nestjs.com](https://nestjs.com/)
--   Twitter - [@nestframework](https://twitter.com/nestframework)
+- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
+- Website - [https://nestjs.com](https://nestjs.com/)
+- Twitter - [@nestframework](https://twitter.com/nestframework)
 
 ## License
 
 Nest is [MIT licensed](LICENSE).
 
-docker exec -t <container_name_or_id> pg_dump -U <postgres_user> -E UTF8 <database_name> > backup.sql
+## Run Docker
+
+```bash
 docker compose --env-file .env.dev up -d
+
+# Backup database
+docker exec -t <container_name_or_id> pg_dump -U <postgres_user> -E UTF8 <database_name> > backup.sql
+
+```
