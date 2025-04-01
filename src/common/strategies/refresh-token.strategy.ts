@@ -1,5 +1,5 @@
 import { AuthService } from '@app/apis/auth/auth.service';
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
@@ -14,7 +14,7 @@ export class RefreshStrategy extends PassportStrategy(Strategy, 'refresh-jwt') {
     private authService: AuthService
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromBodyField('refresh'),
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       secretOrKey: configService.getOrThrow('REFRESH_SECRET_KEY'),
       ignoreExpiration: false,
       passReqToCallback: true,
@@ -24,7 +24,9 @@ export class RefreshStrategy extends PassportStrategy(Strategy, 'refresh-jwt') {
   // request.user
   validate(req: Request, payload: JWTPayLoad) {
     const { id } = payload;
-    const refreshToken = req.body.refresh;
+    const refreshToken = req?.get('authorization')?.replace('Bearer', '').trim();
+
+    if (!refreshToken) throw new ForbiddenException('Refresh token malformed');
 
     return this.authService.validateRefreshToken(id, refreshToken);
   }

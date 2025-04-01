@@ -11,6 +11,7 @@ import { SignInUserDto } from '@common/dtos';
 import { SystemRoles } from '@common/enums';
 import { Authorized } from '@common/guards/authorized.guard';
 import { LocalAuthGuard } from '@common/guards/local-auth.guard';
+import { RefreshAuthGuard } from '@common/guards/refresh-auth.guard';
 import { SignedInUserMapper, SignedUpUserMapper } from '@common/mappers/user.mapper';
 
 import { AuthService } from './auth.service';
@@ -39,6 +40,16 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   signIn(@Authorized() user: User) {
     return this.authService.signIn(user);
+  }
+
+  @Public()
+  @ApiGet('refresh', {
+    auth: false,
+  })
+  @ApiBearerAuth()
+  @UseGuards(RefreshAuthGuard)
+  refresh(@Authorized() user: User) {
+    return this.authService.refresh(user);
   }
 
   // Just for testing purpose

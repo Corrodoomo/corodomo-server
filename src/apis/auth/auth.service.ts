@@ -33,10 +33,7 @@ export class AuthService {
 
   public async refresh(user: User) {
     const { accessToken, refreshToken } = await this.generateToken(user.id, user.email, user.role);
-
-    //TODO: Gắn lại ở cookies session
-
-    return { accessToken, refreshToken, id: user.id, name: user.name, role: user.role };
+    return { accessToken, refreshToken };
   }
 
   // Generate token
