@@ -44,9 +44,6 @@ export class Lesson extends BaseEntity {
   @Column('integer', { name: 'watched_count', default: 0 })
   watchedCount: number;
 
-  @Column('timestamp', { name: 'watched_at', nullable: true })
-  watchedAt: Date;
-
   @Column('character varying', { name: 'language' })
   language: string;
 

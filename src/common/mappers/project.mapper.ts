@@ -1,9 +1,7 @@
 import { Project, User, Workspace } from '@modules/database/entities';
 import { ApiProperty } from '@nestjs/swagger';
 
-import { ItemsDto } from '@common/dtos/common.dto';
-
-import { BelongToUserMapper, IdMapper } from './common.mapper';
+import { BelongToUserMapper, IdMapper, ItemsMapper } from './common.mapper';
 
 export class ProjectRecordMapper extends BelongToUserMapper {
   @ApiProperty()
@@ -33,7 +31,7 @@ export class ProjectRecentMapper extends ProjectRecordMapper {
   };
 }
 
-export class ProjectRecentsMapper extends ItemsDto<ProjectRecentMapper> {
+export class ProjectRecentsMapper extends ItemsMapper<ProjectRecentMapper> {
   constructor(projects: Project[]) {
     super(ProjectRecentsMapper.handleMapper(projects));
   }

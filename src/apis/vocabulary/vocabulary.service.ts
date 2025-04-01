@@ -4,12 +4,12 @@ import { OpenAIService } from '@modules/openai/openai.service';
 import { BadRequestException, Injectable } from '@nestjs/common';
 
 import { InsertResultDto } from '@common/dtos';
-import { ItemsDto } from '@common/dtos/common.dto';
 import { Messages } from '@common/enums';
 
 import { VocabularyRepository } from './vocabulary.repository';
 import { isEmpty } from 'lodash';
 import { isNotEmpty } from 'class-validator';
+import { ItemsMapper } from '@common/mappers';
 
 @Injectable()
 export class VocabularyService {
@@ -84,6 +84,6 @@ export class VocabularyService {
   public async getFlashcards(lessonId: string) {
     const flashcards = await this.vocabularyRepository.find({ where: { lesson: { id: lessonId } } });
 
-    return new ItemsDto(flashcards);
+    return new ItemsMapper(flashcards);
   }
 }

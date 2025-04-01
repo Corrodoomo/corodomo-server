@@ -26,6 +26,8 @@ import { Vocabulary } from './entities/vocabulary.entity';
 import { Workspace } from './entities/workspace.entity';
 import { LessonNote } from './entities/lesson-note.entity';
 import { LessonRecent } from './entities/lesson-recent.entity';
+import { addTransactionalDataSource } from 'typeorm-transactional';
+import { DataSource } from 'typeorm';
 
 @Module({
   imports: [
@@ -81,6 +83,13 @@ import { LessonRecent } from './entities/lesson-recent.entity';
           Folder,
         ],
       }),
+      dataSourceFactory: async (options) => {
+        if (!options) {
+          throw new Error('Invalid options passed');
+        }
+
+        return addTransactionalDataSource(new DataSource(options));
+      },
     }),
   ],
 })

@@ -24,6 +24,17 @@ export class CreateLessonDto {
   folderId: string;
 }
 
+export class UpdateLessonDto {
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsIn(LIST_LANGUAGES)
+  language: string;
+
+  @ApiProperty()
+  @IsUUID()
+  folderId: string;
+}
+
 export class LessonTagDto {
   @ApiProperty()
   tag: string;

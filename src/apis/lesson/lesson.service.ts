@@ -8,11 +8,12 @@ import { isEmpty } from 'lodash';
 import { FilterOperator, paginate, PaginateQuery } from 'nestjs-paginate';
 
 import { LIMIT_DURATION_VIDEO, YOUTUBE_TRANSCRIPT_LANGUAGES } from '@common/constants';
-import { CreateLessonDto, DeleteResultDto, InsertResultDto, ListTagsDto, UpdateResultDto } from '@common/dtos';
-import { ItemDto } from '@common/dtos/common.dto';
+import { CreateLessonDto, DeleteResultDto, InsertResultDto, ListTagsDto, UpdateLessonDto, UpdateResultDto } from '@common/dtos';
 import { Messages } from '@common/enums';
 
 import { LessonRepository } from './lesson.repository';
+import { ItemMapper, UpdateRawResultMapper } from '@common/mappers';
+import { LessonsInFolderMapper } from '@common/mappers/lesson.mapper';
 
 @Injectable()
 export class LessonService {
@@ -83,6 +84,29 @@ export class LessonService {
 
     // Return result
     return new InsertResultDto(createdLesson, 1);
+  }
+
+  /**
+   * Update lesson
+   * @param lesson
+   * @returns
+   */
+  public async update(userId: string, lessonId: string, body: UpdateLessonDto) {
+    const lesson = await this.lessonRepository.getRawOne(lessonId, ['id', 'created_by AS "createdBy"']);
+
+    if (isEmpty(lesson)) {
+      throw new BadRequestException(Messages.ITEM_NOT_FOUND);
+    }
+
+    if (lesson.createdBy !== userId) {
+      throw new ForbiddenException(Messages.INVALID_ACCESS_RESOURCE);
+    }
+
+    // Create lesson
+    const updatedLesson = await this.lessonRepository.updateById(lessonId, { folder: { id: body.folderId }, language: body.language });
+
+    // Return result
+    return new UpdateRawResultMapper(updatedLesson);
   }
 
   /**
@@ -162,6 +186,49 @@ export class LessonService {
   }
 
   /**
+   * Get my lessons
+   * @param userId 
+   * @param query 
+   * @returns 
+   */
+  public async getMyLessons(userId: string, query: PaginateQuery) {
+    // Default filter
+    query.filter = {
+      ...query.filter,
+      createdBy: `$eq:${userId}`,
+    };
+
+    // Paginted results
+    const pagination = await paginate(query, this.lessonRepository, {
+      sortableColumns: ['id', 'title'],
+      defaultSortBy: [['title', 'ASC']],
+      select: [
+        'id',
+        'title',
+        'level',
+        'tag',
+        'language',
+        'level',
+        'watchedCount',
+        'youtubeUrl',
+        'thumbnail',
+        'duration',
+        'createdBy',
+        'lessonRecents.accessedAt',
+        'folder.id',
+      ],
+      filterableColumns: {
+        createdBy: [FilterOperator.EQ],
+        'folder.id': [FilterOperator.EQ],
+      },
+      relations: ['lessonRecents', 'folder'],
+    });
+
+    // Return result
+    return new LessonsInFolderMapper(pagination);
+  }
+
+  /**
    * Watch lesson
    * @param query
    * @returns
@@ -216,8 +283,10 @@ export class LessonService {
     // Get lesson by id
     const lesson = await this.lessonRepository.getLessonForUser(lessonId, userId);
 
+    console.log('123123lesson', lesson);
+
     // Return result
-    return new ItemDto(lesson);
+    return new ItemMapper(lesson);
   }
 
   /**
@@ -238,6 +307,6 @@ export class LessonService {
     const { _id, _source } = await this.minimapEsService.getById(lesson.minimapId);
 
     // Return result
-    return new ItemDto({ id: _id, source: _source });
+    return new ItemMapper({ id: _id, source: _source });
   }
 }
