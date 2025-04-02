@@ -2,6 +2,7 @@ import { AuthService } from '@app/apis/auth/auth.service';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
+import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
 import { JWTPayLoad } from '@common/types/jwt-payload.type';
@@ -13,7 +14,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     private readonly authService: AuthService
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        (req: Request) => req.cookies['accessToken'], // Lấy token từ cookie
+      ]),
       ignoreExpiration: false,
       secretOrKey: configService.getOrThrow('ACCESS_SECRET_KEY'),
     });

@@ -4,10 +4,12 @@ import { UserNewService } from '@app/apis/user-new/user-new.service';
 import { User } from '@modules/database/entities';
 import { JwtService } from '@modules/jwt';
 import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Response } from 'express';
 
+import { options } from '@common/constants/cookie';
 import { Messages } from '@common/enums';
-import { SignedInUserMapper } from '@common/mappers/user.mapper';
 import { BryptService } from '@common/services';
+import { CookieService } from '@common/services/cookie.service';
 
 @Injectable()
 export class AuthService {
@@ -15,7 +17,8 @@ export class AuthService {
     private readonly userNewsService: UserNewService,
     private readonly userNewsRepository: UserNewsRepository,
     private readonly jwtService: JwtService,
-    private readonly brptService: BryptService
+    private readonly brptService: BryptService,
+    private readonly cookieService: CookieService
   ) {}
 
   // Register user
@@ -26,9 +29,13 @@ export class AuthService {
   }
 
   // Sign in
-  public async signIn(user: User): Promise<SignedInUserMapper> {
+  public async signIn(user: User, response: Response) {
     const { accessToken, refreshToken } = await this.generateToken(user.id, user.email, user.role);
-    return { accessToken, refreshToken };
+
+    this.cookieService.setCookie(response, 'accessToken', accessToken, options);
+    this.cookieService.setCookie(response, 'refreshToken', refreshToken, options);
+
+    return { message: 'Login successful' };
   }
 
   public async refresh(user: User) {

@@ -1,7 +1,8 @@
 import { CreateUserDto } from '@app/apis/user-new/dtos/create-user.dto';
 import { User } from '@modules/database/entities';
-import { Body, Controller, UseGuards } from '@nestjs/common';
+import { Body, Controller, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody } from '@nestjs/swagger';
+import { Response } from 'express';
 
 import { ApiGet, ApiPost } from '@common/decorators';
 import { ApiOkInsertResultExample, ApiOkResponseExample } from '@common/decorators/example.decorator';
@@ -38,8 +39,8 @@ export class AuthController {
     type: SignInUserDto,
   })
   @UseGuards(LocalAuthGuard)
-  signIn(@Authorized() user: User) {
-    return this.authService.signIn(user);
+  signIn(@Authorized() user: User, @Res() response: Response) {
+    return this.authService.signIn(user, response);
   }
 
   @Public()
