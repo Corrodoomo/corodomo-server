@@ -34,18 +34,18 @@ export class LessonRepository extends BaseRepository<Lesson> {
 
   /**
    * Query lesson for user
-   * @param lessonId 
-   * @param userId 
-   * @returns 
+   * @param lessonId
+   * @param userId
+   * @returns
    */
-  public async getLessonForUser(lessonId: string, userId: string) {
+  public async queryDetailLesson(lessonId: string, userId: string) {
     return this.createQueryBuilder('lesson')
-    .select(['lesson.id', 'lesson.tag', 'lesson.duration', 'lesson.language', 'lesson.level', 'lesson.watchedCount'])
-    .leftJoinAndSelect('lesson.notes', 'notes', 'notes.createdBy = :userId', { userId })
-    .leftJoinAndSelect('lesson.comments', 'comments')
-    .leftJoinAndSelect('lesson.notedVocabularies', 'notedVocabularies')
-    .leftJoinAndSelect('lesson.subtitles', 'subtitles')
-    .where('lesson.id = :lessonId', { lessonId: lessonId })
-    .getOne();  
+      .select(['lesson.id', 'lesson.tag', 'lesson.duration', 'lesson.language', 'lesson.level', 'lesson.watchedCount'])
+      .leftJoinAndSelect('lesson.notes', 'notes', 'notes.createdBy = :userId', { userId })
+      .leftJoinAndSelect('lesson.comments', 'comments')
+      .leftJoinAndSelect('lesson.notedVocabularies', 'notedVocabularies')
+      .leftJoinAndSelect('lesson.subtitles', 'subtitles')
+      .where('lesson.id = :lessonId', { lessonId: lessonId })
+      .getOne();
   }
 }

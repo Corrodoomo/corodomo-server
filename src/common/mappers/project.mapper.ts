@@ -1,7 +1,7 @@
 import { Project, User, Workspace } from '@modules/database/entities';
 import { ApiProperty } from '@nestjs/swagger';
 
-import { BelongToUserMapper, IdMapper, ItemsMapper } from './common.mapper';
+import { BelongToUserMapper, ItemsMapper } from './common.mapper';
 
 export class ProjectRecordMapper extends BelongToUserMapper {
   @ApiProperty()
@@ -20,15 +20,36 @@ export class ProjectRecordMapper extends BelongToUserMapper {
   endAt: Date;
 }
 
-export class ProjectRecentMapper extends ProjectRecordMapper {
+export class ProjectRecentMapper {
   @ApiProperty()
-  workspace: IdMapper;
+  id: string;
 
   @ApiProperty()
-  createdBy: {
+  name: string;
+
+  @ApiProperty()
+  description: string;
+
+  @ApiProperty()
+  theme: string;
+
+  @ApiProperty()
+  startAt: Date;
+
+  @ApiProperty()
+  endAt: Date;
+
+  @ApiProperty()
+  workspace: {
     id: string;
-    email: string;
+    createdBy: {
+      id: string;
+      email: string;
+    };
   };
+
+  @ApiProperty()
+  accessedAt?: Date;
 }
 
 export class ProjectRecentsMapper extends ItemsMapper<ProjectRecentMapper> {
@@ -38,31 +59,34 @@ export class ProjectRecentsMapper extends ItemsMapper<ProjectRecentMapper> {
 
   /**
    * Handle project recent mapper
-   * @param projects 
-   * @returns 
+   * @param projects
+   * @returns
    */
   public static handleMapper(projects: Project[]): ProjectRecentMapper[] {
-    return projects.map(({ workspace, id, name, description, theme, startAt, endAt, createdAt, updatedAt }) => {
-      const { id: workspaceId, createdBy: user } = workspace as Workspace;
-      const createdBy = user as User;
+    return projects.map(
+      ({ workspace, id, name, description, theme, startAt, endAt, createdAt, updatedAt, recents }) => {
+        const ws = workspace as Workspace;
+        const createdBy = ws.createdBy as User;
 
-      return {
-        id,
-        name,
-        description,
-        theme,
-        startAt,
-        endAt,
-        createdAt,
-        updatedAt,
-        workspace: {
-          id: workspaceId,
-        },
-        createdBy: {
-          id: createdBy.id,
-          email: createdBy.email,
-        },
-      };
-    });
+        return {
+          id,
+          name,
+          description,
+          theme,
+          startAt,
+          endAt,
+          createdAt,
+          updatedAt,
+          workspace: {
+            id: ws.id,
+            createdBy: {
+              id: createdBy.id,
+              email: createdBy.email,
+            }
+          },
+          accessedAt: recents.pop()?.accessedAt,
+        };
+      }
+    );
   }
 }
