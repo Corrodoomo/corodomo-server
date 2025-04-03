@@ -14,7 +14,7 @@ export class RefreshStrategy extends PassportStrategy(Strategy, 'refresh-jwt') {
     private authService: AuthService
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([(req: Request) => req.cookies?.refreshToken]),
       secretOrKey: configService.getOrThrow('REFRESH_SECRET_KEY'),
       ignoreExpiration: false,
       passReqToCallback: true,
@@ -24,7 +24,7 @@ export class RefreshStrategy extends PassportStrategy(Strategy, 'refresh-jwt') {
   // request.user
   validate(req: Request, payload: JWTPayLoad) {
     const { id } = payload;
-    const refreshToken = req?.get('authorization')?.replace('Bearer', '').trim();
+    const refreshToken = req.cookies?.refreshToken;
 
     if (!refreshToken) throw new ForbiddenException('Refresh token malformed');
 

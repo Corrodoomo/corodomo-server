@@ -2,6 +2,7 @@ import { Body, Controller, Req } from '@nestjs/common';
 
 import { ApiPost, RolesOld } from '@common/decorators';
 import { ApiOkInsertResultExample, ApiOkResponseExample } from '@common/decorators/example.decorator';
+import { Public } from '@common/decorators/public-route.decorator';
 import { SignInUserDto } from '@common/dtos';
 import { SystemRoles } from '@common/enums';
 import {
@@ -18,6 +19,7 @@ import { UserService } from './user.service';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @Public()
   @ApiPost('signin', { auth: false })
   @ApiOkResponseExample(SignedInUserMapper)
   signIn(@Body() body: SignInUserDto) {
