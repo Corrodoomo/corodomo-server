@@ -49,15 +49,14 @@ export class AuthController {
   })
   @ApiBearerAuth()
   @UseGuards(RefreshAuthGuard)
-  refresh(@Authorized() user: User) {
-    return this.authService.refresh(user);
+  refresh(@Authorized() user: User, @Res() response: Response) {
+    return this.authService.refresh(user, response);
   }
 
   // Just for testing purpose
   @ApiGet('test', {
     auth: false,
   })
-  // @ApiOkResponseExample(ProfiledUserMapper)
   @ApiBearerAuth()
   @Roles(SystemRoles.LEARNER)
   getTest(@Authorized() user: User) {

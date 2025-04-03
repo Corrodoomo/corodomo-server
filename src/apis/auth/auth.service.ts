@@ -35,12 +35,16 @@ export class AuthService {
     this.cookieService.setCookie(response, 'accessToken', accessToken, options);
     this.cookieService.setCookie(response, 'refreshToken', refreshToken, options);
 
-    return { message: 'Login successful' };
+    response.send({ message: 'Login successful' });
   }
 
-  public async refresh(user: User) {
+  public async refresh(user: User, response: Response) {
     const { accessToken, refreshToken } = await this.generateToken(user.id, user.email, user.role);
-    return { accessToken, refreshToken };
+
+    this.cookieService.setCookie(response, 'accessToken', accessToken, options);
+    this.cookieService.setCookie(response, 'refreshToken', refreshToken, options);
+
+    response.send({ message: 'Refresh successful' });
   }
 
   // Generate token
