@@ -2,14 +2,14 @@ import { LessonRepository } from '@app/apis/lesson/lesson.repository';
 import { MinimapEsService } from '@modules/elastic-search/services/minimap-es.service';
 import { OpenAIService } from '@modules/openai/openai.service';
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { isNotEmpty } from 'class-validator';
+import { isEmpty } from 'lodash';
 
 import { InsertResultDto } from '@common/dtos';
 import { Messages } from '@common/enums';
+import { FlashcardListMapper } from '@common/mappers/vocabulary.mapper';
 
 import { VocabularyRepository } from './vocabulary.repository';
-import { isEmpty } from 'lodash';
-import { isNotEmpty } from 'class-validator';
-import { ItemsMapper } from '@common/mappers';
 
 @Injectable()
 export class VocabularyService {
@@ -70,7 +70,9 @@ export class VocabularyService {
       vocabularies = await this.openaiService.vocabulary(lesson.fullSubtitles, lesson.language);
 
       // Save vocabulary to database
-      await this.vocabularyRepository.save(vocabularies.map((vocabulary) => ({ ...vocabulary, lesson: { id: lessonId } })));
+      await this.vocabularyRepository.save(
+        vocabularies.map((vocabulary) => ({ ...vocabulary, lesson: { id: lessonId } }))
+      );
     }
 
     // Return result
@@ -82,8 +84,18 @@ export class VocabularyService {
    * @param lessonId
    */
   public async getFlashcards(lessonId: string) {
+    // Get lesson by id
+    const lesson = await this.lessonRepository.getById(lessonId, ['id', 'language']);
+
+    // Error if lesson not found
+    if (isEmpty(lesson)) {
+      throw new BadRequestException(Messages.ITEM_NOT_FOUND);
+    }
+
+    // Get flashcard by lesson id
     const flashcards = await this.vocabularyRepository.find({ where: { lesson: { id: lessonId } } });
 
-    return new ItemsMapper(flashcards);
+    // Return result
+    return new FlashcardListMapper(flashcards, lesson.language);
   }
 }
