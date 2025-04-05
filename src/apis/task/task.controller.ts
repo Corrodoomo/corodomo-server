@@ -1,6 +1,6 @@
 import { Body, Controller, Req } from '@nestjs/common';
 
-import { ApiPost, Roles } from '@common/decorators';
+import { ApiPost, RolesOld } from '@common/decorators';
 import { ApiOkInsertResultExample } from '@common/decorators/example.decorator';
 import { CreateTaskDto } from '@common/dtos/task.dto';
 import { SystemRoles } from '@common/enums';
@@ -14,7 +14,7 @@ export class TaskController {
   constructor(private readonly taskService: TaskService) {}
 
   @ApiPost('/')
-  @Roles([SystemRoles.LEARNER])
+  @RolesOld([SystemRoles.LEARNER])
   @ApiOkInsertResultExample(TaskRecordMapper)
   create(@Body() body: CreateTaskDto, @Req() request: Request) {
     return this.taskService.create(request.user.id, body);
