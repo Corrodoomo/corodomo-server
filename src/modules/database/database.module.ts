@@ -12,6 +12,7 @@ import { Folder } from './entities/folder.entity';
 import { GroupTask } from './entities/group-task.entity';
 import { LessonComment } from './entities/lesson-comment.entity';
 import { LessonNote } from './entities/lesson-note.entity';
+import { LessonRecent } from './entities/lesson-recent.entity';
 import { Lesson } from './entities/lesson.entity';
 import { Note } from './entities/note.entity';
 import { NotedVocabulary } from './entities/noted-vocabulary.entity';
@@ -65,6 +66,7 @@ import { Workspace } from './entities/workspace.entity';
           LessonComment,
           Lesson,
           LessonNote,
+          LessonRecent,
           NotedVocabulary,
           Vocabulary,
           Quiz,

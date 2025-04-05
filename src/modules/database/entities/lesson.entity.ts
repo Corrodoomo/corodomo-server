@@ -9,6 +9,7 @@ import { Subtitle } from './subtitle.entity';
 import { User } from './user.entity';
 import { Vocabulary } from './vocabulary.entity';
 import { LessonNote } from './lesson-note.entity';
+import { LessonRecent } from './lesson-recent.entity';
 
 @Index('lessons_pkey', ['id'], { unique: true })
 @Entity('lessons', { schema: 'public' })
@@ -70,6 +71,9 @@ export class Lesson extends BaseEntity {
 
   @OneToMany(() => LessonNote, (note) => note.lesson, { onDelete: 'CASCADE' })
   notes: LessonNote[];
+
+  @OneToMany(() => LessonRecent, (lessonRecent) => lessonRecent.lesson, { onDelete: 'CASCADE' })
+  lessonRecents: LessonRecent[];
 
   @ManyToOne(() => User, (user) => user.lessons, { nullable: false })
   @JoinColumn([{ name: 'created_by', referencedColumnName: 'id' }])

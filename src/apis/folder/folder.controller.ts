@@ -1,14 +1,16 @@
 import { Folder } from '@modules/database/entities';
-import { Body, Controller, Param, Req } from '@nestjs/common';
+import { Body, Controller, Param, Query, Req } from '@nestjs/common';
 
 import { ApiDelete, ApiGet, ApiPost, ApiPut, RolesOld } from '@common/decorators';
 import {
   ApiOkDeleteResultExample,
   ApiOkInsertResultExample,
   ApiOkItemsExample,
+  ApiOkPaginationRawExample,
   ApiOkUpdateResultExample,
 } from '@common/decorators/example.decorator';
 import { CreateFolderDto, FolderIdDto, FolderRecordDto, MyFolderDto } from '@common/dtos';
+import { PaginateQueryDto } from '@common/dtos/common.dto';
 import { SystemRoles } from '@common/enums';
 import { Request } from '@common/models';
 
@@ -20,9 +22,9 @@ export class FolderController {
 
   @ApiGet('/')
   @RolesOld([SystemRoles.LEARNER])
-  @ApiOkItemsExample(MyFolderDto)
-  get(@Req() req: Request) {
-    return this.folderService.get(req.user.id);
+  @ApiOkPaginationRawExample(MyFolderDto)
+  get(@Query() query: PaginateQueryDto) {
+    return this.folderService.get(query);
   }
 
   @ApiGet('/list_lessons')

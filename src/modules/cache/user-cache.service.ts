@@ -19,7 +19,7 @@ export class UserCacheService extends CacheService {
   async getItem(key: string): Promise<SignedInUserMapper> {
     const value = await this.get(key);
 
-    const [accessToken, refreshToken] = (value || '').split(':');
+    const [accessToken, refreshToken] = (value ?? '').split(':');
 
     return { accessToken, refreshToken };
   }

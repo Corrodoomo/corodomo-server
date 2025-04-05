@@ -12,14 +12,11 @@ import * as Joi from 'joi';
         NODE_ENV: Joi.string().valid('dev', 'production', 'test').required(),
         PORT: Joi.number().port().required(),
 
-        THROTTLE_TTL: Joi.string().required(),
-        THROTTLE_LIMIT: Joi.string().required(),
-
         ACCESS_SECRET_KEY: Joi.string().required(),
         ACCESS_SECRET_KEY_EXPIRE: Joi.string().required(),
         REFRESH_SECRET_KEY: Joi.string().required(),
         REFRESH_SECRET_KEY_EXPIRE: Joi.string().required(),
-        BRYPT_SALT_OR_ROUNDS: Joi.number().required(),
+        BCRYPT_SALT_OR_ROUNDS: Joi.number().required(),
 
         // Database Postgres Config
         DB_HOST: Joi.string().hostname().required(),
@@ -66,6 +63,10 @@ import * as Joi from 'joi';
         SESSION_HTTP_ONLY: Joi.boolean().required(),
         SESSION_PREFIX: Joi.string().required(),
         SESSION_DB: Joi.number().required(),
+
+        // RATE LIMITER
+        RATE_LIMITER_MAX: Joi.number().integer().required(),
+        RATE_LIMITER_TLL: Joi.number().integer().required(),
       }),
     }),
   ],

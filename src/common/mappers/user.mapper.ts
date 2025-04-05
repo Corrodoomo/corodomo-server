@@ -41,3 +41,10 @@ export class ProfiledUserMapper {
   @ApiProperty()
   role?: string;
 }
+export class LessonRecentMapper {
+  @ApiProperty()
+  lessonId: string;
+
+  @ApiProperty()
+  accessedAt: Date;
+}

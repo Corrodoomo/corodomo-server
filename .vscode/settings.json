@@ -1,0 +1,29 @@
+{
+  "cSpell.words": [
+    "codoromo",
+    "corodomo",
+    "dpage",
+    "healthcheck",
+    "initdb",
+    "kibanadata",
+    "loglevel",
+    "memlock",
+    "pgadmin",
+    "pgdata",
+    "pgdb",
+    "pgnetwork",
+    "redisinsight",
+    "redislabs",
+    "requirepass",
+    "ulimits",
+    "xpack"
+  ],
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "always",
+    "source.organizeImports": "always",
+    "source.sortMembers": "always",
+    "source.addMissingImports": "always"
+  }
+}

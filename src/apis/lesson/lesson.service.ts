@@ -1,12 +1,13 @@
 import { LessonEsService } from '@modules/elastic-search/services/lesson-es.service';
 import { MinimapEsService } from '@modules/elastic-search/services/minimap-es.service';
+import { LessonRecentRepository } from '@modules/lesson-recent/lesson-recent.repository';
 import { OpenAIService } from '@modules/openai/openai.service';
 import { YoutubeService } from '@modules/youtube/youtube.service';
 import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { isEmpty } from 'lodash';
 import { FilterOperator, paginate, PaginateQuery } from 'nestjs-paginate';
 
-import { LIMIT_DURATION_VIDEO } from '@common/constants';
+import { LIMIT_DURATION_VIDEO, YOUTUBE_TRANSCRIPT_LANGUAGES } from '@common/constants';
 import { CreateLessonDto, DeleteResultDto, InsertResultDto, ListTagsDto, UpdateResultDto } from '@common/dtos';
 import { ItemDto } from '@common/dtos/common.dto';
 import { Messages } from '@common/enums';
@@ -20,7 +21,8 @@ export class LessonService {
     private readonly lessonEsService: LessonEsService,
     private readonly minimapEsService: MinimapEsService,
     private readonly openaiService: OpenAIService,
-    private readonly youtubeService: YoutubeService
+    private readonly youtubeService: YoutubeService,
+    private readonly lessonRecentRepository: LessonRecentRepository
   ) {}
 
   /**
@@ -33,12 +35,30 @@ export class LessonService {
     const metadata = await this.youtubeService.getMetadata(lesson.youtubeUrl);
     const duration = Number(metadata.videoDetails.lengthSeconds);
 
+    // Caption tracks by langs
+    const captionTracks = metadata.player_response.captions?.playerCaptionsTracklistRenderer?.captionTracks;
+
+    // Error if subtitles not found
+    if (isEmpty(captionTracks)) {
+      throw new BadRequestException(Messages.SUBTITLES_NOT_FOUND);
+    }
+
+    // Find caption track by lang
+    const captionTrackByLang = captionTracks?.find(
+      (captionTrack) => captionTrack.languageCode === YOUTUBE_TRANSCRIPT_LANGUAGES[lesson.language]
+    );
+
+    // Error if subtitles not founds
+    if (isEmpty(captionTrackByLang)) {
+      throw new BadRequestException(Messages.LANG_SUBTITLES_NOT_FOUND);
+    }
+
     // Duration limit
     if (duration > LIMIT_DURATION_VIDEO) {
       throw new BadRequestException(Messages.LIMIT_DURATION_VIDEO);
     }
 
-    // Duration limit
+    // Transcript not allowed
     if (isEmpty(metadata.player_response.captions)) {
       throw new BadRequestException(Messages.SUBTITLES_NOT_FOUND);
     }
@@ -125,7 +145,6 @@ export class LessonService {
         'id',
         'title',
         'level',
-        'note',
         'tag',
         'language',
         'level',
@@ -147,7 +166,26 @@ export class LessonService {
    * @param query
    * @returns
    */
-  public async watch(lessonId: string): Promise<UpdateResultDto> {
+  public async watch(userId: string, lessonId: string) {
+    // Get lesson recent by user id and lesson id
+    let lessonRecent = await this.lessonRecentRepository.findOne({
+      where: { accessor: { id: userId }, lesson: { id: lessonId } },
+    });
+
+    // Init lesson recent if not found
+    if (isEmpty(lessonRecent)) {
+      lessonRecent = this.lessonRecentRepository.create({
+        accessor: { id: userId },
+        lesson: { id: lessonId },
+      });
+    }
+
+    // Update accessed date
+    lessonRecent.accessedAt = new Date();
+
+    // Update to database
+    await this.lessonRecentRepository.save(lessonRecent);
+
     // Update watchedAt and watchedCount
     await this.lessonRepository.updateWatchedCount(lessonId);
 

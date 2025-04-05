@@ -66,11 +66,10 @@ export class UserService {
     }
 
     // Generate token
-    const accessToken = await this.jwtService.signAccessToken({
-      id: user.id,
-      email: user.email,
-      role: user.role,
-    });
+     const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAccessToken({ id: user.id, email: user.email, role: user.role }),
+      this.jwtService.signRefreshToken({ id: user.id, email: user.email, role: user.role }),
+    ]);
 
     // Save refresh token to cache
     const cachedToken = await this.cacheService.getItem(user.id);
@@ -79,7 +78,7 @@ export class UserService {
     await this.cacheService.setItem(user.id, `${accessToken}:${cachedToken.refreshToken}`);
 
     // Return result
-    return { accessToken };
+    return { accessToken, refreshToken };
   }
 
   /**
