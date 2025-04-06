@@ -8,7 +8,7 @@ import { Messages } from '@common/enums';
 
 import { UsersRepository } from '../user/user.repository';
 import { WorkspaceRepository } from './workspace.repository';
-import { ItemsDto } from '@common/dtos/common.dto';
+import { ItemsMapper } from '@common/mappers';
 
 @Injectable()
 export class WorkspaceService {
@@ -27,7 +27,7 @@ export class WorkspaceService {
     const workspaces = await this.workspaceRepository.queryMyWorkspaces(userId);
 
     // Return the workspaces
-    return new ItemsDto(workspaces);
+    return new ItemsMapper(workspaces);
   }
 
   /**

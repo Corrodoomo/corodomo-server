@@ -9,7 +9,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
-import { LinksDto, MetaDto } from '@common/dtos/common.dto';
+import { LinksMapper, MetaMapper } from '@common/mappers/common.mapper';
 import { RawMeta } from '@common/mappers';
 
 /**
@@ -17,8 +17,8 @@ import { RawMeta } from '@common/mappers';
  * @param type
  * @returns
  */
-export function createHttpResponseDto<T>(type: Type<T>) {
-  class HttpResponseDto {
+export function createHttpResponseMapper<T>(type: Type<T>) {
+  class HttpResponseMapper {
     @ApiProperty({ type })
     result: T;
 
@@ -37,9 +37,9 @@ export function createHttpResponseDto<T>(type: Type<T>) {
     status: number;
   }
 
-  Object.defineProperty(HttpResponseDto, 'name', { value: `HttpResponseDto_${type.name}` });
+  Object.defineProperty(HttpResponseMapper, 'name', { value: `HttpResponseMapper_${type.name}` });
 
-  return HttpResponseDto;
+  return HttpResponseMapper;
 }
 
 /**
@@ -47,26 +47,26 @@ export function createHttpResponseDto<T>(type: Type<T>) {
  * @param type
  * @returns
  */
-export function createPaginationDto<T extends Type>(DTO: T) {
-  class PaginationDto {
+export function createPaginationMapper<T extends Type>(DTO: T) {
+  class PaginationMapper {
     @ApiProperty({
       description: 'Pagination metadata',
-      type: MetaDto<unknown>,
+      type: MetaMapper<unknown>,
     })
-    meta: MetaDto<unknown>;
+    meta: MetaMapper<unknown>;
 
     @ApiProperty({
       description: 'Pagination links for navigation',
     })
-    links: LinksDto;
+    links: LinksMapper;
 
     @ApiProperty({ type: DTO, isArray: true })
     data: T;
   }
 
-  Object.defineProperty(PaginationDto, 'name', { value: `PaginationDto_${DTO.name}` });
+  Object.defineProperty(PaginationMapper, 'name', { value: `PaginationMapper_${DTO.name}` });
 
-  return PaginationDto;
+  return PaginationMapper;
 }
 
 /**
@@ -74,8 +74,8 @@ export function createPaginationDto<T extends Type>(DTO: T) {
  * @param type
  * @returns
  */
-export function createPaginationRawDto<T extends Type>(DTO: T) {
-  class PaginationRawDto {
+export function createPaginationRawMapper<T extends Type>(DTO: T) {
+  class PaginationRawMapper {
     @ApiProperty({
       description: 'Pagination metadata',
     })
@@ -85,9 +85,9 @@ export function createPaginationRawDto<T extends Type>(DTO: T) {
     data: T;
   }
 
-  Object.defineProperty(PaginationRawDto, 'name', { value: `PaginationRawDto_${DTO.name}` });
+  Object.defineProperty(PaginationRawMapper, 'name', { value: `PaginationRawMapper_${DTO.name}` });
 
-  return PaginationRawDto;
+  return PaginationRawMapper;
 }
 
 /**
@@ -95,8 +95,8 @@ export function createPaginationRawDto<T extends Type>(DTO: T) {
  * @param type
  * @returns
  */
-export function createItemDto<T>(DTO: Type<T>) {
-  class DetailItemDto {
+export function createItemMapper<T>(DTO: Type<T>) {
+  class DetailItemMapper {
     @ApiProperty({
       description: 'The detail item',
       type: DTO,
@@ -104,9 +104,9 @@ export function createItemDto<T>(DTO: Type<T>) {
     data: T;
   }
 
-  Object.defineProperty(DetailItemDto, 'name', { value: `DetailItemDto_${DTO.name}` });
+  Object.defineProperty(DetailItemMapper, 'name', { value: `DetailItemMapper_${DTO.name}` });
 
-  return DetailItemDto;
+  return DetailItemMapper;
 }
 
 /**
@@ -114,8 +114,8 @@ export function createItemDto<T>(DTO: Type<T>) {
  * @param type
  * @returns
  */
-export function createItemsDto<T>(DTO: Type<T>) {
-  class ListItemsDto {
+export function createItemsMapper<T>(DTO: Type<T>) {
+  class ListItemsMapper {
     @ApiProperty({
       description: 'The list of data items',
       type: [DTO],
@@ -123,18 +123,18 @@ export function createItemsDto<T>(DTO: Type<T>) {
     data: T[];
   }
 
-  Object.defineProperty(ListItemsDto, 'name', { value: `ListItemsDto_${DTO.name}` });
+  Object.defineProperty(ListItemsMapper, 'name', { value: `ListItemsMapper_${DTO.name}` });
 
-  return ListItemsDto;
+  return ListItemsMapper;
 }
 
 /**
- * Create Insert Result Dto by generic type
+ * Create Insert Result Mapper by generic type
  * @param type
  * @returns
  */
-export function createInsertResultDto<T>(DTO: Type<T>, isArray?: boolean) {
-  class InsertResultDto {
+export function createInsertResultMapper<T>(DTO: Type<T>, isArray?: boolean) {
+  class InsertResultMapper {
     /**
      * Contains inserted entity id.
      * Has entity-like structure (not just column database name and values).
@@ -150,18 +150,18 @@ export function createInsertResultDto<T>(DTO: Type<T>, isArray?: boolean) {
     raw: T;
   }
 
-  Object.defineProperty(InsertResultDto, 'name', { value: `InsertResultDto_${DTO.name}` });
+  Object.defineProperty(InsertResultMapper, 'name', { value: `InsertResultMapper_${DTO.name}` });
 
-  return InsertResultDto;
+  return InsertResultMapper;
 }
 
 /**
- * Create Update Result Dto by generic type
+ * Create Update Result Mapper by generic type
  * @param type
  * @returns
  */
-export function createUpdateResultDto<T>(DTO?: Type<T>, isArray?: boolean) {
-  class UpdateResultDto {
+export function createUpdateResultMapper<T>(DTO?: Type<T>, isArray?: boolean) {
+  class UpdateResultMapper {
     /**
      * Contains inserted entity id.
      * Has entity-like structure (not just column database name and values).
@@ -177,18 +177,18 @@ export function createUpdateResultDto<T>(DTO?: Type<T>, isArray?: boolean) {
     raw: T;
   }
 
-  Object.defineProperty(UpdateResultDto, 'name', { value: `UpdateResultDto_${DTO?.name || 'default'}` });
+  Object.defineProperty(UpdateResultMapper, 'name', { value: `UpdateResultMapper_${DTO?.name || 'default'}` });
 
-  return UpdateResultDto;
+  return UpdateResultMapper;
 }
 
 /**
- * Create Update Result Dto by generic type
+ * Create Update Result Mapper by generic type
  * @param type
  * @returns
  */
-export function createDeleteResultDto<T>(DTO?: Type<T>, isArray?: boolean) {
-  class DeleteResultDto {
+export function createDeleteResultMapper<T>(DTO?: Type<T>, isArray?: boolean) {
+  class DeleteResultMapper {
     /**
      * Contains inserted entity id.
      * Has entity-like structure (not just column database name and values).
@@ -204,9 +204,9 @@ export function createDeleteResultDto<T>(DTO?: Type<T>, isArray?: boolean) {
     raw: T;
   }
 
-  Object.defineProperty(DeleteResultDto, 'name', { value: `DeleteResultDto_${DTO?.name || 'default'}` });
+  Object.defineProperty(DeleteResultMapper, 'name', { value: `DeleteResultMapper_${DTO?.name || 'default'}` });
 
-  return DeleteResultDto;
+  return DeleteResultMapper;
 }
 
 /**
@@ -215,7 +215,7 @@ export function createDeleteResultDto<T>(DTO?: Type<T>, isArray?: boolean) {
  * @returns
  */
 export const ApiOkItemsExample = <T>(model: Type<T>) => {
-  const dto = createItemsDto(model);
+  const dto = createItemsMapper(model);
 
   return applyDecorators(ApiOkResponseExample(dto));
 };
@@ -226,7 +226,7 @@ export const ApiOkItemsExample = <T>(model: Type<T>) => {
  * @returns
  */
 export const ApiOkResponseExample = <T>(model: Type<T>) => {
-  const dto = createHttpResponseDto(model);
+  const dto = createHttpResponseMapper(model);
 
   return ApiOkResponse({
     type: dto,
@@ -239,7 +239,7 @@ export const ApiOkResponseExample = <T>(model: Type<T>) => {
  * @returns
  */
 export const ApiOkPaginationExample = <T>(model: Type<T>) => {
-  const type = createPaginationDto(model);
+  const type = createPaginationMapper(model);
 
   return applyDecorators(ApiOkResponseExample(type));
 };
@@ -250,7 +250,7 @@ export const ApiOkPaginationExample = <T>(model: Type<T>) => {
  * @returns
  */
 export const ApiOkPaginationRawExample = <T>(model: Type<T>) => {
-  const type = createPaginationRawDto(model);
+  const type = createPaginationRawMapper(model);
 
   return applyDecorators(ApiOkResponseExample(type));
 };
@@ -261,7 +261,7 @@ export const ApiOkPaginationRawExample = <T>(model: Type<T>) => {
  * @returns
  */
 export const ApiOkItemExample = (model: Type) => {
-  const dto = createItemDto(model);
+  const dto = createItemMapper(model);
 
   return applyDecorators(ApiOkResponseExample(dto));
 };
@@ -272,7 +272,7 @@ export const ApiOkItemExample = (model: Type) => {
  * @returns
  */
 export const ApiOkInsertResultExample = (model: Type, isArray?: boolean) => {
-  const dto = createInsertResultDto(model, isArray);
+  const dto = createInsertResultMapper(model, isArray);
 
   return applyDecorators(ApiOkResponseExample(dto));
 };
@@ -283,7 +283,7 @@ export const ApiOkInsertResultExample = (model: Type, isArray?: boolean) => {
  * @returns
  */
 export const ApiOkUpdateResultExample = (model?: Type, isArray?: boolean) => {
-  const dto = createUpdateResultDto(model, isArray);
+  const dto = createUpdateResultMapper(model, isArray);
 
   return applyDecorators(ApiOkResponseExample(dto));
 };
@@ -294,7 +294,7 @@ export const ApiOkUpdateResultExample = (model?: Type, isArray?: boolean) => {
  * @returns
  */
 export const ApiOkDeleteResultExample = (model?: Type, isArray?: boolean) => {
-  const dto = createDeleteResultDto(model, isArray);
+  const dto = createDeleteResultMapper(model, isArray);
 
   return applyDecorators(ApiOkResponseExample(dto));
 };

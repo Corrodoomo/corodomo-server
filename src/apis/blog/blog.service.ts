@@ -3,10 +3,10 @@ import { isEmpty } from 'lodash';
 
 import { DeleteResultDto, InsertResultDto, UpdateResultDto } from '@common/dtos';
 import { CreateBlogDto, GroupBlogsDto, UpdateBlogDto } from '@common/dtos/blog.dto';
-import { ItemDto } from '@common/dtos/common.dto';
 import { Messages } from '@common/enums';
 
 import { BlogRepository } from './blog.repository';
+import { ItemMapper } from '@common/mappers';
 
 @Injectable()
 export class BlogService {
@@ -58,7 +58,7 @@ export class BlogService {
     }
 
     // Return result
-    return new ItemDto(blog);
+    return new ItemMapper(blog);
   }
 
   /**

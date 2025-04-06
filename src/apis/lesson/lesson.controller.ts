@@ -9,14 +9,15 @@ import {
   ApiOkPaginationExample,
   ApiOkUpdateResultExample,
 } from '@common/decorators/example.decorator';
-import { OpenAIMinimapItemDto, UpdateResultDto } from '@common/dtos';
+import { OpenAIMinimapItemDto } from '@common/dtos';
 import { PaginateQueryDto } from '@common/dtos/common.dto';
 import { LessonIdDto } from '@common/dtos/id.dto';
-import { CreateLessonDto, LessonRecordDto, LessonVideoCourse, ListTagsDto } from '@common/dtos/lesson.dto';
+import { CreateLessonDto, LessonRecordDto, LessonVideoCourse, ListTagsDto, UpdateLessonDto } from '@common/dtos/lesson.dto';
 import { SystemRoles } from '@common/enums';
 import { Request } from '@common/models';
 
 import { LessonService } from './lesson.service';
+import { Lesson } from '@modules/database/entities';
 
 @Controller('lessons')
 export class LessonController {
@@ -43,6 +44,13 @@ export class LessonController {
     return this.lessonService.get(query);
   }
 
+  @ApiGet('/me')
+  @Roles([SystemRoles.LEARNER])
+  @ApiOkPaginationExample(LessonRecordDto)
+  getLessonsInFolder(@Query() query: PaginateQueryDto, @Req() req: Request) {
+    return this.lessonService.getMyLessons(req.user.id, query);
+  }
+
   @ApiGet('/list_tags')
   @Roles([SystemRoles.LEARNER])
   @ApiOkItemsExample(ListTagsDto)
@@ -67,7 +75,14 @@ export class LessonController {
   @ApiPut('/:lessonId/watched')
   @Roles([SystemRoles.LEARNER])
   @ApiOkUpdateResultExample()
-  watch(@Param() params: LessonIdDto, @Req() req: Request): Promise<UpdateResultDto> {
+  watch(@Param() params: LessonIdDto, @Req() req: Request) {
     return this.lessonService.watch(req.user.id, params.lessonId);
+  }
+
+  @ApiPut('/:lessonId')
+  @Roles([SystemRoles.LEARNER])
+  @ApiOkUpdateResultExample(Lesson)
+  update(@Param() params: LessonIdDto, @Body() body: UpdateLessonDto, @Req() req: Request) {
+    return this.lessonService.update(req.user.id, params.lessonId, body);
   }
 }
