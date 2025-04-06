@@ -1,3 +1,4 @@
+import { Lesson } from '@modules/database/entities';
 import { Body, Param, Query, Req } from '@nestjs/common';
 
 import { ApiDelete, ApiGet, ApiPost, ApiPut, Controller, RolesOld } from '@common/decorators';
@@ -12,12 +13,17 @@ import {
 import { OpenAIMinimapItemDto } from '@common/dtos';
 import { PaginateQueryDto } from '@common/dtos/common.dto';
 import { LessonIdDto } from '@common/dtos/id.dto';
-import { CreateLessonDto, LessonRecordDto, LessonVideoCourse, ListTagsDto, UpdateLessonDto } from '@common/dtos/lesson.dto';
+import {
+  CreateLessonDto,
+  LessonRecordDto,
+  LessonVideoCourse,
+  ListTagsDto,
+  UpdateLessonDto,
+} from '@common/dtos/lesson.dto';
 import { SystemRoles } from '@common/enums';
 import { Request } from '@common/models';
 
 import { LessonService } from './lesson.service';
-import { Lesson } from '@modules/database/entities';
 
 @Controller('lessons')
 export class LessonController {
@@ -45,7 +51,7 @@ export class LessonController {
   }
 
   @ApiGet('/me')
-  @Roles([SystemRoles.LEARNER])
+  @RolesOld([SystemRoles.LEARNER])
   @ApiOkPaginationExample(LessonRecordDto)
   getLessonsInFolder(@Query() query: PaginateQueryDto, @Req() req: Request) {
     return this.lessonService.getMyLessons(req.user.id, query);
@@ -80,7 +86,7 @@ export class LessonController {
   }
 
   @ApiPut('/:lessonId')
-  @Roles([SystemRoles.LEARNER])
+  @RolesOld([SystemRoles.LEARNER])
   @ApiOkUpdateResultExample(Lesson)
   update(@Param() params: LessonIdDto, @Body() body: UpdateLessonDto, @Req() req: Request) {
     return this.lessonService.update(req.user.id, params.lessonId, body);

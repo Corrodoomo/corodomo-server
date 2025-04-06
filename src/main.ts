@@ -32,7 +32,7 @@ async function bootstrap() {
   const redisClient = new Redis({
     port: configService.getOrThrow<number>('REDIS_PORT'),
     host: configService.getOrThrow<string>('REDIS_HOST'),
-    db: configService.getOrThrow<number>('REDIS_USER_DB'),
+    db: configService.getOrThrow<number>('SESSION_DB'),
     password: configService.getOrThrow<string>('REDIS_PASSWORD'),
   });
 

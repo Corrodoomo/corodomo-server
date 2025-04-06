@@ -1,8 +1,8 @@
 import { CreateUserDto } from '@app/apis/user-new/dtos/create-user.dto';
 import { User } from '@modules/database/entities';
-import { Body, Controller, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody } from '@nestjs/swagger';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 
 import { ApiGet, ApiPost } from '@common/decorators';
 import { ApiOkInsertResultExample, ApiOkResponseExample } from '@common/decorators/example.decorator';
@@ -39,8 +39,8 @@ export class AuthController {
     type: SignInUserDto,
   })
   @UseGuards(LocalAuthGuard)
-  signIn(@Authorized() user: User, @Res() response: Response) {
-    return this.authService.signIn(user, response);
+  signIn(@Req() request: Request, @Res() response: Response) {
+    return this.authService.signIn(request, response);
   }
 
   @Public()
@@ -51,6 +51,16 @@ export class AuthController {
   @UseGuards(RefreshAuthGuard)
   refresh(@Authorized() user: User, @Res() response: Response) {
     return this.authService.refresh(user, response);
+  }
+
+  @Public()
+  @ApiPost('logout', {
+    auth: false,
+  })
+  @ApiBearerAuth()
+  @UseGuards(RefreshAuthGuard)
+  logout(@Req() request: Request, @Res() response: Response) {
+    return this.authService.logout(request, response);
   }
 
   // Just for testing purpose

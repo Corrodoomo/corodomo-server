@@ -11,10 +11,11 @@ export class UserNewsRepository extends BaseRepository<User> {
   }
 
   public findByEmail(email: string) {
-    return this.findOne({ where: { email } });
+    console.log('findByEmail');
+    return this.findOne({ where: { email }, cache: true });
   }
 
   public findUserById(id: string) {
-    return this.findOne({ where: { id } });
+    return this.findOne({ where: { id }, cache: true });
   }
 }

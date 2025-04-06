@@ -4,12 +4,14 @@ import { UserNewService } from '@app/apis/user-new/user-new.service';
 import { User } from '@modules/database/entities';
 import { JwtService } from '@modules/jwt';
 import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
-import { Response } from 'express';
+import { ConfigService } from '@nestjs/config';
+import { Request, Response } from 'express';
 
 import { options } from '@common/constants/cookie';
 import { Messages } from '@common/enums';
 import { BryptService } from '@common/services';
 import { CookieService } from '@common/services/cookie.service';
+import { SessionService } from '@common/services/session.service';
 
 @Injectable()
 export class AuthService {
@@ -18,7 +20,9 @@ export class AuthService {
     private readonly userNewsRepository: UserNewsRepository,
     private readonly jwtService: JwtService,
     private readonly brptService: BryptService,
-    private readonly cookieService: CookieService
+    private readonly cookieService: CookieService,
+    private readonly sessionService: SessionService,
+    private readonly configService: ConfigService
   ) {}
 
   // Register user
@@ -29,11 +33,16 @@ export class AuthService {
   }
 
   // Sign in
-  public async signIn(user: User, response: Response) {
+  public async signIn(request: Request, response: Response) {
+    const user = request.user as User;
     const { accessToken, refreshToken } = await this.generateToken(user.id, user.email, user.role);
 
+    // Set cookies
     this.cookieService.setCookie(response, 'accessToken', accessToken, options);
     this.cookieService.setCookie(response, 'refreshToken', refreshToken, options);
+
+    // Save session
+    this.sessionService.saveSession(request, user);
 
     response.send({ message: 'Login successful' });
   }
@@ -41,10 +50,16 @@ export class AuthService {
   public async refresh(user: User, response: Response) {
     const { accessToken, refreshToken } = await this.generateToken(user.id, user.email, user.role);
 
+    // Set cookies
     this.cookieService.setCookie(response, 'accessToken', accessToken, options);
     this.cookieService.setCookie(response, 'refreshToken', refreshToken, options);
 
     response.send({ message: 'Refresh successful' });
+  }
+
+  public async logout(request: Request, response: Response) {
+    await this.sessionService.destroySession(request, this.configService);
+    response.send({ message: 'Logout successful' });
   }
 
   // Generate token

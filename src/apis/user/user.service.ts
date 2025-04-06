@@ -66,7 +66,7 @@ export class UserService {
     }
 
     // Generate token
-     const [accessToken, refreshToken] = await Promise.all([
+    const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAccessToken({ id: user.id, email: user.email, role: user.role }),
       this.jwtService.signRefreshToken({ id: user.id, email: user.email, role: user.role }),
     ]);
