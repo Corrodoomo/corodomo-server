@@ -40,10 +40,16 @@ export class BaseElasticsearchService {
    * @returns
    */
   async getById(docId: string) {
-    return this.elasticsearchService.get({
-      index: this.index, // Sử dụng index generic
-      id: docId,
-    });
+    try {
+      const data = await this.elasticsearchService.get({
+        index: this.index, // Sử dụng index generic
+        id: docId,
+      });
+
+      return data;
+    } catch {
+      return null;
+    }
   }
 
   /**

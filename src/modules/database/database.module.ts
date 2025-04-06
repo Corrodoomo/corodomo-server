@@ -4,6 +4,8 @@ import { User } from '@modules/database/entities/user.entity';
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { addTransactionalDataSource } from 'typeorm-transactional';
 
 import { Quiz } from './entities';
 import { ExamPart } from './entities/exam-part.entity';
@@ -16,6 +18,7 @@ import { LessonRecent } from './entities/lesson-recent.entity';
 import { Lesson } from './entities/lesson.entity';
 import { Note } from './entities/note.entity';
 import { NotedVocabulary } from './entities/noted-vocabulary.entity';
+import { ProjectRecent } from './entities/project-recent.entity';
 import { Project } from './entities/project.entity';
 import { QuestionChoice } from './entities/question-choice.entity';
 import { Question } from './entities/question.entity';
@@ -74,6 +77,7 @@ import { Workspace } from './entities/workspace.entity';
           Song,
           Workspace,
           Project,
+          ProjectRecent,
           GroupTask,
           Task,
           SubTask,
@@ -81,6 +85,13 @@ import { Workspace } from './entities/workspace.entity';
           Folder,
         ],
       }),
+      dataSourceFactory: async (options) => {
+        if (!options) {
+          throw new Error('Invalid options passed');
+        }
+
+        return addTransactionalDataSource(new DataSource(options));
+      },
     }),
   ],
 })

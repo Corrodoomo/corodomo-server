@@ -8,6 +8,7 @@ import * as cookieParser from 'cookie-parser';
 import * as cors from 'cors';
 import * as session from 'express-session';
 import Redis from 'ioredis';
+import { initializeTransactionalContext, StorageDriver } from 'typeorm-transactional';
 
 import { PaginationPipe, TransformPropertyPipe } from '@common/pipes';
 import { ms, StringValue } from '@common/utils/ms.util';
@@ -18,6 +19,8 @@ import { useSwagger } from './app.swagger';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
+  initializeTransactionalContext({ storageDriver: StorageDriver.AUTO });
+
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: ['error', 'debug', 'verbose'],
   });

@@ -16,6 +16,7 @@ import { Request } from '@common/models';
 
 import { FolderService } from './folder.service';
 
+
 @Controller('folders')
 export class FolderController {
   constructor(private readonly folderService: FolderService) {}
@@ -23,8 +24,8 @@ export class FolderController {
   @ApiGet('/')
   @RolesOld([SystemRoles.LEARNER])
   @ApiOkPaginationRawExample(MyFolderDto)
-  get(@Query() query: PaginateQueryDto) {
-    return this.folderService.get(query);
+  get(@Query() query: PaginateQueryDto, @Req() req: Request) {
+    return this.folderService.get(query, req.user.id);
   }
 
   @ApiGet('/list_lessons')

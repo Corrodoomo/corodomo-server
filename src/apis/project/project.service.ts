@@ -10,11 +10,13 @@ import { ProjectRecentsMapper } from '@common/mappers/project.mapper';
 import { UsersRepository } from '../user/user.repository';
 import { WorkspaceRepository } from '../workspace/workspace.repository';
 import { ProjectRepository } from './project.repository';
+import { ProjectRecentRepository } from '@modules/project-recent/project-recent.repository';
 
 @Injectable()
 export class ProjectService {
   constructor(
     private readonly projectRepository: ProjectRepository,
+    private readonly projectRecentRepository: ProjectRecentRepository,
     private readonly workspaceRepository: WorkspaceRepository,
     private readonly userRepository: UsersRepository
   ) {}
@@ -25,19 +27,8 @@ export class ProjectService {
    * @returns
    */
   public async getMyProjectRecents(userId: string) {
-    // Get user by userId
-    const user = await this.userRepository.getById(userId, ['id', 'projectRecents']);
-
-    // Check if user not found
-    if (isEmpty(user)) {
-      throw new BadRequestException(Messages.ITEM_NOT_FOUND);
-    }
-
-    // Map list project to project ids
-    const projectIds = user.projectRecents.map((recent) => recent.projectId);
-
     // Get project recents
-    const recents = await this.projectRepository.queryMyProjectRecents(projectIds);
+    const recents = await this.projectRepository.queryMyProjectRecents(userId);
 
     // Return result
     return new ProjectRecentsMapper(recents);

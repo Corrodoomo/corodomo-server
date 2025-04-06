@@ -4,8 +4,7 @@ import { IsArray, IsIn, IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength, Min
 
 import { BLOG_ACCESS_TYPE, BLOG_TAGS } from '@common/constants';
 import { TransformProperty } from '@common/decorators/transform.decorator';
-
-import { ItemsDto } from './common.dto';
+import { ItemsMapper } from '@common/mappers';
 
 export class CreateBlogDto {
   @ApiProperty()
@@ -89,7 +88,7 @@ export class UpdateBlogDto {
   sharedFor?: string;
 }
 
-export class GroupBlogsDto extends ItemsDto<Blog> {
+export class GroupBlogsDto extends ItemsMapper<Blog> {
   constructor(blogs: Blog[]) {
     super(GroupBlogsDto.groupBlogs(blogs));
   }

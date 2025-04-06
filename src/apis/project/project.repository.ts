@@ -15,22 +15,26 @@ export class ProjectRepository extends BaseRepository<Project> {
    * @param projectIds
    * @returns
    */
-  public queryMyProjectRecents(projectIds: string[]) {
-    return this.createQueryBuilder('project')
-      .innerJoin('project.workspace', 'workspace')
-      .innerJoin('workspace.createdBy', 'user')
-      .select([
-        'project.id',
-        'project.name',
-        'project.theme',
-        'project.description',
-        'project.startAt',
-        'project.endAt',
-        'workspace.id',
-        'user.id',
-        'user.email',
-      ])
-      .where('project.id in (:...projectIds)', { projectIds })
-      .getMany();
+  public queryMyProjectRecents(userId: string) {
+    return (
+      this.createQueryBuilder('project')
+        .innerJoin('project.workspace', 'workspace')
+        .innerJoin('workspace.createdBy', 'user')
+        .innerJoin('project.recents', 'recent')
+        .select([
+          'project.id',
+          'project.name',
+          'project.theme',
+          'project.description',
+          'project.startAt',
+          'project.endAt',
+          'workspace.id',
+          'user.id',
+          'user.email',
+          'recent.accessedAt',
+        ])
+        .where('recent.accessedBy = :userId', { userId })
+        .getMany()
+    );
   }
 }

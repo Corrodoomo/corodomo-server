@@ -103,9 +103,9 @@ export class OpenAIService {
       The ${LANGUAGES[language]} passage description: ${message}.
       Classify important 50 words and types of nouns, adjectives, verbs in the following text.
       If 50 words are not enough, try to list as many as possible.
-      Please respond with only the JSON result, like [ { 'word': '?', 'type': '?' } ]., without any explanations
+      Please respond with only the JSON result, like [ { 'word': '?', 'type': '?' } ], without any explanations.
       Require all 'word' and 'type' must be ${LANGUAGES[language]} language.
-      ${OPEN_AI_JSON_FORMAT_REQUIRED}.
+      ${OPEN_AI_JSON_FORMAT_REQUIRED}
     `;
 
     this.logger.debug('Vocabulary Request data =>', content);

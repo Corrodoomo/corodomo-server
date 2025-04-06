@@ -8,9 +8,17 @@ import { isEmpty } from 'lodash';
 import { FilterOperator, paginate, PaginateQuery } from 'nestjs-paginate';
 
 import { LIMIT_DURATION_VIDEO, YOUTUBE_TRANSCRIPT_LANGUAGES } from '@common/constants';
-import { CreateLessonDto, DeleteResultDto, InsertResultDto, ListTagsDto, UpdateResultDto } from '@common/dtos';
-import { ItemDto } from '@common/dtos/common.dto';
+import {
+  CreateLessonDto,
+  DeleteResultDto,
+  InsertResultDto,
+  ListTagsDto,
+  UpdateLessonDto,
+  UpdateResultDto,
+} from '@common/dtos';
 import { Messages } from '@common/enums';
+import { ItemMapper, UpdateRawResultMapper } from '@common/mappers';
+import { LessonsInFolderMapper } from '@common/mappers/lesson.mapper';
 
 import { LessonRepository } from './lesson.repository';
 
@@ -86,6 +94,32 @@ export class LessonService {
   }
 
   /**
+   * Update lesson
+   * @param lesson
+   * @returns
+   */
+  public async update(userId: string, lessonId: string, body: UpdateLessonDto) {
+    const lesson = await this.lessonRepository.getRawOne(lessonId, ['id', 'created_by AS "createdBy"']);
+
+    if (isEmpty(lesson)) {
+      throw new BadRequestException(Messages.ITEM_NOT_FOUND);
+    }
+
+    if (lesson.createdBy !== userId) {
+      throw new ForbiddenException(Messages.INVALID_ACCESS_RESOURCE);
+    }
+
+    // Create lesson
+    const updatedLesson = await this.lessonRepository.updateById(lessonId, {
+      folder: { id: body.folderId },
+      language: body.language,
+    });
+
+    // Return result
+    return new UpdateRawResultMapper(updatedLesson);
+  }
+
+  /**
    * Delete lesson by id
    * @param lesson
    * @returns
@@ -108,13 +142,20 @@ export class LessonService {
       throw new ForbiddenException(Messages.INVALID_ACCESS_RESOURCE);
     }
 
+    // Get minimap by id
+    const minimap = await this.minimapEsService.getById(lesson.minimapId);
+
+    // Delete if it found
+    if (minimap) {
+      await this.minimapEsService.deleteDocument(lesson.minimapId);
+    }
+
     // Delete process
     await Promise.all([
       // Delete casade. It will delete all records have a FK lesson_id
       await this.lessonRepository.delete(lessonId),
       // Delete all data in elastic search
-      await this.lessonEsService.deleteByLessonId('19f66779-7024-4447-bd39-99e6eb571925'),
-      await this.minimapEsService.deleteDocument('l3YDpZUBSz-XFdOgJyFD'),
+      await this.lessonEsService.deleteByLessonId(lessonId),
     ]);
 
     // Return result
@@ -162,6 +203,49 @@ export class LessonService {
   }
 
   /**
+   * Get my lessons
+   * @param userId
+   * @param query
+   * @returns
+   */
+  public async getMyLessons(userId: string, query: PaginateQuery) {
+    // Default filter
+    query.filter = {
+      ...query.filter,
+      createdBy: `$eq:${userId}`,
+    };
+
+    // Paginted results
+    const pagination = await paginate(query, this.lessonRepository, {
+      sortableColumns: ['id', 'title'],
+      defaultSortBy: [['title', 'ASC']],
+      select: [
+        'id',
+        'title',
+        'level',
+        'tag',
+        'language',
+        'level',
+        'watchedCount',
+        'youtubeUrl',
+        'thumbnail',
+        'duration',
+        'createdBy',
+        'lessonRecents.accessedAt',
+        'folder.id',
+      ],
+      filterableColumns: {
+        createdBy: [FilterOperator.EQ],
+        'folder.id': [FilterOperator.EQ],
+      },
+      relations: ['lessonRecents', 'folder'],
+    });
+
+    // Return result
+    return new LessonsInFolderMapper(pagination);
+  }
+
+  /**
    * Watch lesson
    * @param query
    * @returns
@@ -169,13 +253,13 @@ export class LessonService {
   public async watch(userId: string, lessonId: string) {
     // Get lesson recent by user id and lesson id
     let lessonRecent = await this.lessonRecentRepository.findOne({
-      where: { accessor: { id: userId }, lesson: { id: lessonId } },
+      where: { accessedBy: { id: userId }, lesson: { id: lessonId } },
     });
 
     // Init lesson recent if not found
     if (isEmpty(lessonRecent)) {
       lessonRecent = this.lessonRecentRepository.create({
-        accessor: { id: userId },
+        accessedBy: { id: userId },
         lesson: { id: lessonId },
       });
     }
@@ -214,10 +298,10 @@ export class LessonService {
    */
   public async getDetail(lessonId: string, userId: string) {
     // Get lesson by id
-    const lesson = await this.lessonRepository.getLessonForUser(lessonId, userId);
+    const lesson = await this.lessonRepository.queryDetailLesson(lessonId, userId);
 
     // Return result
-    return new ItemDto(lesson);
+    return new ItemMapper(lesson);
   }
 
   /**
@@ -235,9 +319,9 @@ export class LessonService {
     }
 
     // Get minimap in elastic search
-    const { _id, _source } = await this.minimapEsService.getById(lesson.minimapId);
+    const minimap = await this.minimapEsService.getById(lesson.minimapId);
 
     // Return result
-    return new ItemDto({ id: _id, source: _source });
+    return new ItemMapper({ id: minimap?._id, source: minimap?._source });
   }
 }

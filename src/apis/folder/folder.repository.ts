@@ -50,4 +50,28 @@ export class FolderRepository extends BaseRepository<Folder> {
       ])
       .getMany();
   }
+
+  /**
+   * Query paginated folder
+   * @param userId
+   * @param folder
+   * @returns
+   */
+  public queryPaginatedFolder(userId: string) {
+    return this.createQueryBuilder('folder')
+      .select([
+        'folder.id as "id"',
+        'folder.name as "name"',
+        'folder.updated_at as "updatedAt"',
+        'folder.created_at as "createdAt"',
+      ])
+      .addSelect((subQuery) => {
+        return subQuery
+          .select('CAST(COUNT(lesson.id) AS INT)', 'amount') // Đếm số bài học
+          .from('lessons', 'lesson')
+          .where('lesson.folder_id = folder.id');
+      }, 'amount')
+      .where('created_by = :userId', { userId })
+      .orderBy('folder.name', 'ASC');
+  }
 }
