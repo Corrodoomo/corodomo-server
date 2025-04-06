@@ -42,7 +42,7 @@ export class AuthService {
     this.cookieService.setCookie(response, 'refreshToken', refreshToken, options);
 
     // Save session
-    this.sessionService.saveSession(request, user);
+    await this.sessionService.saveSession(request, user);
 
     response.send({ message: 'Login successful' });
   }
