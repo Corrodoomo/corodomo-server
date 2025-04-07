@@ -25,6 +25,7 @@ import { APP_GUARD } from '@nestjs/core';
 
 import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
 import { RolesGuard } from '@common/guards/role.guard';
+import { SessionMiddleware } from '@common/middlewares/session.middleware';
 
 import { BlogModule } from './apis/blog/blog.module';
 import { LessonCommentModule } from './apis/lesson-comment/lesson-comment.module';
@@ -81,6 +82,6 @@ import { WorkspaceModule } from './apis/workspace/workspace.module';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(HelmetMiddleware, LoggerMiddleware).forRoutes('*');
+    consumer.apply(HelmetMiddleware, LoggerMiddleware, SessionMiddleware).forRoutes('*');
   }
 }

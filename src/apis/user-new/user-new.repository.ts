@@ -11,7 +11,6 @@ export class UserNewsRepository extends BaseRepository<User> {
   }
 
   public findByEmail(email: string) {
-    console.log('findByEmail');
     return this.findOne({ where: { email }, cache: true });
   }
 

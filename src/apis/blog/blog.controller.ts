@@ -1,7 +1,7 @@
 import { Blog } from '@modules/database/entities';
 import { Body, Controller, Param, Req } from '@nestjs/common';
 
-import { ApiDelete, ApiGet, ApiPost, ApiPut, RolesOld } from '@common/decorators';
+import { ApiDelete, ApiGet, ApiPost, ApiPut, Roles } from '@common/decorators';
 import {
   ApiOkDeleteResultExample,
   ApiOkInsertResultExample,
@@ -21,35 +21,35 @@ export class BlogController {
   constructor(private readonly blogService: BlogService) {}
 
   @ApiGet('/:blogId')
-  @RolesOld([SystemRoles.LEARNER])
+  @Roles(SystemRoles.LEARNER)
   @ApiOkItemExample(Blog)
   getDetail(@Param() param: BlogIdDto, @Req() request: Request) {
     return this.blogService.getDetail(request.user.id, param.blogId);
   }
 
   @ApiGet('/my_lists')
-  @RolesOld([SystemRoles.LEARNER])
+  @Roles(SystemRoles.LEARNER)
   @ApiOkItemsExample(Blog)
   getMyBlogs(@Req() request: Request) {
     return this.blogService.getMyBlogs(request.user.id);
   }
 
   @ApiPost('/')
-  @RolesOld([SystemRoles.LEARNER])
+  @Roles(SystemRoles.LEARNER)
   @ApiOkInsertResultExample(Blog)
   create(@Body() body: CreateBlogDto, @Req() request: Request) {
     return this.blogService.create(request.user.id, body);
   }
 
   @ApiPut('/:blogId')
-  @RolesOld([SystemRoles.LEARNER])
+  @Roles(SystemRoles.LEARNER)
   @ApiOkUpdateResultExample(Blog)
   update(@Param() param: BlogIdDto, @Body() body: UpdateBlogDto, @Req() request: Request) {
     return this.blogService.update(request.user.id, param.blogId, body);
   }
 
   @ApiDelete('/:blogId')
-  @RolesOld([SystemRoles.LEARNER])
+  @Roles(SystemRoles.LEARNER)
   @ApiOkDeleteResultExample()
   delete(@Param() param: BlogIdDto, @Req() request: Request) {
     return this.blogService.delete(request.user.id, param.blogId);

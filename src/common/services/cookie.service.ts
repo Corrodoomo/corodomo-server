@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { CookieOptions, Response } from 'express';
+import { Response } from 'express';
+
+import { options } from '@common/constants/cookie';
 
 @Injectable()
 export class CookieService {
-  setCookie(response: Response, name: string, value: string, options: CookieOptions): void {
+  setHttpOnlyCookie(response: Response, name: string, value: string): void {
     response.cookie(name, value, options);
   }
 }

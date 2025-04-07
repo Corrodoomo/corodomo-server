@@ -1,6 +1,6 @@
 import { Body, Controller, Req } from '@nestjs/common';
 
-import { ApiPost, RolesOld } from '@common/decorators';
+import { ApiPost, Roles } from '@common/decorators';
 import { ApiOkInsertResultExample, ApiOkResponseExample } from '@common/decorators/example.decorator';
 import { Public } from '@common/decorators/public-route.decorator';
 import { SignInUserDto } from '@common/dtos';
@@ -20,27 +20,27 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Public()
-  @ApiPost('signin', { auth: false })
+  @ApiPost('signin')
   @ApiOkResponseExample(SignedInUserMapper)
   signIn(@Body() body: SignInUserDto) {
     return this.userService.signIn(body.email, body.password);
   }
 
-  @ApiPost('signup', { auth: false })
+  @ApiPost('signup')
   @ApiOkInsertResultExample(SignedUpUserMapper)
   signUp(@Body() body: SignInUserDto) {
     return this.userService.signUp(body.email, body.password);
   }
 
   @ApiPost('signout')
-  @RolesOld([SystemRoles.LEARNER])
+  @Roles(SystemRoles.LEARNER)
   @ApiOkResponseExample(SignedOutUserMapper)
   signOut(@Req() request: Request) {
     return this.userService.signOut(request.user.id);
   }
 
   @ApiPost('refresh')
-  @RolesOld([SystemRoles.LEARNER])
+  @Roles(SystemRoles.LEARNER)
   @ApiOkResponseExample(RefreshUserMapper)
   refresh(@Req() request: Request) {
     return this.userService.refresh(request.user.id);

@@ -1,6 +1,6 @@
 import { Body, Controller, Param, Req } from '@nestjs/common';
 
-import { ApiDelete, ApiGet, ApiPost, ApiPut, RolesOld } from '@common/decorators';
+import { ApiDelete, ApiGet, ApiPost, ApiPut, Roles } from '@common/decorators';
 import {
   ApiOkDeleteResultExample,
   ApiOkInsertResultExample,
@@ -20,28 +20,28 @@ export class WorkspaceController {
   constructor(private readonly workspaceService: WorkspaceService) {}
 
   @ApiGet('/')
-  @RolesOld([SystemRoles.LEARNER])
+  @Roles(SystemRoles.LEARNER)
   @ApiOkItemsExample(MyWorkspaceMapper)
   getMyWorkspaces(@Req() request: Request) {
     return this.workspaceService.getMyWorkspaces(request.user.id);
   }
 
   @ApiPost('/')
-  @RolesOld([SystemRoles.LEARNER])
+  @Roles(SystemRoles.LEARNER)
   @ApiOkInsertResultExample(WorkspaceRecordMapper)
   create(@Body() body: CreateWorkspaceDto, @Req() request: Request) {
     return this.workspaceService.create(request.user.id, body);
   }
 
   @ApiPut('/:workspaceId')
-  @RolesOld([SystemRoles.LEARNER])
+  @Roles(SystemRoles.LEARNER)
   @ApiOkUpdateResultExample(WorkspaceRecordMapper)
   update(@Param() param: WorkspaceIdDto, @Body() body: CreateWorkspaceDto, @Req() request: Request) {
     return this.workspaceService.update(request.user.id, param.workspaceId, body);
   }
 
   @ApiDelete('/:workspaceId')
-  @RolesOld([SystemRoles.LEARNER])
+  @Roles(SystemRoles.LEARNER)
   @ApiOkDeleteResultExample()
   delete(@Param() param: WorkspaceIdDto, @Req() request: Request) {
     return this.workspaceService.delete(request.user.id, param.workspaceId);

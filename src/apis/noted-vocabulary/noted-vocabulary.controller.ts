@@ -1,6 +1,6 @@
 import { Body, Controller, Param, Req } from '@nestjs/common';
 
-import { ApiDelete, ApiPost, ApiPut, RolesOld } from '@common/decorators';
+import { ApiDelete, ApiPost, ApiPut, Roles } from '@common/decorators';
 import {
   ApiOkDeleteResultExample,
   ApiOkInsertResultExample,
@@ -22,21 +22,21 @@ export class NotedVocabularyController {
   constructor(private readonly notedVocabularyService: NotedVocabularyService) {}
 
   @ApiPost('/translate')
-  @RolesOld([SystemRoles.LEARNER])
+  @Roles(SystemRoles.LEARNER)
   @ApiOkInsertResultExample(NotedVocabularyRecordDto)
   create(@Body() body: CreateNotedVocabularyDto, @Req() req: Request) {
     return this.notedVocabularyService.create(req.user.id, body);
   }
 
   @ApiPut('/:notedVocabularyId/translate')
-  @RolesOld([SystemRoles.LEARNER])
+  @Roles(SystemRoles.LEARNER)
   @ApiOkUpdateResultExample(NotedVocabularyRecordDto)
   update(@Param() param: NotedVocabularyIdDto, @Body() body: UpdateNotedVocabularyDto, @Req() req: Request) {
     return this.notedVocabularyService.update(req.user.id, param.notedVocabularyId, body);
   }
 
   @ApiDelete('/:notedVocabularyId')
-  @RolesOld([SystemRoles.LEARNER])
+  @Roles(SystemRoles.LEARNER)
   @ApiOkDeleteResultExample()
   delete(@Param() param: NotedVocabularyIdDto, @Req() req: Request) {
     return this.notedVocabularyService.delete(req.user.id, param.notedVocabularyId);

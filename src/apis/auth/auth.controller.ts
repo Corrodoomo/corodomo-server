@@ -13,7 +13,7 @@ import { SystemRoles } from '@common/enums';
 import { Authorized } from '@common/guards/authorized.guard';
 import { LocalAuthGuard } from '@common/guards/local-auth.guard';
 import { RefreshAuthGuard } from '@common/guards/refresh-auth.guard';
-import { SignedInUserMapper, SignedUpUserMapper } from '@common/mappers/user.mapper';
+import { AuthUserMapper, SignedUpUserMapper } from '@common/mappers/user.mapper';
 
 import { AuthService } from './auth.service';
 
@@ -22,19 +22,15 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Public()
-  @ApiPost('signup', {
-    auth: false,
-  })
+  @ApiPost('signup')
   @ApiOkInsertResultExample(SignedUpUserMapper)
   registerUser(@Body() createUserDto: CreateUserDto) {
     return this.authService.registerUser(createUserDto);
   }
 
   @Public()
-  @ApiPost('signin', {
-    auth: false,
-  })
-  @ApiOkResponseExample(SignedInUserMapper)
+  @ApiPost('signin')
+  @ApiOkResponseExample(AuthUserMapper)
   @ApiBody({
     type: SignInUserDto,
   })
@@ -44,29 +40,25 @@ export class AuthController {
   }
 
   @Public()
-  @ApiGet('refresh', {
-    auth: false,
-  })
+  @ApiGet('refresh')
   @ApiBearerAuth()
+  @ApiOkResponseExample(AuthUserMapper)
   @UseGuards(RefreshAuthGuard)
   refresh(@Authorized() user: User, @Res() response: Response) {
     return this.authService.refresh(user, response);
   }
 
   @Public()
-  @ApiPost('logout', {
-    auth: false,
-  })
+  @ApiPost('logout')
   @ApiBearerAuth()
+  @ApiOkResponseExample(AuthUserMapper)
   @UseGuards(RefreshAuthGuard)
   logout(@Req() request: Request, @Res() response: Response) {
     return this.authService.logout(request, response);
   }
 
   // Just for testing purpose
-  @ApiGet('test', {
-    auth: false,
-  })
+  @ApiGet('test')
   @ApiBearerAuth()
   @Roles(SystemRoles.LEARNER)
   getTest(@Authorized() user: User) {

@@ -18,10 +18,13 @@ export class UserCacheService extends CacheService {
 
   async getItem(key: string): Promise<SignedInUserMapper> {
     const value = await this.get(key);
+    if (!value) return { accessToken: '', refreshToken: '' };
 
-    const [accessToken, refreshToken] = (value ?? '').split(':');
-
-    return { accessToken, refreshToken };
+    const tokenData = JSON.parse(value);
+    return {
+      accessToken: tokenData.accessToken,
+      refreshToken: tokenData.refreshToken,
+    };
   }
 
   async setItem(key: string, value: string) {

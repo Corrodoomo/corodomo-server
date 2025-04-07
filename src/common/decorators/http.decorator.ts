@@ -21,11 +21,8 @@ import { ApiExceptionResponse } from './example.decorator';
  * @param options
  * @returns
  */
-export const ApiGet = (path?: string, options?: HttpOption) => {
-  const defaultOptions = { auth: true, ...options };
+export const ApiGet = (path?: string) => {
   const decorators = [NestGet(path), ApiExceptionResponse()];
-
-  if (defaultOptions.auth) decorators.push(ApiBearerAuth(), UseGuards(AuthenticationGuard, AuthorizationGuard));
 
   return applyDecorators(...decorators);
 };
@@ -36,11 +33,8 @@ export const ApiGet = (path?: string, options?: HttpOption) => {
  * @param options
  * @returns
  */
-export const ApiPost = (path?: string, options?: HttpOption) => {
-  const defaultOptions = { auth: true, ...options };
+export const ApiPost = (path?: string) => {
   const decorators = [NestPost(path), ApiExceptionResponse()];
-
-  if (defaultOptions.auth) decorators.push(ApiBearerAuth(), UseGuards(AuthenticationGuard, AuthorizationGuard));
 
   return applyDecorators(...decorators);
 };
