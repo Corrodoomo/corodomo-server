@@ -9,4 +9,6 @@ export enum Messages {
   LIMIT_DURATION_VIDEO = 'Limit duration video is 10 minutes',
   SUBTITLES_NOT_FOUND = 'Youtube subtitles is not allowed to transcript',
   LANG_SUBTITLES_NOT_FOUND = 'Youtube subtitles is not allowed to transcript with the language',
+  INVALID_ACCESS_TOKEN = 'Access token is invalid or expired',
+  INVALID_REFRESH_TOKEN = 'Refresh token is invalid or revoked',
 }

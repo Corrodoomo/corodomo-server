@@ -1,11 +1,13 @@
 import { UserNewsRepository } from '@app/apis/user-new/user-new.repository';
+import { UserCacheService } from '@modules/cache/user-cache.service';
 import { JwtService } from '@modules/jwt';
-import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
+import { USER_TOKEN } from '@common/constants/token';
 import { JWTPayLoad } from '@common/types/jwt-payload.type';
 
 @Injectable()
@@ -13,7 +15,8 @@ export class RefreshStrategy extends PassportStrategy(Strategy, 'refresh-jwt') {
   constructor(
     private readonly configService: ConfigService,
     private readonly userNewsRepository: UserNewsRepository,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
+    private readonly cacheService: UserCacheService
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([(req: Request) => req.cookies?.refreshToken]),
@@ -28,7 +31,9 @@ export class RefreshStrategy extends PassportStrategy(Strategy, 'refresh-jwt') {
 
     // Get refresh token from cookies
     const refreshToken = req.cookies?.refreshToken;
-    if (!refreshToken) throw new ForbiddenException('Refresh token malformed');
+
+    //Check refresh token in Redis
+    await this.cacheService.validateToken(id, USER_TOKEN.REFRESH_TOKEN, refreshToken);
 
     // Check if user exists
     const user = await this.userNewsRepository.findUserById(id);

@@ -8,4 +8,8 @@ export class CookieService {
   setHttpOnlyCookie(response: Response, name: string, value: string): void {
     response.cookie(name, value, options);
   }
+
+  clearCookie(response: Response, name: string): void {
+    response.clearCookie(name);
+  }
 }

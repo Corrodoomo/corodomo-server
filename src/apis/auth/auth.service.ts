@@ -62,11 +62,26 @@ export class AuthService {
     this.cookieService.setHttpOnlyCookie(response, 'accessToken', accessToken);
     this.cookieService.setHttpOnlyCookie(response, 'refreshToken', refreshToken);
 
+    // Save token to cache
+    await this.cacheService.setItem(
+      user.id,
+      JSON.stringify({
+        accessToken,
+        refreshToken,
+        createdAt: new Date().toISOString(),
+      })
+    );
+
     response.send({ message: 'Refresh successful' });
   }
 
   public async logout(request: Request, response: Response) {
     await this.sessionService.destroySession(request, this.configService);
+
+    //Clear cookie
+    this.cookieService.clearCookie(response, 'accessToken');
+    this.cookieService.clearCookie(response, 'refreshToken');
+
     response.send({ message: 'Logout successful' });
   }
 }

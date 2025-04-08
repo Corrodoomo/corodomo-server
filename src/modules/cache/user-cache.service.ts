@@ -3,8 +3,10 @@ import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
 
 import { MetadataKey } from '@common/constants';
+import { USER_TOKEN } from '@common/constants/token';
 import { Messages } from '@common/enums';
 import { SignedInUserMapper } from '@common/mappers/user.mapper';
+import { TUserTokenType } from '@common/types/token.type';
 
 import { CacheService } from './cache.service';
 
@@ -37,6 +39,16 @@ export class UserCacheService extends CacheService {
 
     if (existed) {
       throw new UnauthorizedException(Messages.DUPLICATED_SESSION);
+    }
+  }
+
+  async validateToken(userId: string, type: TUserTokenType, token: string) {
+    const storedToken = await this.getItem(userId);
+
+    if (!storedToken || storedToken[type] !== token) {
+      const message = type === USER_TOKEN.ACCESS_TOKEN ? Messages.INVALID_ACCESS_TOKEN : Messages.INVALID_REFRESH_TOKEN;
+
+      throw new UnauthorizedException(message);
     }
   }
 }
