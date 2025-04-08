@@ -28,6 +28,8 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     const isPasswordMatched = await this.brptService.compare(password, user.password);
     if (!isPasswordMatched) throw new UnauthorizedException(Messages.INVALID_EMAIL_OR_PASSWORD);
 
+    console.log('🐖 ~ validate:', user, isPasswordMatched);
+
     return user;
   }
 }

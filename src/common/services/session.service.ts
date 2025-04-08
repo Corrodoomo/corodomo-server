@@ -7,11 +7,15 @@ import { Request } from 'express';
 export class SessionService {
   saveSession(req: Request, user: User) {
     return new Promise((resolve, reject) => {
-      req.session.createdAt = new Date();
-      req.session.userId = user.id;
-      req.session.save((err) => {
-        if (err) reject(new InternalServerErrorException('Error saving session'));
-        resolve(true);
+      req.session.regenerate((err) => {
+        if (err) reject(new InternalServerErrorException('Error regenerating session'));
+
+        req.session.createdAt = new Date();
+        req.session.userId = user.id;
+        req.session.save((err) => {
+          if (err) reject(new InternalServerErrorException('Error saving session'));
+          resolve(true);
+        });
       });
     });
   }
