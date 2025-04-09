@@ -18,14 +18,18 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     private readonly cacheService: UserCacheService
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromExtractors([(req: Request) => req.cookies?.accessToken]),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        (req: Request) => {
+          return req.cookies?.accessToken;
+        },
+      ]),
       ignoreExpiration: false,
       secretOrKey: configService.getOrThrow('ACCESS_SECRET_KEY'),
       passReqToCallback: true,
     });
   }
 
-  async validate(payload: JWTPayLoad, req: Request) {
+  async validate(req: Request, payload: JWTPayLoad) {
     const { id } = payload;
 
     // Get accessToken token from cookies

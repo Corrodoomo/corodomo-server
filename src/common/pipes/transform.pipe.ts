@@ -20,6 +20,7 @@ export class TransformPropertyPipe implements PipeTransform {
   hasMetadata(value: any, property: string) {
     try {
       return Reflect.getMetadata('transformProperty', value, property);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (_error) {
       return null;
     }

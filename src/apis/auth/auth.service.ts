@@ -7,10 +7,13 @@ import { JwtService } from '@modules/jwt';
 import { ConflictException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request, Response } from 'express';
+import { Transactional } from 'typeorm-transactional';
 
 import { Messages } from '@common/enums';
 import { CookieService } from '@common/services/cookie.service';
 import { SessionService } from '@common/services/session.service';
+import { WebCookie } from '@common/utils/cookie.util';
+import { WebSession } from '@common/utils/session.util';
 
 @Injectable()
 export class AuthService {
@@ -25,6 +28,7 @@ export class AuthService {
   ) {}
 
   // Register user
+  @Transactional()
   public async registerUser(body: CreateUserDto) {
     const user = await this.userNewsRepository.findByEmail(body.email);
     if (user) throw new ConflictException(Messages.USER_ALREADY_EXIST);
@@ -32,20 +36,26 @@ export class AuthService {
   }
 
   // Sign in
-  public async signIn(request: NestRequest, response: Response, userAgent: string) {
+  public async signIn(
+    request: SystemRequest,
+    response: SystemResponse,
+    userAgent: string,
+    cookie: WebCookie,
+    session: WebSession
+  ) {
     const user = request.user;
 
     const { accessToken, refreshToken } = await this.jwtService.generateToken(user);
 
     // Set cookies
-    this.cookieService.setHttpOnlyCookie(response, 'accessToken', accessToken);
-    this.cookieService.setHttpOnlyCookie(response, 'refreshToken', refreshToken);
+    cookie.setHttpOnlyCookie('accessToken', accessToken);
+    cookie.setHttpOnlyCookie('refreshToken', refreshToken);
 
     // Get metadata
-    const metadata = this.sessionService.getSessionMetadata(request, userAgent);
+    const metadata = session.getSessionMetadata(userAgent);
 
     // Save session
-    await this.sessionService.saveSession(request, user, metadata);
+    await session.saveSession(user, metadata);
 
     // Save token to cache
     await this.cacheService.setItem(
@@ -60,12 +70,12 @@ export class AuthService {
     response.send({ message: 'Login successful' });
   }
 
-  public async refresh(user: User, response: Response) {
+  public async refresh(user: User, response: Response, cookie: WebCookie) {
     const { accessToken, refreshToken } = await this.jwtService.generateToken(user);
 
     // Set cookies
-    this.cookieService.setHttpOnlyCookie(response, 'accessToken', accessToken);
-    this.cookieService.setHttpOnlyCookie(response, 'refreshToken', refreshToken);
+    cookie.setHttpOnlyCookie('accessToken', accessToken);
+    cookie.setHttpOnlyCookie('refreshToken', refreshToken);
 
     // Save token to cache
     await this.cacheService.setItem(

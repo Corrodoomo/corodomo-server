@@ -10,9 +10,9 @@ declare global {
     exp: number; // Thời gian hết hạn cũng là số nguyên
   };
 
-  type NestRequest = ExpressRequest & { user: User; timeId: string };
+  type SystemRequest = ExpressRequest & { user: User; timeId: string };
 
-  type NestResponse = ExpressResponse;
+  type SystemResponse = ExpressResponse;
 
   type PaginatedResult<T> = {
     page: number;

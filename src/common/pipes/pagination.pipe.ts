@@ -13,6 +13,10 @@ export class PaginationPipe implements PipeTransform {
       }
     });
 
+    if (Object.keys(filter).length === 0) {
+      return value;
+    }
+
     return { ...value, filter };
   }
 }

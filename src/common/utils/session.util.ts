@@ -1,7 +1,6 @@
 import { User } from '@modules/database/entities';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Request } from 'express';
 import { lookup } from 'geoip-lite';
 import * as countries from 'i18n-iso-countries';
 
@@ -15,16 +14,22 @@ import DeviceDetector = require('device-detector-js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 countries.registerLocale(require('i18n-iso-countries/langs/en.json'));
 @Injectable()
-export class SessionService {
-  saveSession(req: Request, user: User, metadata: SessionMetadata) {
+export class WebSession {
+  private readonly request: SystemRequest;
+
+  constructor(request: SystemRequest) {
+    this.request = request;
+  }
+
+  saveSession(user: User, metadata: SessionMetadata) {
     return new Promise((resolve, reject) => {
-      req.session.regenerate((err) => {
+      this.request.session.regenerate((err) => {
         if (err) reject(new InternalServerErrorException('Error regenerating session'));
 
-        req.session.createdAt = new Date();
-        req.session.userId = user.id;
-        req.session.metadata = metadata;
-        req.session.save((err) => {
+        this.request.session.createdAt = new Date();
+        this.request.session.userId = user.id;
+        this.request.session.metadata = metadata;
+        this.request.session.save((err) => {
           if (err) reject(new InternalServerErrorException('Error saving session'));
           resolve(true);
         });
@@ -32,22 +37,22 @@ export class SessionService {
     });
   }
 
-  destroySession(req: Request, configService: ConfigService) {
+  destroySession(configService: ConfigService) {
     return new Promise((resolve, reject) => {
-      req.session.destroy((err) => {
+      this.request.session.destroy((err) => {
         if (err) {
           return reject(new InternalServerErrorException('Error destroying session'));
         }
 
         // Clear cookies
-        req.res?.clearCookie(configService.getOrThrow('SESSION_NAME'));
+        this.request.res?.clearCookie(configService.getOrThrow('SESSION_NAME'));
         resolve(true);
       });
     });
   }
 
-  getSessionMetadata(req: SystemRequest, userAgent: string): SessionMetadata {
-    const ip = getClientIp(req);
+  getSessionMetadata(userAgent: string): SessionMetadata {
+    const ip = getClientIp(this.request);
     const location = lookup(ip);
     const device = new DeviceDetector().parse(userAgent);
 
