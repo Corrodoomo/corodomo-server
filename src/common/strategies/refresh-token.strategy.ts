@@ -8,6 +8,7 @@ import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
 import { USER_TOKEN } from '@common/constants/token';
+import { Messages } from '@common/enums';
 import { JWTPayLoad } from '@common/types/jwt-payload.type';
 
 @Injectable()
@@ -37,11 +38,11 @@ export class RefreshStrategy extends PassportStrategy(Strategy, 'refresh-jwt') {
 
     // Check if user exists
     const user = await this.userNewsRepository.findUserById(id);
-    if (!user) throw new UnauthorizedException('User not found');
+    if (!user) throw new UnauthorizedException(Messages.USER_NOT_FOUND);
 
     // Check if refresh token is valid
-    const isRefreshTokenMatched = await this.jwtService.verifyRefreshToken(refreshToken);
-    if (!isRefreshTokenMatched) throw new UnauthorizedException('Invalid refresh token');
+    const isRefreshTokenMatched = this.jwtService.verifyRefreshToken(refreshToken);
+    if (!isRefreshTokenMatched) throw new UnauthorizedException(Messages.INVALID_REFRESH_TOKEN);
 
     // Return user
     const curentUser = { id: user.id, email: user.email, role: user.role };

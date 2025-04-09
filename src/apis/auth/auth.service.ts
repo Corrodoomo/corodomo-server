@@ -8,6 +8,7 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request, Response } from 'express';
 
+import { Messages } from '@common/enums';
 import { CookieService } from '@common/services/cookie.service';
 import { SessionService } from '@common/services/session.service';
 
@@ -26,21 +27,25 @@ export class AuthService {
   // Register user
   public async registerUser(body: CreateUserDto) {
     const user = await this.userNewsRepository.findByEmail(body.email);
-    if (user) throw new ConflictException('User already exists');
+    if (user) throw new ConflictException(Messages.USER_ALREADY_EXIST);
     return this.userNewsService.create(body);
   }
 
   // Sign in
-  public async signIn(request: Request, response: Response) {
-    const user = request.user as User;
-    const { accessToken, refreshToken } = await this.jwtService.generateToken(user.id, user.email, user.role);
+  public async signIn(request: NestRequest, response: Response, userAgent: string) {
+    const user = request.user;
+
+    const { accessToken, refreshToken } = await this.jwtService.generateToken(user);
 
     // Set cookies
     this.cookieService.setHttpOnlyCookie(response, 'accessToken', accessToken);
     this.cookieService.setHttpOnlyCookie(response, 'refreshToken', refreshToken);
 
+    // Get metadata
+    const metadata = this.sessionService.getSessionMetadata(request, userAgent);
+
     // Save session
-    await this.sessionService.saveSession(request, user);
+    await this.sessionService.saveSession(request, user, metadata);
 
     // Save token to cache
     await this.cacheService.setItem(
@@ -56,7 +61,7 @@ export class AuthService {
   }
 
   public async refresh(user: User, response: Response) {
-    const { accessToken, refreshToken } = await this.jwtService.generateToken(user.id, user.email, user.role);
+    const { accessToken, refreshToken } = await this.jwtService.generateToken(user);
 
     // Set cookies
     this.cookieService.setHttpOnlyCookie(response, 'accessToken', accessToken);

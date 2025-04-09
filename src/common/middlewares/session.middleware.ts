@@ -6,7 +6,6 @@ import * as session from 'express-session';
 import Redis from 'ioredis';
 
 import { ms, StringValue } from '@common/utils/ms.util';
-import { parseBoolean } from '@common/utils/parse-boolean.util';
 
 @Injectable()
 export class SessionMiddleware implements NestMiddleware {
@@ -29,8 +28,8 @@ export class SessionMiddleware implements NestMiddleware {
       cookie: {
         domain: this.configService.getOrThrow<string>('SESSION_DOMAIN'),
         maxAge: ms(this.configService.getOrThrow<StringValue>('SESSION_MAX_AGE')),
-        httpOnly: parseBoolean(this.configService.getOrThrow<string>('SESSION_HTTP_ONLY')),
-        secure: parseBoolean(this.configService.getOrThrow<string>('SESSION_SECURE')),
+        httpOnly: this.configService.getOrThrow<boolean>('SESSION_HTTP_ONLY'),
+        secure: this.configService.getOrThrow<boolean>('SESSION_SECURE'),
         sameSite: 'lax',
       },
       store: new RedisStore({

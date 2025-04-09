@@ -3,7 +3,7 @@ import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
 
 import { ROLES_KEY } from '@common/decorators/roles.decorator';
-import { SystemRoles } from '@common/enums';
+import { Messages, SystemRoles } from '@common/enums';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -22,7 +22,7 @@ export class RolesGuard implements CanActivate {
     const hasRequiredRole = requiredRoles.some((role) => user.role === role);
 
     if (!hasRequiredRole) {
-      throw new ForbiddenException(`You don't have permission to access this resource`);
+      throw new ForbiddenException(Messages.PERMISSION_REQUIRED);
     }
 
     return hasRequiredRole;

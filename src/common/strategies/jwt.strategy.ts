@@ -7,6 +7,7 @@ import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
 import { USER_TOKEN } from '@common/constants/token';
+import { Messages } from '@common/enums';
 import { JWTPayLoad } from '@common/types/jwt-payload.type';
 
 @Injectable()
@@ -35,7 +36,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     // Check if user exists
     const user = await this.userNewsRepository.findUserById(id);
-    if (!user) throw new UnauthorizedException('User not found');
+    if (!user) throw new UnauthorizedException(Messages.USER_NOT_FOUND);
     const curentUser = { id: user.id, email: user.email, role: user.role };
 
     return curentUser;

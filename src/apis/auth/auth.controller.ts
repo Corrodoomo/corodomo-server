@@ -8,6 +8,7 @@ import { ApiGet, ApiPost } from '@common/decorators';
 import { ApiOkInsertResultExample, ApiOkResponseExample } from '@common/decorators/example.decorator';
 import { Public } from '@common/decorators/public-route.decorator';
 import { Roles } from '@common/decorators/roles.decorator';
+import { UserAgent } from '@common/decorators/user-agent.decorator';
 import { SignInUserDto } from '@common/dtos';
 import { SystemRoles } from '@common/enums';
 import { Authorized } from '@common/guards/authorized.guard';
@@ -35,8 +36,8 @@ export class AuthController {
     type: SignInUserDto,
   })
   @UseGuards(LocalAuthGuard)
-  signIn(@Req() request: Request, @Res() response: Response) {
-    return this.authService.signIn(request, response);
+  signIn(@Req() request: NestRequest, @Res() response: Response, @UserAgent() userAgent: string) {
+    return this.authService.signIn(request, response, userAgent);
   }
 
   @Public()

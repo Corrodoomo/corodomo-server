@@ -39,11 +39,8 @@ export class JwtService {
   }
 
   // Generate token
-  async generateToken(id: string, email: string, role: string) {
-    const [accessToken, refreshToken] = await Promise.all([
-      this.signAccessToken({ id, email, role }),
-      this.signRefreshToken({ id, email, role }),
-    ]);
+  async generateToken(user: { id: string; email: string; role: string }) {
+    const [accessToken, refreshToken] = await Promise.all([this.signAccessToken(user), this.signRefreshToken(user)]);
 
     return { accessToken, refreshToken };
   }

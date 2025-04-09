@@ -11,4 +11,8 @@ export enum Messages {
   LANG_SUBTITLES_NOT_FOUND = 'Youtube subtitles is not allowed to transcript with the language',
   INVALID_ACCESS_TOKEN = 'Access token is invalid or expired',
   INVALID_REFRESH_TOKEN = 'Refresh token is invalid or revoked',
+  USER_NOT_FOUND = 'User not found',
+  USER_ALREADY_EXIST = 'User already exists',
+  PERMISSION_REQUIRED = 'You do not have permission to access this resource',
+  JWT_INVALID = 'JWT token is invalid',
 }
