@@ -28,7 +28,7 @@ export class ProjectController {
   }
 
   @ApiGet('/')
-  @Roles([SystemRoles.LEARNER])
+  @Roles(SystemRoles.LEARNER)
   @ApiOkItemsExample(ProjectRecentMapper)
   get(@Query() query: PaginateQueryDto, @Req() req: Request) {
     return this.projectService.getPagination(query, req.user.id);
