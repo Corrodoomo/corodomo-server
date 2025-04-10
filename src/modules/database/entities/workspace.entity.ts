@@ -10,8 +10,8 @@ export class Workspace extends BaseEntity {
   @Column('character varying', { name: 'title' })
   title: string;
 
-  @Column('character varying', { name: 'members', nullable: true })
-  members: string | null;
+  @Column('character varying', { name: 'theme' })
+  theme: string;
 
   @OneToMany(() => Project, (projects) => projects.workspace)
   projects: Project[];

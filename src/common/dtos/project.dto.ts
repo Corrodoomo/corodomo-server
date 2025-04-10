@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsIn, IsNotEmpty, IsUUID, MaxLength, MinLength } from 'class-validator';
+import { IsIn, IsNotEmpty, IsOptional, IsUUID, MaxLength, MinLength } from 'class-validator';
 
-import { PROJECT_THEMES } from '@common/constants';
+import { WORKSPACE_THEMES } from '@common/constants';
 import { IsValidDate } from '@common/decorators';
 
 export class CreateProjectDto {
@@ -17,7 +17,7 @@ export class CreateProjectDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  @IsIn(PROJECT_THEMES)
+  @IsIn(WORKSPACE_THEMES)
   theme: string;
 
   @ApiProperty({ type: Date, example: '2025-03-20' })
@@ -38,29 +38,33 @@ export class CreateProjectDto {
 
 export class UpdateProjectDto {
   @ApiProperty()
-  @IsNotEmpty()
+  @IsOptional()
   @MinLength(1)
   @MaxLength(50)
   name: string;
 
   @ApiProperty()
-  @IsNotEmpty()
+  @IsOptional()
   @MinLength(1)
   @MaxLength(200)
   description: string;
 
   @ApiProperty()
-  @IsNotEmpty()
-  @IsIn(PROJECT_THEMES)
+  @IsOptional()
+  @IsIn(WORKSPACE_THEMES)
   theme: string;
 
   @ApiProperty({ type: Date, example: '2025-03-20' })
-  @IsNotEmpty()
+  @IsOptional()
   @IsValidDate('YYYY-MM-DD')
   startAt: string;
 
   @ApiProperty({ type: Date, example: '2025-03-24' })
-  @IsNotEmpty()
+  @IsOptional()
   @IsValidDate('YYYY-MM-DD')
   endAt: string;
+
+  @ApiProperty()
+  @IsOptional()
+  workspaceId: string;
 }

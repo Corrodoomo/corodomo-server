@@ -46,6 +46,7 @@ export class LessonRepository extends BaseRepository<Lesson> {
       .leftJoinAndSelect('lesson.notedVocabularies', 'notedVocabularies')
       .leftJoinAndSelect('lesson.subtitles', 'subtitles')
       .where('lesson.id = :lessonId', { lessonId: lessonId })
+      .cache(true)
       .getOne();
   }
 }

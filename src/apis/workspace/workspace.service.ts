@@ -1,14 +1,15 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { isEmpty } from 'lodash';
-import { In } from 'typeorm';
+import { paginateRaw } from 'nestjs-typeorm-paginate';
 
 import { DeleteResultDto, InsertResultDto, UpdateResultDto } from '@common/dtos';
+import { PaginateQueryDto } from '@common/dtos/common.dto';
 import { CreateWorkspaceDto } from '@common/dtos/workspace.dto';
 import { Messages } from '@common/enums';
+import { PaginateRawMapper } from '@common/mappers';
 
 import { UsersRepository } from '../user/user.repository';
 import { WorkspaceRepository } from './workspace.repository';
-import { ItemsMapper } from '@common/mappers';
 
 @Injectable()
 export class WorkspaceService {
@@ -19,15 +20,17 @@ export class WorkspaceService {
 
   /**
    * Get my workspaces
-   * @param userId 
-   * @returns 
+   * @param userId
+   * @returns
    */
-  public async getMyWorkspaces(userId: string) {
+  public async getMyWorkspaces(query: PaginateQueryDto, userId: string) {
     // Query all workspace where user is a member or user is the owner
-    const workspaces = await this.workspaceRepository.queryMyWorkspaces(userId);
+    const queryBuilder = this.workspaceRepository.queryMyWorkspaces(userId);
 
-    // Return the workspaces
-    return new ItemsMapper(workspaces);
+    const raw = await paginateRaw(queryBuilder, { page: query.page, limit: query.limit });
+
+    // Return result
+    return new PaginateRawMapper(raw);
   }
 
   /**
@@ -38,20 +41,12 @@ export class WorkspaceService {
    */
   public async create(userId: string, body: CreateWorkspaceDto) {
     // Destructing body
-    const { members, title } = body;
-
-    // Find members includes user table
-    const user = await this.userRepository.find({ where: { id: In(members) } });
-
-    // Check if members not exist
-    if (user.length !== members.length) {
-      throw new BadRequestException(Messages.MEMBERS_NOT_FOUND);
-    }
+    const { theme, title } = body;
 
     // Save workspace
     const savedWorkspace = await this.workspaceRepository.save({
       title,
-      members: members.join(','),
+      theme,
       createdBy: { id: userId },
     });
 
@@ -79,23 +74,8 @@ export class WorkspaceService {
       throw new BadRequestException(Messages.INVALID_ACCESS_RESOURCE);
     }
 
-    // Destructing body
-    const { members, title } = body;
-
-    // Find members includes user table
-    const user = await this.userRepository.find({ where: { id: In(members) } });
-
-    // Check if members not exist
-    if (user.length !== members.length) {
-      throw new BadRequestException(Messages.MEMBERS_NOT_FOUND);
-    }
-
     // Save workspace
-    const { affected } = await this.workspaceRepository.updateById(workspaceId, {
-      title,
-      members: members.join(','),
-      createdBy: { id: userId },
-    });
+    const { affected } = await this.workspaceRepository.updateById(workspaceId, body);
 
     // Return result
     return new UpdateResultDto(affected);

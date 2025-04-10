@@ -17,12 +17,18 @@ export class WorkspaceRepository extends BaseRepository<Workspace> {
    */
   public queryMyWorkspaces(userId: string) {
     return this.createQueryBuilder('workspace')
-      .leftJoinAndSelect('workspace.projects', 'project')
+      .leftJoin('workspace.projects', 'project')
       .where('workspace.createdBy = :userId')
-      .orWhere(':userId::text = ANY(string_to_array(workspace.members, :comma))')
-      .select()
-      .setParameters({ userId, comma: ',' })
-      .getMany();
+      .orWhere(':userId::text = ANY(string_to_array(project.members, :comma))')
+      .select([
+        'DISTINCT ON (workspace.id) workspace.id AS "id"',
+        'workspace.title AS "title"',
+        'workspace.theme AS "theme"',
+        'workspace.updated_at AS "updatedAt"',
+        'workspace.created_at AS "createdAt"',
+      ])
+      .cache(true)
+      .setParameters({ userId, comma: ',' });
   }
 
   /**

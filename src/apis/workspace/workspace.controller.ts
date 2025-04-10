@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Req } from '@nestjs/common';
+import { Body, Controller, Param, Query, Req } from '@nestjs/common';
 
 import { ApiDelete, ApiGet, ApiPost, ApiPut, Roles } from '@common/decorators';
 import {
@@ -7,6 +7,7 @@ import {
   ApiOkItemsExample,
   ApiOkUpdateResultExample,
 } from '@common/decorators/example.decorator';
+import { PaginateQueryDto } from '@common/dtos/common.dto';
 import { WorkspaceIdDto } from '@common/dtos/id.dto';
 import { CreateWorkspaceDto } from '@common/dtos/workspace.dto';
 import { SystemRoles } from '@common/enums';
@@ -22,8 +23,8 @@ export class WorkspaceController {
   @ApiGet('/')
   @Roles(SystemRoles.LEARNER)
   @ApiOkItemsExample(MyWorkspaceMapper)
-  getMyWorkspaces(@Req() request: Request) {
-    return this.workspaceService.getMyWorkspaces(request.user.id);
+  getMyWorkspaces(@Query() query: PaginateQueryDto, @Req() request: Request) {
+    return this.workspaceService.getMyWorkspaces(query, request.user.id);
   }
 
   @ApiPost('/')
