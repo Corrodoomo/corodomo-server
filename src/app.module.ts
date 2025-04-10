@@ -8,7 +8,6 @@ import { UserNewModule } from '@app/apis/user-new/user-new.module';
 import { UserModule } from '@app/apis/user/user.module';
 import { VocabularyModule } from '@app/apis/vocabulary/vocabulary.module';
 import { AppController } from '@app/app.controller';
-import { AppService } from '@app/app.service';
 import { HelmetMiddleware } from '@middlewares/helmet.middleware';
 import { LoggerMiddleware } from '@middlewares/logger.middleware';
 import { CacheModule } from '@modules/cache/cache.module';
@@ -21,18 +20,14 @@ import { OpenAIModule } from '@modules/openai/openai.module';
 import { RateLimitModule } from '@modules/rate-limit/rate-limit.module';
 import { YoutubeModule } from '@modules/youtube/youtube.module';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
-
-import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
-import { RolesGuard } from '@common/guards/role.guard';
 import { SessionMiddleware } from '@common/middlewares/session.middleware';
-
 import { BlogModule } from './apis/blog/blog.module';
 import { LessonCommentModule } from './apis/lesson-comment/lesson-comment.module';
 import { LessonNoteModule } from './apis/lesson-note/lesson-note.module';
 import { ProjectModule } from './apis/project/project.module';
 import { TaskModule } from './apis/task/task.module';
 import { WorkspaceModule } from './apis/workspace/workspace.module';
+import { providers } from './app.provider';
 
 @Module({
   imports: [
@@ -68,17 +63,7 @@ import { WorkspaceModule } from './apis/workspace/workspace.module';
   ],
   exports: [],
   controllers: [AppController],
-  providers: [
-    AppService,
-    {
-      provide: APP_GUARD,
-      useClass: JwtAuthGuard, //@UseGuards(JwtAuthGuard)
-    },
-    {
-      provide: APP_GUARD,
-      useClass: RolesGuard, //@UseGuards(RolesGuard)
-    },
-  ],
+  providers,
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

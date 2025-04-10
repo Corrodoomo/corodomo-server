@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Req } from '@nestjs/common';
+import { Body, Controller, Param, Query, Req } from '@nestjs/common';
 
 import { ApiDelete, ApiGet, ApiPost, ApiPut, Roles } from '@common/decorators';
 import {
@@ -14,6 +14,7 @@ import { ProjectRecentMapper, ProjectRecordMapper } from '@common/mappers/projec
 import { Request } from '@common/models';
 
 import { ProjectService } from './project.service';
+import { PaginateQueryDto } from '@common/dtos/common.dto';
 
 @Controller('projects')
 export class ProjectController {
@@ -24,6 +25,13 @@ export class ProjectController {
   @ApiOkItemsExample(ProjectRecentMapper)
   getMyProjectRecents(@Req() request: Request) {
     return this.projectService.getMyProjectRecents(request.user.id);
+  }
+
+  @ApiGet('/')
+  @Roles([SystemRoles.LEARNER])
+  @ApiOkItemsExample(ProjectRecentMapper)
+  get(@Query() query: PaginateQueryDto, @Req() req: Request) {
+    return this.projectService.getPagination(query, req.user.id);
   }
 
   @ApiPost('/')

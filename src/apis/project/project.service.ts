@@ -1,25 +1,68 @@
 import { ProjectRaw } from '@modules/database/entities';
+import { ProjectRecentRepository } from '@modules/project-recent/project-recent.repository';
 import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
+import { isNotEmpty } from 'class-validator';
 import { isEmpty } from 'lodash';
+import { FilterOperator, FilterSuffix, paginate } from 'nestjs-paginate';
 
 import { DeleteResultDto, InsertResultDto, UpdateResultDto } from '@common/dtos';
+import { PaginateQueryDto } from '@common/dtos/common.dto';
 import { CreateProjectDto, UpdateProjectDto } from '@common/dtos/project.dto';
 import { Messages } from '@common/enums';
 import { ProjectRecentsMapper } from '@common/mappers/project.mapper';
 
-import { UsersRepository } from '../user/user.repository';
 import { WorkspaceRepository } from '../workspace/workspace.repository';
 import { ProjectRepository } from './project.repository';
-import { ProjectRecentRepository } from '@modules/project-recent/project-recent.repository';
 
 @Injectable()
 export class ProjectService {
   constructor(
     private readonly projectRepository: ProjectRepository,
     private readonly projectRecentRepository: ProjectRecentRepository,
-    private readonly workspaceRepository: WorkspaceRepository,
-    private readonly userRepository: UsersRepository
+    private readonly workspaceRepository: WorkspaceRepository
   ) {}
+
+  /**
+   * Get my project recents
+   * @param userId
+   * @returns
+   */
+  public async getPagination(query: PaginateQueryDto, userId: string) {
+    return paginate(
+      {
+        ...query,
+        filter: {
+          ...query.filter,
+          members: `$or:$in:${userId}`,
+          'workspace.createdBy': `$or:$eq:${userId}`,
+        },
+      },
+      this.projectRepository,
+      {
+        select: [
+          'id',
+          'name',
+          'description',
+          'startAt',
+          'endAt',
+          'members',
+          'theme',
+          'workspace.id',
+          'workspace.title',
+          'recents.id',
+          'recents.accessedAt',
+        ],
+        sortableColumns: ['name', 'recents.accessedAt'],
+        filterableColumns: {
+          'workspace.id': [FilterOperator.EQ],
+          'workspace.createdBy': [FilterOperator.EQ],
+          members: [FilterOperator.IN],
+          'recents.accessedAt': [FilterOperator.NULL, FilterSuffix.NOT],
+        },
+        relations: ['workspace', 'recents'],
+      }
+    );
+  }
 
   /**
    * Get my project recents
@@ -74,6 +117,7 @@ export class ProjectService {
    * @returns
    */
   public async update(userId: string, projectId: string, body: UpdateProjectDto) {
+    const { workspaceId, ...sentBody } = body;
     // Get workspace by id
     const project = (await this.projectRepository.getRawOne(projectId, [
       'id',
@@ -85,21 +129,29 @@ export class ProjectService {
       throw new BadRequestException(Messages.ITEM_NOT_FOUND);
     }
 
-    // Get workspace by id
-    const workspace = await this.workspaceRepository.queryWorkspaceExisted(project.id);
+    // If user want to update workspace
+    if (isNotEmpty(workspaceId)) {
+      // Get workspace by id
+      const workspace = await this.workspaceRepository.queryWorkspaceExisted(workspaceId);
 
-    // Check if workspace is empty
-    if (isEmpty(workspace)) {
-      throw new BadRequestException(Messages.ITEM_NOT_FOUND);
-    }
+      // Check if workspace is empty
+      if (isEmpty(workspace)) {
+        throw new BadRequestException(Messages.ITEM_NOT_FOUND);
+      }
 
-    // Check if workspace is owned by user
-    if (workspace.createdBy !== userId) {
-      throw new ForbiddenException(Messages.INVALID_ACCESS_RESOURCE);
+      // Check if workspace is owned by user
+      if (workspace.createdBy !== userId) {
+        throw new ForbiddenException(Messages.INVALID_ACCESS_RESOURCE);
+      }
     }
 
     // Create project
-    const { affected } = await this.projectRepository.updateById(projectId, body);
+    const { affected } = await this.projectRepository.updateById(projectId, {
+      ...sentBody,
+      workspace: {
+        id: workspaceId,
+      },
+    });
 
     // Return insert result
     return new UpdateResultDto(affected);

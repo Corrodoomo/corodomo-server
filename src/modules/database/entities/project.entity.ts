@@ -17,6 +17,9 @@ export class Project extends BaseEntity {
   @Column('character varying', { name: 'theme' })
   theme: string;
 
+  @Column('character varying', { name: 'members' })
+  members: string;
+
   @Column('timestamp without time zone', { name: 'start_at' })
   startAt: Date;
 

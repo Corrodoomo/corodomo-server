@@ -48,8 +48,6 @@ async function bootstrap() {
       credentials: true,
     })
   );
-  app.setBaseViewsDir(join(__dirname, 'views'));
-  app.setViewEngine('hbs');
   app.use(cookieParser());
   useSwagger(app);
 

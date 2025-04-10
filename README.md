@@ -82,4 +82,6 @@ docker compose --env-file .env.dev up -d
 # Backup database
 docker exec -t <container_name_or_id> pg_dump -U <postgres_user> -E UTF8 <database_name> > backup.sql
 
+# Restore database
+docker exec -i corodomo_pgdb psql -U corodomo_admin -d corodomo_db < backup_new.sql
 ```
