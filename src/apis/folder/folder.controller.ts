@@ -10,47 +10,46 @@ import {
   ApiOkUpdateResultExample,
 } from '@common/decorators/example.decorator';
 import { CreateFolderDto, FolderIdDto, FolderRecordDto, MyFolderDto } from '@common/dtos';
+import { PaginateQueryDto } from '@common/dtos/common.dto';
 import { SystemRoles } from '@common/enums';
 import { Request } from '@common/models';
 
 import { FolderService } from './folder.service';
-import { PaginateQueryDto } from '@common/dtos/common.dto';
-
 
 @Controller('folders')
 export class FolderController {
   constructor(private readonly folderService: FolderService) {}
 
   @ApiGet('/')
-  @Roles([SystemRoles.LEARNER])
+  @Roles(SystemRoles.LEARNER)
   @ApiOkPaginationRawExample(MyFolderDto)
   get(@Query() query: PaginateQueryDto, @Req() req: Request) {
     return this.folderService.get(query, req.user.id);
   }
 
   @ApiGet('/list_lessons')
-  @Roles([SystemRoles.LEARNER])
+  @Roles(SystemRoles.LEARNER)
   @ApiOkItemsExample(Folder)
   getLessonInFolder(@Req() req: Request) {
     return this.folderService.getLessonInFolder(req.user.id);
   }
 
   @ApiPost('/')
-  @Roles([SystemRoles.LEARNER])
+  @Roles(SystemRoles.LEARNER)
   @ApiOkInsertResultExample(FolderRecordDto)
   create(@Body() body: CreateFolderDto, @Req() req: Request) {
     return this.folderService.create(req.user.id, body);
   }
 
   @ApiPut('/:folderId')
-  @Roles([SystemRoles.LEARNER])
+  @Roles(SystemRoles.LEARNER)
   @ApiOkUpdateResultExample(FolderRecordDto)
   update(@Req() req: Request, @Param() params: FolderIdDto, @Body() body: CreateFolderDto) {
     return this.folderService.update(params.folderId, body, req.user.id);
   }
 
   @ApiDelete('/:folderId')
-  @Roles([SystemRoles.LEARNER])
+  @Roles(SystemRoles.LEARNER)
   @ApiOkDeleteResultExample()
   delete(@Param() params: FolderIdDto, @Req() req: Request) {
     return this.folderService.delete(params.folderId, req.user.id);

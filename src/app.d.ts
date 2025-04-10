@@ -1,3 +1,4 @@
+import { User } from '@modules/database/entities';
 import { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 
 declare global {
@@ -9,8 +10,9 @@ declare global {
     exp: number; // Thời gian hết hạn cũng là số nguyên
   };
 
-  type NestRequest = ExpressRequest & { user: DecodedUser };
-  type NestResponse = ExpressResponse;
+  type SystemRequest = ExpressRequest & { user: User; timeId: string };
+
+  type SystemResponse = ExpressResponse;
 
   type PaginatedResult<T> = {
     page: number;

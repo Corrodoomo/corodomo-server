@@ -22,21 +22,21 @@ export class NotedVocabularyController {
   constructor(private readonly notedVocabularyService: NotedVocabularyService) {}
 
   @ApiPost('/translate')
-  @Roles([SystemRoles.LEARNER])
+  @Roles(SystemRoles.LEARNER)
   @ApiOkInsertResultExample(NotedVocabularyRecordDto)
   create(@Body() body: CreateNotedVocabularyDto, @Req() req: Request) {
     return this.notedVocabularyService.create(req.user.id, body);
   }
 
   @ApiPut('/:notedVocabularyId/translate')
-  @Roles([SystemRoles.LEARNER])
+  @Roles(SystemRoles.LEARNER)
   @ApiOkUpdateResultExample(NotedVocabularyRecordDto)
   update(@Param() param: NotedVocabularyIdDto, @Body() body: UpdateNotedVocabularyDto, @Req() req: Request) {
     return this.notedVocabularyService.update(req.user.id, param.notedVocabularyId, body);
   }
 
   @ApiDelete('/:notedVocabularyId')
-  @Roles([SystemRoles.LEARNER])
+  @Roles(SystemRoles.LEARNER)
   @ApiOkDeleteResultExample()
   delete(@Param() param: NotedVocabularyIdDto, @Req() req: Request) {
     return this.notedVocabularyService.delete(req.user.id, param.notedVocabularyId);

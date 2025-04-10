@@ -4,8 +4,8 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { isEmpty } from 'lodash';
 
 import { InsertResultDto } from '@common/dtos';
-import { SignedInUserDto } from '@common/dtos/user.dto';
 import { Messages } from '@common/enums';
+import { SignedInUserMapper } from '@common/mappers/user.mapper';
 import { BryptService } from '@common/services';
 
 import { UsersRepository } from './user.repository';
@@ -25,7 +25,7 @@ export class UserService {
    * @param password
    * @returns
    */
-  public async signIn(email: string, password: string): Promise<SignedInUserDto> {
+  public async signIn(email: string, password: string): Promise<SignedInUserMapper> {
     // Get user by email
     const user = await this.userRepository.findByEmail(email);
     // Error if user invalid
@@ -56,7 +56,7 @@ export class UserService {
     return { accessToken, refreshToken };
   }
 
-  public async refresh(userId: string): Promise<SignedInUserDto> {
+  public async refresh(userId: string): Promise<SignedInUserMapper> {
     // Get user by email
     const user = await this.userRepository.findOne({ where: { id: userId } });
 
@@ -66,7 +66,7 @@ export class UserService {
     }
 
     // Generate token
-     const [accessToken, refreshToken] = await Promise.all([
+    const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAccessToken({ id: user.id, email: user.email, role: user.role }),
       this.jwtService.signRefreshToken({ id: user.id, email: user.email, role: user.role }),
     ]);

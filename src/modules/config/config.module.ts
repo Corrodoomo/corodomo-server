@@ -53,6 +53,17 @@ import * as Joi from 'joi';
         OPEN_AI_BASE_URL: Joi.string().required(),
         OPEN_AI_API_KEY: Joi.string().required(),
 
+        //SESSION Config
+        SESSION_SECRET: Joi.string().required(),
+        SESSION_NAME: Joi.string().required(),
+        SESSION_MAX_AGE: Joi.string().required(),
+        SESSION_DOMAIN: Joi.string().required(),
+        SESSION_PATH: Joi.string().required(),
+        SESSION_SECURE: Joi.boolean().required(),
+        SESSION_HTTP_ONLY: Joi.boolean().required(),
+        SESSION_PREFIX: Joi.string().required(),
+        SESSION_DB: Joi.number().required(),
+
         // RATE LIMITER
         RATE_LIMITER_MAX: Joi.number().integer().required(),
         RATE_LIMITER_TLL: Joi.number().integer().required(),

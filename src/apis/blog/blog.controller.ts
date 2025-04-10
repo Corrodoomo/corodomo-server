@@ -21,35 +21,35 @@ export class BlogController {
   constructor(private readonly blogService: BlogService) {}
 
   @ApiGet('/:blogId')
-  @Roles([SystemRoles.LEARNER])
+  @Roles(SystemRoles.LEARNER)
   @ApiOkItemExample(Blog)
   getDetail(@Param() param: BlogIdDto, @Req() request: Request) {
     return this.blogService.getDetail(request.user.id, param.blogId);
   }
 
   @ApiGet('/my_lists')
-  @Roles([SystemRoles.LEARNER])
+  @Roles(SystemRoles.LEARNER)
   @ApiOkItemsExample(Blog)
   getMyBlogs(@Req() request: Request) {
     return this.blogService.getMyBlogs(request.user.id);
   }
 
   @ApiPost('/')
-  @Roles([SystemRoles.LEARNER])
+  @Roles(SystemRoles.LEARNER)
   @ApiOkInsertResultExample(Blog)
   create(@Body() body: CreateBlogDto, @Req() request: Request) {
     return this.blogService.create(request.user.id, body);
   }
 
   @ApiPut('/:blogId')
-  @Roles([SystemRoles.LEARNER])
+  @Roles(SystemRoles.LEARNER)
   @ApiOkUpdateResultExample(Blog)
   update(@Param() param: BlogIdDto, @Body() body: UpdateBlogDto, @Req() request: Request) {
     return this.blogService.update(request.user.id, param.blogId, body);
   }
 
   @ApiDelete('/:blogId')
-  @Roles([SystemRoles.LEARNER])
+  @Roles(SystemRoles.LEARNER)
   @ApiOkDeleteResultExample()
   delete(@Param() param: BlogIdDto, @Req() request: Request) {
     return this.blogService.delete(request.user.id, param.blogId);

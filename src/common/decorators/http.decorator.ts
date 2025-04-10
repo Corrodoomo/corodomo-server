@@ -5,13 +5,8 @@ import {
   Get as NestGet,
   Post as NestPost,
   Put as NestPut,
-  UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-
-import { AuthenticationGuard } from '@common/guards/authentication.guard';
-import { AuthorizationGuard } from '@common/guards/authorization.guard';
-import { HttpOption } from '@common/types';
+import { ApiTags } from '@nestjs/swagger';
 
 import { ApiExceptionResponse } from './example.decorator';
 
@@ -21,12 +16,9 @@ import { ApiExceptionResponse } from './example.decorator';
  * @param options
  * @returns
  */
-export const ApiGet = (path?: string, options?: HttpOption) => {
-  const defaultOptions = { auth: true, ...options };
+export const ApiGet = (path?: string) => {
   const decorators = [NestGet(path), ApiExceptionResponse()];
 
-  if (defaultOptions.auth) decorators.push(ApiBearerAuth(), UseGuards(AuthenticationGuard, AuthorizationGuard));
-
   return applyDecorators(...decorators);
 };
 
@@ -36,12 +28,9 @@ export const ApiGet = (path?: string, options?: HttpOption) => {
  * @param options
  * @returns
  */
-export const ApiPost = (path?: string, options?: HttpOption) => {
-  const defaultOptions = { auth: true, ...options };
+export const ApiPost = (path?: string) => {
   const decorators = [NestPost(path), ApiExceptionResponse()];
 
-  if (defaultOptions.auth) decorators.push(ApiBearerAuth(), UseGuards(AuthenticationGuard, AuthorizationGuard));
-
   return applyDecorators(...decorators);
 };
 
@@ -51,12 +40,9 @@ export const ApiPost = (path?: string, options?: HttpOption) => {
  * @param options
  * @returns
  */
-export const ApiPut = (path?: string, options?: HttpOption) => {
-  const defaultOptions = { auth: true, ...options };
+export const ApiPut = (path?: string) => {
   const decorators = [NestPut(path), ApiExceptionResponse()];
 
-  if (defaultOptions.auth) decorators.push(ApiBearerAuth(), UseGuards(AuthenticationGuard, AuthorizationGuard));
-
   return applyDecorators(...decorators);
 };
 
@@ -66,11 +52,8 @@ export const ApiPut = (path?: string, options?: HttpOption) => {
  * @param options
  * @returns
  */
-export const ApiDelete = (path?: string, options?: HttpOption) => {
-  const defaultOptions = { auth: true, ...options };
+export const ApiDelete = (path?: string) => {
   const decorators = [NestDelete(path), ApiExceptionResponse()];
-
-  if (defaultOptions.auth) decorators.push(ApiBearerAuth(), UseGuards(AuthenticationGuard, AuthorizationGuard));
 
   return applyDecorators(...decorators);
 };

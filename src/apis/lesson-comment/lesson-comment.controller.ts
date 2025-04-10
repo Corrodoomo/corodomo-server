@@ -22,21 +22,21 @@ export class LessonCommentController {
   constructor(private readonly commentService: LessonCommentService) {}
 
   @ApiPost('/send')
-  @Roles([SystemRoles.LEARNER])
+  @Roles(SystemRoles.LEARNER)
   @ApiOkInsertResultExample(LessonCommentRecordDto)
   create(@Body() body: CreateLessonCommentDto, @Req() req: Request) {
     return this.commentService.create(req.user.id, body);
   }
 
   @ApiPut('/:commentId')
-  @Roles([SystemRoles.LEARNER])
+  @Roles(SystemRoles.LEARNER)
   @ApiOkUpdateResultExample(LessonCommentRecordDto)
   update(@Param() param: CommentIdDto, @Body() body: UpdateLessonCommentDto, @Req() req: Request) {
     return this.commentService.update(req.user.id, param.commentId, body);
   }
 
   @ApiDelete('/:commentId')
-  @Roles([SystemRoles.LEARNER])
+  @Roles(SystemRoles.LEARNER)
   @ApiOkDeleteResultExample()
   delete(@Param() param: CommentIdDto, @Req() req: Request) {
     return this.commentService.delete(req.user.id, param.commentId);

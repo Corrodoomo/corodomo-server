@@ -3,6 +3,7 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import * as cookieParser from 'cookie-parser';
 import * as cors from 'cors';
 import { initializeTransactionalContext, StorageDriver } from 'typeorm-transactional';
 
@@ -18,6 +19,11 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: ['error', 'debug', 'verbose'],
   });
+
+  const configService = app.get<ConfigService>(ConfigService);
+  const port = configService.get<string>('PORT') || 5000;
+  const nodeEnv = configService.get<string>('NODE_ENV');
+
   app.useGlobalPipes(
     new PaginationPipe(),
     new ValidationPipe({
@@ -29,9 +35,6 @@ async function bootstrap() {
     }),
     new TransformPropertyPipe()
   );
-  const configService = app.get<ConfigService>(ConfigService);
-  const port = configService.get<string>('PORT') ?? 5000;
-  const nodeEnv = configService.get<string>('NODE_ENV');
 
   app.enableCors({
     origin: true,
@@ -47,6 +50,7 @@ async function bootstrap() {
   );
   app.setBaseViewsDir(join(__dirname, 'views'));
   app.setViewEngine('hbs');
+  app.use(cookieParser());
   useSwagger(app);
 
   await app.listen(port).then(async () => {

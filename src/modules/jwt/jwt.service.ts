@@ -37,4 +37,14 @@ export class JwtService {
       expiresIn: this.configService.getOrThrow('REFRESH_SECRET_KEY_EXPIRE'),
     });
   }
+
+  // Generate token
+  async generateToken(user: { id: string; email: string; role: string }) {
+    const [accessToken, refreshToken] = await Promise.all([
+      this.signAccessToken({ ...user }),
+      this.signRefreshToken({ ...user }),
+    ]);
+
+    return { accessToken, refreshToken };
+  }
 }
