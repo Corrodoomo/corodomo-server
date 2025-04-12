@@ -3,6 +3,7 @@ import { ProjectRecentRepository } from '@modules/project-recent/project-recent.
 import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { isEmpty } from 'lodash';
 import { FilterOperator, FilterSuffix, paginate } from 'nestjs-paginate';
+import { Brackets } from 'typeorm';
 
 import { DeleteResultDto, InsertResultDto, UpdateResultDto } from '@common/dtos';
 import { PaginateQueryDto } from '@common/dtos/common.dto';
@@ -28,15 +29,18 @@ export class ProjectService {
    */
   public async getPagination(query: PaginateQueryDto, userId: string) {
     return paginate(
-      {
-        ...query,
-        filter: {
-          ...query.filter,
-          // members: `$or:$in:${userId}`,
-          // createdBy: `$or:$eq:${userId}`,
-        },
-      },
-      this.projectRepository,
+      query,
+      this.projectRepository.createQueryBuilder('project').andWhere(
+        new Brackets((qb) => {
+          qb.where('project.created_by = :userId', { userId }).orWhere(
+            ':member::text = ANY(string_to_array(project.members, :comma))',
+            {
+              member: userId,
+              comma: ',',
+            }
+          );
+        })
+      ),
       {
         select: [
           'id',
@@ -57,12 +61,9 @@ export class ProjectService {
         sortableColumns: ['name', 'recents.accessedAt'],
         filterableColumns: {
           'workspace.id': [FilterOperator.EQ],
-          'workspace.createdBy': [FilterOperator.EQ],
-          createdBy: [FilterOperator.EQ],
-          members: [FilterOperator.IN],
           'recents.accessedAt': [FilterOperator.NULL, FilterSuffix.NOT],
         },
-        relations: ['workspace', 'recents', 'createdBy'],
+        relations: ['recents', 'createdBy', 'workspace'],
       }
     );
   }
@@ -134,7 +135,7 @@ export class ProjectService {
     if (isEmpty(project)) {
       throw new BadRequestException(Messages.ITEM_NOT_FOUND);
     }
-    
+
     // Check if project is owned by user
     if (project.createdBy !== userId) {
       throw new ForbiddenException(Messages.INVALID_ACCESS_RESOURCE);
