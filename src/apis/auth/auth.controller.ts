@@ -51,7 +51,7 @@ export class AuthController {
   }
 
   @Public()
-  @ApiGet('refresh')
+  @ApiPost('refresh')
   @ApiOkResponseExample(AuthUserMapper)
   @UseGuards(RefreshAuthGuard)
   refresh(@Authorized() user: User, @Res() response: Response, @CookieParser() cookie: WebCookie) {
