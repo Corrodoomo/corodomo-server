@@ -4,6 +4,7 @@ import { BaseEntity } from './base.entity';
 import { GroupTask } from './group-task.entity';
 import { ProjectRecent } from './project-recent.entity';
 import { Workspace } from './workspace.entity';
+import { User } from './user.entity';
 
 @Index('projects_pkey', ['id'], { unique: true })
 @Entity('projects', { schema: 'public' })
@@ -35,6 +36,10 @@ export class Project extends BaseEntity {
   @ManyToOne(() => Workspace, (workspace) => workspace.projects, { nullable: false })
   @JoinColumn([{ name: 'workspace_id', referencedColumnName: 'id' }])
   workspace: Workspace | string;
+
+  @ManyToOne(() => User, (user) => user.projects, { nullable: false })
+  @JoinColumn([{ name: 'created_by', referencedColumnName: 'id' }])
+  createdBy: User | string;
 }
 
 export type ProjectRaw = Omit<Project, 'workspace'> & { workspaceId: string };

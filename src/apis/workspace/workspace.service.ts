@@ -8,14 +8,14 @@ import { CreateWorkspaceDto } from '@common/dtos/workspace.dto';
 import { Messages } from '@common/enums';
 import { PaginateRawMapper } from '@common/mappers';
 
-import { UsersRepository } from '../user/user.repository';
+import { ProjectRepository } from '../project/project.repository';
 import { WorkspaceRepository } from './workspace.repository';
 
 @Injectable()
 export class WorkspaceService {
   constructor(
     private readonly workspaceRepository: WorkspaceRepository,
-    private readonly userRepository: UsersRepository
+    private readonly projectRepository: ProjectRepository
   ) {}
 
   /**
@@ -100,6 +100,13 @@ export class WorkspaceService {
     if (workspace.createdBy !== userId) {
       throw new BadRequestException(Messages.INVALID_ACCESS_RESOURCE);
     }
+
+    // Delete project
+    await this.projectRepository.delete({
+      workspace: {
+        id: workspaceId,
+      },
+    });
 
     // Delete workspace
     const { affected } = await this.workspaceRepository.delete(workspaceId);
