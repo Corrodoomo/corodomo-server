@@ -16,6 +16,7 @@ import { TaskComment } from './task-comment.entity';
 import { Task } from './task.entity';
 import { Workspace } from './workspace.entity';
 import { ProjectRecent } from './project-recent.entity';
+import { Project } from './project.entity';
 
 @Index('users_pkey', ['id'], { unique: true })
 @Entity('users', { schema: 'public' })
@@ -34,6 +35,12 @@ export class User extends BaseEntity {
 
   @Column('boolean', { name: 'email_verified', default: false })
   emailVerified: boolean;
+
+  @Column('character varying', { name: 'avatar_url' })
+  avatarUrl: string;
+
+  @Column('character varying', { name: 'auth_provider' })
+  authProvider: string;
 
   @OneToMany(() => Blog, (blog) => blog.createdBy)
   blogs: Blog[];
@@ -55,6 +62,9 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Workspace, (workspace) => workspace.createdBy)
   workspaces: Workspace[];
+
+  @OneToMany(() => Project, (project) => project.createdBy)
+  projects: Project[];
 
   @OneToMany(() => GroupTask, (groupTask) => groupTask.createdBy)
   groupTasks: GroupTask[];

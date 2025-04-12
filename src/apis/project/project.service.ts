@@ -1,7 +1,6 @@
 import { ProjectRaw } from '@modules/database/entities';
 import { ProjectRecentRepository } from '@modules/project-recent/project-recent.repository';
 import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
-import { isNotEmpty } from 'class-validator';
 import { isEmpty } from 'lodash';
 import { FilterOperator, FilterSuffix, paginate } from 'nestjs-paginate';
 
@@ -33,8 +32,8 @@ export class ProjectService {
         ...query,
         filter: {
           ...query.filter,
-          members: `$or:$in:${userId}`,
-          'workspace.createdBy': `$or:$eq:${userId}`,
+          // members: `$or:$in:${userId}`,
+          // createdBy: `$or:$eq:${userId}`,
         },
       },
       this.projectRepository,
@@ -51,15 +50,19 @@ export class ProjectService {
           'workspace.title',
           'recents.id',
           'recents.accessedAt',
+          'createdBy.id',
+          'createdBy.name',
+          'createdBy.avatarUrl',
         ],
         sortableColumns: ['name', 'recents.accessedAt'],
         filterableColumns: {
           'workspace.id': [FilterOperator.EQ],
           'workspace.createdBy': [FilterOperator.EQ],
+          createdBy: [FilterOperator.EQ],
           members: [FilterOperator.IN],
           'recents.accessedAt': [FilterOperator.NULL, FilterSuffix.NOT],
         },
-        relations: ['workspace', 'recents'],
+        relations: ['workspace', 'recents', 'createdBy'],
       }
     );
   }
@@ -103,6 +106,9 @@ export class ProjectService {
     // Create project
     const savedProject = await this.projectRepository.save({
       ...createdProject,
+      createdBy: {
+        id: userId,
+      },
       workspace: { id: workspaceId },
     });
 
@@ -121,28 +127,17 @@ export class ProjectService {
     // Get workspace by id
     const project = (await this.projectRepository.getRawOne(projectId, [
       'id',
-      'workspace_id as "workspaceId"',
+      'created_by as "createdBy"',
     ])) as ProjectRaw;
 
     // Check if workspace is empty
     if (isEmpty(project)) {
       throw new BadRequestException(Messages.ITEM_NOT_FOUND);
     }
-
-    // If user want to update workspace
-    if (isNotEmpty(workspaceId)) {
-      // Get workspace by id
-      const workspace = await this.workspaceRepository.queryWorkspaceExisted(workspaceId);
-
-      // Check if workspace is empty
-      if (isEmpty(workspace)) {
-        throw new BadRequestException(Messages.ITEM_NOT_FOUND);
-      }
-
-      // Check if workspace is owned by user
-      if (workspace.createdBy !== userId) {
-        throw new ForbiddenException(Messages.INVALID_ACCESS_RESOURCE);
-      }
+    
+    // Check if project is owned by user
+    if (project.createdBy !== userId) {
+      throw new ForbiddenException(Messages.INVALID_ACCESS_RESOURCE);
     }
 
     // Create project
@@ -165,23 +160,15 @@ export class ProjectService {
    */
   public async delete(userId: string, projectId: string) {
     // Get workspace by id
-    const project = await this.projectRepository.getRawOne(projectId, ['id', 'workspace_id as "workspace"']);
+    const project = await this.projectRepository.getRawOne(projectId, ['id', 'created_by as "createdBy"']);
 
     // Check if workspace is empty
     if (isEmpty(project)) {
       throw new BadRequestException(Messages.ITEM_NOT_FOUND);
     }
 
-    // Get workspace by id
-    const workspace = await this.workspaceRepository.queryWorkspaceExisted(String(project?.workspace));
-
-    // Check if workspace is empty
-    if (isEmpty(workspace)) {
-      throw new BadRequestException(Messages.ITEM_NOT_FOUND);
-    }
-
-    // Check if workspace is owned by user
-    if (workspace.createdBy !== userId) {
+    // Check if project is owned by user
+    if (project.createdBy !== userId) {
       throw new ForbiddenException(Messages.INVALID_ACCESS_RESOURCE);
     }
 
