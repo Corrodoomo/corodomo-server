@@ -1,8 +1,10 @@
 import { CreateUserDto } from '@app/apis/user-new/dtos/create-user.dto';
+import { UserDto } from '@app/apis/user-new/dtos/user.dto';
 import { UserNewsRepository } from '@app/apis/user-new/user-new.repository';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { InsertResultDto } from '@common/dtos';
+import { Messages } from '@common/enums';
 import { BryptService } from '@common/services';
 
 @Injectable()
@@ -33,5 +35,17 @@ export class UserNewService {
       },
       1
     );
+  }
+
+  public async get(id: string) {
+    const user = await this.userNewsRepository.findOne({
+      where: { id },
+    });
+
+    if (!user) {
+      throw new NotFoundException(Messages.USER_NOT_FOUND);
+    }
+
+    return new UserDto(user);
   }
 }

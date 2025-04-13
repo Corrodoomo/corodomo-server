@@ -53,3 +53,17 @@ export class LessonRecentMapper {
   @ApiProperty()
   accessedAt: Date;
 }
+
+export class UserNewMapper extends BaseRecordDto {
+  @ApiProperty()
+  email: string;
+
+  @ApiProperty()
+  name: string;
+
+  @ApiProperty()
+  emailVerified: boolean;
+
+  @ApiProperty()
+  role: string;
+}
