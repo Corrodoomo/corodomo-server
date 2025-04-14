@@ -29,6 +29,10 @@ export class SubtitleService {
       'id',
       'tag',
       'language',
+      'thumbnail',
+      'duration',
+      'watched_count AS "watchedCount"',
+      'title',
       'full_subtitles AS "fullSubtitles"',
       'youtube_url AS "youtubeUrl"',
       'created_by AS "createdBy"',
@@ -59,7 +63,7 @@ export class SubtitleService {
 
     // Update lessson and subtitle
     await Promise.all([
-      this.lessonService.classify(lessonId, fullSubtitles, lesson.language),
+      this.lessonService.classify(lesson, fullSubtitles, lesson.language),
       this.subtitleRepository.updateByTranscripts(lessonId, transcripts),
     ]);
 

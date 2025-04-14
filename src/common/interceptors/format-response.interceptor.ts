@@ -16,7 +16,7 @@ export class FormatResponseInterceptor implements NestInterceptor {
     return next.handle().pipe(
       map(async (result) => {
         console.timeEnd(request.timeId);
-        this.logger.debug(JSON.stringify(result));
+        this.logger.debug(JSON.stringify(result).substring(0, 1000));
 
         return new HttpResponse(result, status);
       })

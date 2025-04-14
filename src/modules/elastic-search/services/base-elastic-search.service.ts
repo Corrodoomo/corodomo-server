@@ -39,6 +39,18 @@ export class BaseElasticsearchService {
    * @param query
    * @returns
    */
+  async paginate(body: any) {
+    return this.elasticsearchService.search({
+      index: this.index, // Sử dụng index generic
+      body,
+    });
+  }
+
+  /**
+   * Search by query
+   * @param query
+   * @returns
+   */
   async getById(docId: string) {
     try {
       const data = await this.elasticsearchService.get({

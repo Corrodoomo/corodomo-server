@@ -1,3 +1,4 @@
+import { Lesson } from '@modules/database/entities';
 import { LessonEsService } from '@modules/elastic-search/services/lesson-es.service';
 import { MinimapEsService } from '@modules/elastic-search/services/minimap-es.service';
 import { LessonRecentRepository } from '@modules/lesson-recent/lesson-recent.repository';
@@ -17,7 +18,7 @@ import {
   UpdateResultDto,
 } from '@common/dtos';
 import { Messages } from '@common/enums';
-import { ItemMapper, UpdateRawResultMapper } from '@common/mappers';
+import { ItemMapper, PaginateRawMapper, UpdateRawResultMapper } from '@common/mappers';
 import { LessonsInFolderMapper } from '@common/mappers/lesson.mapper';
 
 import { LessonRepository } from './lesson.repository';
@@ -85,9 +86,6 @@ export class LessonService {
         id: userId,
       },
     });
-
-    // Create lesson in Elastic search
-    await this.lessonEsService.indexDocument(createdLesson);
 
     // Return result
     return new InsertResultDto(createdLesson, 1);
@@ -203,6 +201,124 @@ export class LessonService {
   }
 
   /**
+   * Get lesson pagination
+   * @param query
+   * @returns
+   */
+  public async search(query: PaginateQuery) {
+    // Migration lesson to elastic
+    // console.time('lessonRepository');
+    // const lessons = await this.lessonRepository.find();
+    // return lessons;
+    // console.timeEnd('lessonRepository');
+    // console.log('lessons', lessons[0])
+
+    // lessons.forEach(async (lesson) => {
+
+    //   const defaultLevel = {
+    //     ja: 'N5',
+    //     en: 'A1',
+    //     ko: 'TOPIK1',
+    //     cn: 'HSK1',
+    //   }
+
+    //   await this.lessonEsService.indexDocument({
+    //     ...lesson,
+    //     level: lesson.level || defaultLevel[lesson.language],
+    //   });
+    // });
+
+    const keyword = String(query.filter?.['keyword']);
+
+    const should: any[] = [];
+    const must: any[] = [];
+
+    // Add condition If keyword existed
+    if (keyword) {
+      should.push(
+        {
+          match: {
+            title: {
+              query: keyword,
+              fuzziness: 'AUTO',
+            },
+          },
+        },
+        {
+          wildcard: {
+            'title.keyword': {
+              value: `${keyword}*`,
+              case_insensitive: true,
+            },
+          },
+        },
+        {
+          prefix: {
+            title: {
+              value: keyword,
+            },
+          },
+        }
+      );
+    }
+
+    // Add condition If language existed
+    // 'language.keyword' to condition includes
+    if (query.filter?.['lang']) {
+      must.push({ terms: { 'language.keyword': [String(query.filter?.['lang'])] } });
+    }
+
+    // Add condition If tags existed
+    // 'tags.keyword' to condition includes
+    if (query.filter?.['tags']) {
+      must.push({
+        terms: {
+          'tag.keyword': String(query.filter?.['tags']).split(','),
+        },
+      });
+    }
+
+    // Add condition If levels existed
+    // 'levels.keyword' to condition includes
+    if (query.filter?.['levels']) {
+      must.push({
+        terms: {
+          'level.keyword': String(query.filter?.['levels']).split(','),
+        },
+      });
+    }
+
+    // Search data of elastic
+    const result = await this.lessonEsService.paginate({
+      query: {
+        bool: {
+          should,
+          must,
+        },
+      },
+      highlight: {},
+      aggs: {},
+      from: (Number(query.page) - 1) * Number(query.limit),
+      size: query.limit,
+    });
+
+    // Get total items
+    const totalItems = Number((result.hits.total as object)['value']);
+
+    // Return result
+    return new PaginateRawMapper({
+      items: result.hits.hits.map((hit) => hit._source),
+      meta: {
+        currentPage: Number(query.page),
+        itemsPerPage: Number(query.limit),
+        itemCount: result.hits.hits.length,
+        totalItems,
+        totalPages: Math.ceil(totalItems / Number(query.limit)),
+      },
+    });
+  }
+
+  /**
    * Get my lessons
    * @param userId
    * @param query
@@ -283,12 +399,23 @@ export class LessonService {
    * @param transcripts
    * @returns
    */
-  public async classify(lessonId: string, fullSubtitles: string, language: string) {
+  public async classify(lesson: Lesson, fullSubtitles: string, language: string) {
     // Tag and level generated
     const level = await this.openaiService.level(fullSubtitles, language);
 
+    // Update fullSubtitles after getting level
+    await this.lessonRepository.update(lesson.id, { fullSubtitles });
+    
+    const { createdBy } = lesson;
+
     // Update lesson
-    return this.lessonRepository.update({ id: lessonId }, { fullSubtitles, level });
+    return this.lessonEsService.indexDocument({
+      ...lesson,
+      createdBy: {
+        id: createdBy,
+      },
+      level,
+    });
   }
 
   /**

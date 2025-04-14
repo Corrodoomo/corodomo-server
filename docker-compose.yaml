@@ -116,6 +116,18 @@ services:
     networks:
       - pgnetwork
 
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    container_name: mosquitto
+    ports:
+      - "1883:1883"     # MQTT protocol
+      - "9001:9001"     # WebSocket (tuỳ chọn)
+    volumes:
+      - ./mosquitto/config:/mosquitto/config
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+    restart: unless-stopped
+
 networks:
   pgnetwork:
     driver: bridge
