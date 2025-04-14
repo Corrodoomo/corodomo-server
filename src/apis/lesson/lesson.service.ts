@@ -6,7 +6,7 @@ import { OpenAIService } from '@modules/openai/openai.service';
 import { YoutubeService } from '@modules/youtube/youtube.service';
 import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { isEmpty } from 'lodash';
-import { FilterOperator, paginate, PaginateQuery } from 'nestjs-paginate';
+import { FilterOperator, FilterSuffix, paginate, PaginateQuery } from 'nestjs-paginate';
 
 import { LIMIT_DURATION_VIDEO, YOUTUBE_TRANSCRIPT_LANGUAGES } from '@common/constants';
 import {
@@ -196,6 +196,8 @@ export class LessonService {
       filterableColumns: {
         language: [FilterOperator.EQ],
         level: [FilterOperator.EQ],
+        tag: [FilterOperator.EQ],
+        id: [FilterOperator.EQ, FilterSuffix.NOT],
       },
     });
   }
