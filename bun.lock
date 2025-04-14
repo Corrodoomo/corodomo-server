@@ -18,6 +18,7 @@
         "@nestjs/swagger": "^11.0.6",
         "@nestjs/throttler": "^6.4.0",
         "@nestjs/typeorm": "^11.0.0",
+        "@types/cookie-parser": "^1.4.8",
         "@types/express-session": "^1.18.1",
         "@types/geoip-lite": "^1.4.4",
         "@types/lodash": "^4.17.16",
@@ -447,6 +448,8 @@
     "@types/connect": ["@types/connect@3.4.38", "", { "dependencies": { "@types/node": "*" } }, "sha512-K6uROf1LD88uDQqJCktA4yzL1YYAK6NgfsI0v/mTgyPKWsX1CnJ0XPSDhViejru1GcRkLWb8RlzFYJRqGUbaug=="],
 
     "@types/conventional-commits-parser": ["@types/conventional-commits-parser@5.0.1", "", { "dependencies": { "@types/node": "*" } }, "sha512-7uz5EHdzz2TqoMfV7ee61Egf5y6NkcO4FB/1iCCQnbeiI1F3xzv3vK5dBCXUCLQgGYS+mUeigK1iKQzvED+QnQ=="],
+
+    "@types/cookie-parser": ["@types/cookie-parser@1.4.8", "", { "peerDependencies": { "@types/express": "*" } }, "sha512-l37JqFrOJ9yQfRQkljb41l0xVphc7kg5JTjjr+pLRZ0IyZ49V4BQ8vbF4Ut2C2e+WH4al3xD3ZwYwIUfnbT4NQ=="],
 
     "@types/cookiejar": ["@types/cookiejar@2.1.5", "", {}, "sha512-he+DHOWReW0nghN24E1WUqM0efK4kI9oTqDm6XmK8ZPe2djZ90BSNdGnIyCLzCPw7/pogPlGbzI2wHGGmi4O/Q=="],
 

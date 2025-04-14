@@ -43,7 +43,7 @@ export class LoggerMiddleware implements NestMiddleware {
     });
 
     // Create time id to calc time end of a request
-    req.timeId = `[${method}] - ${host} - ${originalUrl} - ${ip} - ${v4()}`;
+    req.timeId = `[${method}] - ${host} - ${originalUrl} - ${ip} - ${v4()} - Time End`;
     console.time(req.timeId);
 
     next();

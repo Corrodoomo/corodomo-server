@@ -6,7 +6,7 @@ export enum Messages {
   ITEM_NOT_FOUND = 'Item is not found',
   MEMBERS_NOT_FOUND = 'Member are not found',
   INVALID_ACCESS_RESOURCE = 'Invalid access permission with resources',
-  LIMIT_DURATION_VIDEO = 'Limit duration video is 10 minutes',
+  LIMIT_DURATION_VIDEO = 'Limit duration video is 20 minutes',
   SUBTITLES_NOT_FOUND = 'Youtube subtitles is not allowed to transcript',
   LANG_SUBTITLES_NOT_FOUND = 'Youtube subtitles is not allowed to transcript with the language',
   INVALID_ACCESS_TOKEN = 'Access token is invalid or expired',
