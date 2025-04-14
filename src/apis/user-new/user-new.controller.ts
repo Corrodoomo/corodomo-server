@@ -7,11 +7,11 @@ import { UserNewMapper } from '@common/mappers/user.mapper';
 
 import { UserNewService } from './user-new.service';
 
-@Controller('user-new')
+@Controller('users')
 export class UserNewController {
   constructor(private readonly userNewService: UserNewService) {}
 
-  @ApiGet(':id')
+  @ApiGet('profile')
   @ApiOkResponseExample(UserNewMapper)
   async get(@Authorized('id') id: string) {
     return this.userNewService.get(id);

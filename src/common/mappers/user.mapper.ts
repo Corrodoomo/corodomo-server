@@ -1,6 +1,8 @@
+import { User } from '@modules/database/entities';
 import { ApiProperty } from '@nestjs/swagger';
 
 import { BaseRecordDto } from '@common/dtos/common.dto';
+import { ItemMapper } from '@common/mappers/common.mapper';
 
 export class SignedInUserMapper {
   @ApiProperty()
@@ -66,4 +68,35 @@ export class UserNewMapper extends BaseRecordDto {
 
   @ApiProperty()
   role: string;
+}
+
+export class UserProfileMapper {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty()
+  email: string;
+
+  @ApiProperty()
+  name: string;
+
+  @ApiProperty()
+  emailVerified: boolean;
+
+  @ApiProperty()
+  role: string;
+
+  @ApiProperty()
+  createdAt: Date;
+
+  @ApiProperty()
+  updatedAt: Date;
+}
+
+export class ProfileMapper extends ItemMapper<UserProfileMapper> {
+  constructor(user: User) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...rest } = user;
+    super(rest);
+  }
 }
