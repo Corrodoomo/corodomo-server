@@ -40,13 +40,21 @@ export class LessonRepository extends BaseRepository<Lesson> {
    */
   public async queryDetailLesson(lessonId: string, userId: string) {
     return this.createQueryBuilder('lesson')
-      .select(['lesson.id', 'lesson.tag', 'lesson.duration', 'lesson.language', 'lesson.level', 'lesson.watchedCount'])
+      .select([
+        'lesson.id',
+        'lesson.tag',
+        'lesson.duration',
+        'lesson.language',
+        'lesson.level',
+        'lesson.title',
+        'lesson.watchedCount',
+        'lesson.youtubeUrl',
+      ])
       .leftJoinAndSelect('lesson.notes', 'notes', 'notes.createdBy = :userId', { userId })
       .leftJoinAndSelect('lesson.comments', 'comments')
       .leftJoinAndSelect('lesson.notedVocabularies', 'notedVocabularies')
       .leftJoinAndSelect('lesson.subtitles', 'subtitles')
       .where('lesson.id = :lessonId', { lessonId: lessonId })
-      .cache(true)
       .getOne();
   }
 }
