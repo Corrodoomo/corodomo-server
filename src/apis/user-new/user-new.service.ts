@@ -1,10 +1,10 @@
 import { CreateUserDto } from '@app/apis/user-new/dtos/create-user.dto';
-import { UserDto } from '@app/apis/user-new/dtos/user.dto';
 import { UserNewsRepository } from '@app/apis/user-new/user-new.repository';
 import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { InsertResultDto } from '@common/dtos';
 import { Messages } from '@common/enums';
+import { ProfileMapper } from '@common/mappers/user.mapper';
 import { BryptService } from '@common/services';
 
 @Injectable()
@@ -46,6 +46,6 @@ export class UserNewService {
       throw new NotFoundException(Messages.USER_NOT_FOUND);
     }
 
-    return new UserDto(user);
+    return new ProfileMapper(user);
   }
 }

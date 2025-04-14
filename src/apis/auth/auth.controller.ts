@@ -66,6 +66,12 @@ export class AuthController {
     return this.authService.logout(request, response);
   }
 
+  @ApiPost('verify')
+  @ApiOkResponseExample(AuthUserMapper)
+  verify(@Authorized() user: User) {
+    return `Verify successful for ${user.email}`;
+  }
+
   // Just for testing purpose
   @ApiGet('test')
   @Roles(SystemRoles.LEARNER)
