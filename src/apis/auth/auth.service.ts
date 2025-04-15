@@ -68,6 +68,8 @@ export class AuthService {
     );
 
     response.send({ message: 'Login successful' });
+
+    return null;
   }
 
   public async refresh(user: User, response: Response, cookie: WebCookie) {
@@ -88,6 +90,7 @@ export class AuthService {
     );
 
     response.send({ message: 'Refresh successful' });
+    return null;
   }
 
   public async logout(request: Request, response: Response) {
@@ -98,5 +101,6 @@ export class AuthService {
     this.cookieService.clearCookie(response, 'refreshToken');
 
     response.send({ message: 'Logout successful' });
+    return null;
   }
 }
