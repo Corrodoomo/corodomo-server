@@ -1,5 +1,6 @@
 import { Lesson } from '@modules/database/entities';
 import { LessonEsService } from '@modules/elastic-search/services/lesson-es.service';
+import { LessonRecentEsService } from '@modules/elastic-search/services/lesson-recent-es.service';
 import { MinimapEsService } from '@modules/elastic-search/services/minimap-es.service';
 import { LessonRecentRepository } from '@modules/lesson-recent/lesson-recent.repository';
 import { OpenAIService } from '@modules/openai/openai.service';
@@ -18,7 +19,7 @@ import {
   UpdateResultDto,
 } from '@common/dtos';
 import { Messages } from '@common/enums';
-import { ItemMapper, PaginateRawMapper, UpdateRawResultMapper } from '@common/mappers';
+import { ItemMapper, UpdateRawResultMapper } from '@common/mappers';
 import { LessonsInFolderMapper } from '@common/mappers/lesson.mapper';
 
 import { LessonRepository } from './lesson.repository';
@@ -28,6 +29,7 @@ export class LessonService {
   constructor(
     private readonly lessonRepository: LessonRepository,
     private readonly lessonEsService: LessonEsService,
+    private readonly lessonRecentEsService: LessonRecentEsService,
     private readonly minimapEsService: MinimapEsService,
     private readonly openaiService: OpenAIService,
     private readonly youtubeService: YoutubeService,
@@ -209,10 +211,8 @@ export class LessonService {
    */
   public async search(query: PaginateQuery) {
     // Migration lesson to elastic
-    // console.time('lessonRepository');
     // const lessons = await this.lessonRepository.find();
-    // return lessons;
-    // console.timeEnd('lessonRepository');
+    // // return lessons;
     // console.log('lessons', lessons[0])
 
     // lessons.forEach(async (lesson) => {
@@ -291,33 +291,90 @@ export class LessonService {
     }
 
     // Search data of elastic
-    const result = await this.lessonEsService.paginate({
-      query: {
-        bool: {
-          should,
-          must,
+    return this.lessonEsService.paginate(
+      {
+        query: {
+          bool: {
+            should,
+            must,
+          },
         },
       },
-      highlight: {},
-      aggs: {},
-      from: (Number(query.page) - 1) * Number(query.limit),
-      size: query.limit,
-    });
+      {
+        page: Number(query.page),
+        limit: Number(query.limit),
+      }
+    );
+  }
 
-    // Get total items
-    const totalItems = Number((result.hits.total as object)['value']);
+  /**
+   * Search my history
+   * @param query
+   * @returns
+   */
+  public async searchMyHistory(query: PaginateQuery, userId: string) {
+    const keyword = String(query.filter?.['keyword']);
 
-    // Return result
-    return new PaginateRawMapper({
-      items: result.hits.hits.map((hit) => hit._source),
-      meta: {
-        currentPage: Number(query.page),
-        itemsPerPage: Number(query.limit),
-        itemCount: result.hits.hits.length,
-        totalItems,
-        totalPages: Math.ceil(totalItems / Number(query.limit)),
+    const should: any[] = [];
+    const sort: any[] = [];
+
+    // Add condition If keyword existed
+    if (keyword) {
+      should.push(
+        {
+          match: {
+            title: {
+              query: keyword,
+              fuzziness: 'AUTO',
+            },
+          },
+        },
+        {
+          wildcard: {
+            'title.keyword': {
+              value: `${keyword}*`,
+              case_insensitive: true,
+            },
+          },
+        },
+        {
+          prefix: {
+            title: {
+              value: keyword,
+            },
+          },
+        }
+      );
+    }
+
+    // Add condition If sortBy existed
+    // Default sortBy accessedAt ASC
+    if (query.sortBy?.length) {
+      const order = query.sortBy[0];
+
+      sort.push({
+        accessedAt: {
+          order: order[1],
+        },
+      });
+    }
+
+    // Search data of elastic
+    return this.lessonRecentEsService.paginate(
+      {
+        query: {
+          bool: {
+            should,
+            must: [{ terms: { 'userId.keyword': [userId] } }],
+          },
+        },
+        sort,
       },
-    });
+      {
+        page: Number(query.page),
+        limit: Number(query.limit),
+      }
+    );
   }
 
   /**
@@ -391,6 +448,41 @@ export class LessonService {
     // Update watchedAt and watchedCount
     await this.lessonRepository.updateWatchedCount(lessonId);
 
+    const recent = await this.lessonRecentEsService.search({
+      bool: {
+        must: [{ terms: { 'id.keyword': [lessonId] } }],
+      },
+    });
+
+    if (recent.hits.hits.length) {
+      // Update lesson in elastic to search
+      await this.lessonRecentEsService.updateByQuery(
+        {
+          bool: {
+            must: [{ terms: { 'id.keyword': [lessonId] } }],
+          },
+        },
+        {
+          source: `ctx._source.accessedAt = '${new Date().toISOString()}'`,
+          lang: 'painless',
+        }
+      );
+    } else {
+      // Get detail lesson
+      const lesson = await this.lessonRepository.findOne({
+        select: ['id', 'title', 'thumbnail', 'duration'],
+        where: { id: lessonId },
+        cache: true,
+      });
+
+      // Update lesson in elastic to search
+      await this.lessonRecentEsService.indexDocument({
+        ...lesson,
+        userId,
+        accessedAt: lessonRecent.accessedAt,
+      });
+    }
+
     // Return result
     return new UpdateResultDto(1);
   }
@@ -407,7 +499,7 @@ export class LessonService {
 
     // Update fullSubtitles after getting level
     await this.lessonRepository.update(lesson.id, { fullSubtitles });
-    
+
     const { createdBy } = lesson;
 
     // Update lesson

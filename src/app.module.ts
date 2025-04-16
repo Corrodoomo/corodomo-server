@@ -20,7 +20,9 @@ import { OpenAIModule } from '@modules/openai/openai.module';
 import { RateLimitModule } from '@modules/rate-limit/rate-limit.module';
 import { YoutubeModule } from '@modules/youtube/youtube.module';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+
 import { SessionMiddleware } from '@common/middlewares/session.middleware';
+
 import { BlogModule } from './apis/blog/blog.module';
 import { LessonCommentModule } from './apis/lesson-comment/lesson-comment.module';
 import { LessonNoteModule } from './apis/lesson-note/lesson-note.module';
@@ -28,6 +30,7 @@ import { ProjectModule } from './apis/project/project.module';
 import { TaskModule } from './apis/task/task.module';
 import { WorkspaceModule } from './apis/workspace/workspace.module';
 import { providers } from './app.provider';
+import { MqttModule } from '@modules/mqtt/mqtt.module';
 
 @Module({
   imports: [
@@ -60,6 +63,9 @@ import { providers } from './app.provider';
     TaskModule,
     WorkspaceModule,
     ProjectModule,
+
+    // Message Queue
+    MqttModule,
   ],
   exports: [],
   controllers: [AppController],

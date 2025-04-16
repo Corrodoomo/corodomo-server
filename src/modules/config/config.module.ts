@@ -67,6 +67,11 @@ import * as Joi from 'joi';
         // RATE LIMITER
         RATE_LIMITER_MAX: Joi.number().integer().required(),
         RATE_LIMITER_TLL: Joi.number().integer().required(),
+
+        // MQTT
+        MQTT_URL: Joi.string().required(),
+        MQTT_USERNAME: Joi.string().required(),
+        MQTT_PASSWORD: Joi.string().required(),
       }),
     }),
   ],
