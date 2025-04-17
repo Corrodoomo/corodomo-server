@@ -57,6 +57,13 @@ export class LessonController {
     return this.lessonService.search(query);
   }
 
+  @ApiGet('/search/me')
+  @Roles(SystemRoles.LEARNER)
+  @ApiOkPaginationExample(LessonRecordDto)
+  searchMyHistory(@Query() query: PaginateQueryDto, @Req() req: Request) {
+    return this.lessonService.searchMyHistory(query, req.user.id);
+  }
+
   @ApiGet('/me')
   @Roles(SystemRoles.LEARNER)
   @ApiOkPaginationExample(LessonRecordDto)

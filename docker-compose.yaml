@@ -116,16 +116,16 @@ services:
     networks:
       - pgnetwork
 
-  mosquitto:
-    image: eclipse-mosquitto:latest
-    container_name: mosquitto
+  mqtt5:
+    image: eclipse-mosquitto
+    container_name: mqtt5
     ports:
-      - "1883:1883"     # MQTT protocol
-      - "9001:9001"     # WebSocket (tuỳ chọn)
+      - "1883:1883" #default mqtt port
+      - "9001:9001" #default mqtt port for websockets
     volumes:
-      - ./mosquitto/config:/mosquitto/config
-      - ./mosquitto/data:/mosquitto/data
-      - ./mosquitto/log:/mosquitto/log
+      - ./config/mosquitto:/mosquitto/config:rw
+      - ./data/mosquitto:/mosquitto/data:rw
+      - ./log/mosquitto:/mosquitto/log:rw
     restart: unless-stopped
 
 networks:

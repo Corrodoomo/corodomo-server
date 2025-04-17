@@ -1,6 +1,7 @@
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import { Transport } from '@nestjs/microservices';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import * as cookieParser from 'cookie-parser';
 import * as cors from 'cors';
@@ -18,6 +19,19 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: ['error', 'debug', 'verbose'],
   });
+
+  // TCP service
+  app.connectMicroservice({
+    transport: Transport.MQTT,
+    options: {
+      url: 'mqtt://localhost:1883',
+      username: 'mqtt',
+      password: 'root',
+      clientId: 'rest_api'
+    },
+  });
+
+  app.startAllMicroservices();
 
   const configService = app.get<ConfigService>(ConfigService);
   const port = configService.get<string>('PORT') || 5000;
@@ -48,6 +62,7 @@ async function bootstrap() {
     })
   );
   app.use(cookieParser());
+
   useSwagger(app);
 
   await app.listen(port).then(async () => {

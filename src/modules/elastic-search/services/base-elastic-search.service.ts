@@ -1,7 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
 
+import { TMeta } from '@common/types/elastic-search.type';
+
 import '@nestjs/elasticsearch';
+
+import { QueryDslQueryContainer, SearchRequest, Script } from '@elastic/elasticsearch/lib/api/types';
+
+import { PaginateRawMapper } from '@common/mappers';
 
 @Injectable()
 export class BaseElasticsearchService {
@@ -27,7 +33,7 @@ export class BaseElasticsearchService {
    * @param query
    * @returns
    */
-  async search(query: any) {
+  async search(query: QueryDslQueryContainer) {
     return this.elasticsearchService.search({
       index: this.index, // Sử dụng index generic
       body: { query },
@@ -39,10 +45,33 @@ export class BaseElasticsearchService {
    * @param query
    * @returns
    */
-  async paginate(body: any) {
-    return this.elasticsearchService.search({
+  async paginate(body: SearchRequest, meta: TMeta) {
+    const { page, limit } = meta;
+
+    // Elastic search result
+    const result = await this.elasticsearchService.search({
       index: this.index, // Sử dụng index generic
-      body,
+      body: {
+        ...body,
+        aggs: {},
+        from: (page - 1) * limit,
+        size: limit,
+      },
+    });
+
+    // Get total items
+    const totalItems = Number((result.hits.total as object)['value']);
+
+    // Return result
+    return new PaginateRawMapper({
+      items: result.hits.hits.map((hit) => hit._source),
+      meta: {
+        currentPage: page,
+        itemsPerPage: limit,
+        itemCount: result.hits.hits.length,
+        totalItems,
+        totalPages: Math.ceil(totalItems / limit),
+      },
     });
   }
 
@@ -81,11 +110,26 @@ export class BaseElasticsearchService {
    * @param id
    * @returns
    */
-  public deleteByQuery(query: any) {
+  public deleteByQuery(query: QueryDslQueryContainer) {
     return this.elasticsearchService.deleteByQuery({
       index: this.index, // Sử dụng index generic
       body: {
         query,
+      },
+    });
+  }
+
+  /**
+   * Delete document
+   * @param id
+   * @returns
+   */
+  public updateByQuery(query: QueryDslQueryContainer, script: string | Script | undefined) {
+    return this.elasticsearchService.updateByQuery({
+      index: this.index, // Sử dụng index generic
+      body: {
+        query,
+        script,
       },
     });
   }

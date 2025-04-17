@@ -5,8 +5,9 @@ import { ElasticsearchModule as BaseElasticsearchModule } from '@nestjs/elastics
 
 import { LessonEsService } from './services/lesson-es.service';
 import { MinimapEsService } from './services/minimap-es.service';
+import { LessonRecentEsService } from './services/lesson-recent-es.service';
 
-const providers = [MinimapEsService, LessonEsService];
+const providers = [MinimapEsService, LessonEsService, LessonRecentEsService];
 
 @Global()
 @Module({
