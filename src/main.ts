@@ -3,8 +3,6 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { Transport } from '@nestjs/microservices';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import * as cookieParser from 'cookie-parser';
-import * as cors from 'cors';
 import { initializeTransactionalContext, StorageDriver } from 'typeorm-transactional';
 
 import { PaginationPipe, TransformPropertyPipe } from '@common/pipes';
@@ -12,26 +10,16 @@ import { PaginationPipe, TransformPropertyPipe } from '@common/pipes';
 import { AppModule } from './app.module';
 import { useSwagger } from './app.swagger';
 
+
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
+
+  // Config transaction handler
   initializeTransactionalContext({ storageDriver: StorageDriver.AUTO });
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: ['error', 'debug', 'verbose'],
   });
-
-  // TCP service
-  app.connectMicroservice({
-    transport: Transport.MQTT,
-    options: {
-      url: 'mqtt://localhost:1883',
-      username: 'mqtt',
-      password: 'root',
-      clientId: 'rest_api'
-    },
-  });
-
-  app.startAllMicroservices();
 
   const configService = app.get<ConfigService>(ConfigService);
   const port = configService.get<string>('PORT') || 5000;
@@ -50,18 +38,23 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: true,
+    origin: configService.getOrThrow('CLIENT_DOMAIN'),
     credentials: true,
   });
-  app.setGlobalPrefix('api/v1');
 
-  app.use(
-    cors({
-      origin: 'http://localhost:3000',
-      credentials: true,
-    })
-  );
-  app.use(cookieParser());
+  // TCP service
+  app.connectMicroservice({
+    transport: Transport.MQTT,
+    options: {
+      url: configService.getOrThrow('MQTT_URL'),
+      username: configService.getOrThrow('MQTT_USERNAME'),
+      password: configService.getOrThrow('MQTT_PASSWORD'),
+    },
+  });
+
+  app.startAllMicroservices();
+
+  app.setGlobalPrefix('api/v1');
 
   useSwagger(app);
 

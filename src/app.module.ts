@@ -20,6 +20,7 @@ import { RateLimitModule } from '@modules/rate-limit/rate-limit.module';
 import { YoutubeModule } from '@modules/youtube/youtube.module';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 
+import { CookieMiddleware } from '@common/middlewares/cookie.middleware';
 import { SessionMiddleware } from '@common/middlewares/session.middleware';
 
 import { BlogModule } from './apis/blog/blog.module';
@@ -75,6 +76,6 @@ import { PolicyModule } from './modules/policy/policy.module';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(HelmetMiddleware, LoggerMiddleware, SessionMiddleware).forRoutes('*');
+    consumer.apply(HelmetMiddleware, LoggerMiddleware, CookieMiddleware, SessionMiddleware).forRoutes('*');
   }
 }

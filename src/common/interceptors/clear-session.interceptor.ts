@@ -53,6 +53,12 @@ export class ClearSessionInterceptor implements NestInterceptor {
 
         // Clear cookies
         request.res?.clearCookie(this.configService.getOrThrow('SESSION_NAME'));
+
+        // Clear session from Redis
+        request.sessionStore.destroy(request.sessionID, (err) => {
+          if (err) new InternalServerErrorException(Messages.ERROR_DESTROYING_SESSION);
+        });
+
         resolve(true);
       });
     });

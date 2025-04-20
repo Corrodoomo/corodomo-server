@@ -18,5 +18,6 @@ export enum Messages {
   ERROR_REGENERATING_SESSION = 'Error regenerating session',
   ERROR_SAVING_SESSION = 'Error saving session',
   ERROR_DESTROYING_SESSION = 'Error destroying session',
+  SESSION_NOT_FOUND = 'Session not found',
   DUPLICATED_DEVICE = 'Duplicated device',
 }
