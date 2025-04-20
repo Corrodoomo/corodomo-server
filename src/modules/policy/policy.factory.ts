@@ -33,7 +33,20 @@ export enum Role {
 /**
  * Resource string value
  */
-export type Resources = 'all' | 'lessons' | 'folders';
+export type Resources =
+  | 'lessons'
+  | 'folders'
+  | 'blogs'
+  | 'lesson_comments'
+  | 'noted_vocabularies'
+  | 'lesson_notes'
+  | 'projects'
+  | 'quizzes'
+  | 'subtitles'
+  | 'tasks'
+  | 'vocabularies'
+  | 'workspaces'
+  | 'users';
 
 /**
  * App Ability type
@@ -59,14 +72,17 @@ export class PolicyAbilityFactory {
     // If pricing has existed
     if (pricing) {
       pricing.policies.forEach((policy) => {
-        policy.permissions.forEach((permission) => {          
+        policy.permissions.forEach((permission) => {
           // Pass if it is valid with flexible conditions in database permissions
           if (user.userMetadata.emailVerified !== permission.conditions[0]['email_verified']) {
             return;
           }
 
           if (permission.action === Action.WRITE_READ) {
-            can(Action.WRITE, permission.resource);
+            can(Action.Create, permission.resource);
+            can(Action.Update, permission.resource);
+            can(Action.Delete, permission.resource);
+
             can(Action.READ, permission.resource);
             return;
           }
