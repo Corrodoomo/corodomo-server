@@ -1,6 +1,7 @@
+import { Policy } from '@modules/policy/policy.decorator';
 import { Body, Controller, Param, Query, Req } from '@nestjs/common';
 
-import { ApiDelete, ApiGet, ApiPost, ApiPut, Roles } from '@common/decorators';
+import { ApiDelete, ApiGet, ApiPost, ApiPut } from '@common/decorators';
 import {
   ApiOkDeleteResultExample,
   ApiOkInsertResultExample,
@@ -10,7 +11,6 @@ import {
 import { PaginateQueryDto } from '@common/dtos/common.dto';
 import { WorkspaceIdDto } from '@common/dtos/id.dto';
 import { CreateWorkspaceDto } from '@common/dtos/workspace.dto';
-import { SystemRoles } from '@common/enums';
 import { MyWorkspaceMapper, WorkspaceRecordMapper } from '@common/mappers/workspace.mapper';
 import { Request } from '@common/models';
 
@@ -21,28 +21,28 @@ export class WorkspaceController {
   constructor(private readonly workspaceService: WorkspaceService) {}
 
   @ApiGet('/')
-  @Roles(SystemRoles.LEARNER)
+  @Policy('read', 'workspaces')
   @ApiOkItemsExample(MyWorkspaceMapper)
   getMyWorkspaces(@Query() query: PaginateQueryDto, @Req() request: Request) {
     return this.workspaceService.getMyWorkspaces(query, request.user.id);
   }
 
   @ApiPost('/')
-  @Roles(SystemRoles.LEARNER)
+  @Policy('create', 'workspaces')
   @ApiOkInsertResultExample(WorkspaceRecordMapper)
   create(@Body() body: CreateWorkspaceDto, @Req() request: Request) {
     return this.workspaceService.create(request.user.id, body);
   }
 
   @ApiPut('/:workspaceId')
-  @Roles(SystemRoles.LEARNER)
+  @Policy('update', 'workspaces')
   @ApiOkUpdateResultExample(WorkspaceRecordMapper)
   update(@Param() param: WorkspaceIdDto, @Body() body: CreateWorkspaceDto, @Req() request: Request) {
     return this.workspaceService.update(request.user.id, param.workspaceId, body);
   }
 
   @ApiDelete('/:workspaceId')
-  @Roles(SystemRoles.LEARNER)
+  @Policy('delete', 'workspaces')
   @ApiOkDeleteResultExample()
   delete(@Param() param: WorkspaceIdDto, @Req() request: Request) {
     return this.workspaceService.delete(request.user.id, param.workspaceId);

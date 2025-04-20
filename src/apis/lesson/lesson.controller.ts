@@ -1,7 +1,8 @@
 import { Lesson } from '@modules/database/entities';
+import { Policy } from '@modules/policy/policy.decorator';
 import { Body, Param, Query, Req } from '@nestjs/common';
 
-import { ApiDelete, ApiGet, ApiPost, ApiPut, Controller, Roles } from '@common/decorators';
+import { ApiDelete, ApiGet, ApiPost, ApiPut, Controller } from '@common/decorators';
 import {
   ApiOkDeleteResultExample,
   ApiOkInsertResultExample,
@@ -20,7 +21,6 @@ import {
   ListTagsDto,
   UpdateLessonDto,
 } from '@common/dtos/lesson.dto';
-import { SystemRoles } from '@common/enums';
 import { Request } from '@common/models';
 
 import { LessonService } from './lesson.service';
@@ -30,77 +30,77 @@ export class LessonController {
   constructor(private readonly lessonService: LessonService) {}
 
   @ApiPost('/')
-  @Roles(SystemRoles.LEARNER)
+  @Policy('create', 'lessons')
   @ApiOkInsertResultExample(LessonRecordDto)
   create(@Body() body: CreateLessonDto, @Req() request: Request) {
     return this.lessonService.create(request.user.id, body);
   }
 
   @ApiDelete('/:lessonId')
-  @Roles(SystemRoles.LEARNER)
+  @Policy('delete', 'lessons')
   @ApiOkDeleteResultExample()
   delete(@Param() param: LessonIdDto, @Req() request: Request) {
     return this.lessonService.delete(request.user.id, param.lessonId);
   }
 
   @ApiGet('/')
-  @Roles(SystemRoles.LEARNER)
+  @Policy('read', 'lessons')
   @ApiOkPaginationExample(LessonRecordDto)
   get(@Query() query: PaginateQueryDto) {
     return this.lessonService.get(query);
   }
 
   @ApiGet('/search')
-  @Roles(SystemRoles.LEARNER)
+  @Policy('read', 'lessons')
   @ApiOkPaginationExample(LessonRecordDto)
   search(@Query() query: PaginateQueryDto) {
     return this.lessonService.search(query);
   }
 
   @ApiGet('/search/me')
-  @Roles(SystemRoles.LEARNER)
+  @Policy('read', 'lessons')
   @ApiOkPaginationExample(LessonRecordDto)
   searchMyHistory(@Query() query: PaginateQueryDto, @Req() req: Request) {
     return this.lessonService.searchMyHistory(query, req.user.id);
   }
 
   @ApiGet('/me')
-  @Roles(SystemRoles.LEARNER)
+  @Policy('read', 'lessons')
   @ApiOkPaginationExample(LessonRecordDto)
   getLessonsInFolder(@Query() query: PaginateQueryDto, @Req() req: Request) {
     return this.lessonService.getMyLessons(req.user.id, query);
   }
 
   @ApiGet('/list_tags')
-  @Roles(SystemRoles.LEARNER)
+  @Policy('read', 'lessons')
   @ApiOkItemsExample(ListTagsDto)
   getListOfTags() {
     return this.lessonService.getListTags();
   }
 
   @ApiGet('/:lessonId/video_course')
-  @Roles(SystemRoles.LEARNER)
+  @Policy('read', 'lessons')
   @ApiOkItemExample(LessonVideoCourse)
   getDetail(@Param() params: LessonIdDto, @Req() req: Request) {
     return this.lessonService.getDetail(params.lessonId, req.user.id);
   }
 
   @ApiGet('/:lessonId/minimap')
-  @Roles(SystemRoles.LEARNER)
+  @Policy('read', 'lessons')
   @ApiOkItemExample(OpenAIMinimapItemDto)
   getMinimaps(@Param() params: LessonIdDto) {
     return this.lessonService.getMinimaps(params.lessonId);
   }
 
   @ApiPut('/:lessonId/watched')
-  @Roles(SystemRoles.LEARNER)
+  @Policy('update', 'lessons')
   @ApiOkUpdateResultExample()
   watch(@Param() params: LessonIdDto, @Req() req: Request) {
     return this.lessonService.watch(req.user.id, params.lessonId);
   }
 
   @ApiPut('/:lessonId')
-  @Roles(SystemRoles.LEARNER)
+  @Policy('update', 'lessons')
   @ApiOkUpdateResultExample(Lesson)
   update(@Param() params: LessonIdDto, @Body() body: UpdateLessonDto, @Req() req: Request) {
     return this.lessonService.update(req.user.id, params.lessonId, body);
