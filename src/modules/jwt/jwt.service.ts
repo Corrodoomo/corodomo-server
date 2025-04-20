@@ -36,6 +36,7 @@ export class JwtService {
     return this.jwtService.signAsync(user, {
       secret: this.configService.getOrThrow('REFRESH_SECRET_KEY'),
       expiresIn: this.configService.getOrThrow('REFRESH_SECRET_KEY_EXPIRE'),
+      algorithm: 'HS256'
     });
   }
 

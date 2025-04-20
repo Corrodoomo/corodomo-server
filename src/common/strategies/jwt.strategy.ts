@@ -1,4 +1,3 @@
-import { UserRepository } from '@app/apis/user/user.repository';
 import { UserCacheService } from '@modules/cache/user-cache.service';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -13,7 +12,6 @@ import { JWTPayLoad } from '@common/types/jwt-payload.type';
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     private readonly configService: ConfigService,
-    private readonly userRepository: UserRepository,
     private readonly cacheService: UserCacheService
   ) {
     super({

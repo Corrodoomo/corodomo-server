@@ -8,7 +8,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 
 import { USER_TOKEN } from '@common/constants/token';
 import { Messages } from '@common/enums';
-import { AuthMetadataMapper } from '@common/mappers/auth.mapper';
+import { JWTPayLoad } from '@common/types/jwt-payload.type';
 
 @Injectable()
 export class RefreshStrategy extends PassportStrategy(Strategy, 'refresh-jwt') {
@@ -25,18 +25,20 @@ export class RefreshStrategy extends PassportStrategy(Strategy, 'refresh-jwt') {
     });
   }
 
-  async validate(req: Request, payload: AuthMetadataMapper) {
-    const { id } = payload;
-
+  async validate(req: Request, payload: JWTPayLoad) {
     // Get refresh token from cookies
     const refreshToken = req.cookies.refreshToken;
 
     //Check refresh token in Redis
-    await this.cacheService.validateToken(id, USER_TOKEN.REFRESH_TOKEN, refreshToken);
+    await this.cacheService.validateToken(payload.id, USER_TOKEN.REFRESH_TOKEN, refreshToken);
 
     // Check if refresh token is valid
     const isRefreshTokenMatched = this.jwtService.verifyRefreshToken(refreshToken);
     if (!isRefreshTokenMatched) throw new UnauthorizedException(Messages.INVALID_REFRESH_TOKEN);
+
+    // Delete expire date option
+    delete payload.iat;
+    delete payload.exp;
 
     // Return user
     return payload;
