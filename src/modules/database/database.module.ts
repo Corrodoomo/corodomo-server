@@ -18,10 +18,13 @@ import { LessonRecent } from './entities/lesson-recent.entity';
 import { Lesson } from './entities/lesson.entity';
 import { Note } from './entities/note.entity';
 import { NotedVocabulary } from './entities/noted-vocabulary.entity';
+import { Permission } from './entities/permission.entity';
+import { Policy } from './entities/policy.entity';
 import { ProjectRecent } from './entities/project-recent.entity';
 import { Project } from './entities/project.entity';
 import { QuestionChoice } from './entities/question-choice.entity';
 import { Question } from './entities/question.entity';
+import { Resource } from './entities/resource.entity';
 import { Song } from './entities/song.entity';
 import { SubTask } from './entities/sub-task.entity';
 import { Subtitle } from './entities/subtitle.entity';
@@ -29,10 +32,14 @@ import { TaskComment } from './entities/task-comment.entity';
 import { Task } from './entities/task.entity';
 import { Vocabulary } from './entities/vocabulary.entity';
 import { Workspace } from './entities/workspace.entity';
+import { Role } from './entities/role.entity';
+import { Action } from './entities/action.entity';
+import { PricingPlan } from './entities/pricing-plan.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
+      name: 'default',
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
@@ -59,6 +66,12 @@ import { Workspace } from './entities/workspace.entity';
         },
         entities: [
           User,
+          PricingPlan,
+          Role,
+          Action,
+          Resource,
+          Policy,
+          Permission,
           Blog,
           Note,
           Exam,
@@ -94,5 +107,6 @@ import { Workspace } from './entities/workspace.entity';
       },
     }),
   ],
+  exports: [],
 })
 export class DatabaseModule {}

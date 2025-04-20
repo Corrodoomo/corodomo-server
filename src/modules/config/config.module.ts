@@ -11,6 +11,7 @@ import * as Joi from 'joi';
         // Node Config
         NODE_ENV: Joi.string().valid('dev', 'production', 'test').required(),
         PORT: Joi.number().port().required(),
+        CLIENT_DOMAIN: Joi.string().required(),
 
         ACCESS_SECRET_KEY: Joi.string().required(),
         ACCESS_SECRET_KEY_EXPIRE: Joi.string().required(),
@@ -63,6 +64,7 @@ import * as Joi from 'joi';
         SESSION_HTTP_ONLY: Joi.boolean().required(),
         SESSION_PREFIX: Joi.string().required(),
         SESSION_DB: Joi.number().required(),
+        COOKIE_SECRET_KEY: Joi.string().required(),
 
         // RATE LIMITER
         RATE_LIMITER_MAX: Joi.number().integer().required(),

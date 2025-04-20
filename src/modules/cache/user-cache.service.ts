@@ -29,9 +29,14 @@ export class UserCacheService extends CacheService {
     };
   }
 
-  async setItem(key: string, value: string) {
-    await this.del(key);
-    return this.set(key, value, this.configService.getOrThrow('ACCESS_SECRET_REDIS_EXPIRE'));
+  /**
+   * Set Json Item
+   * @param key
+   * @param value
+   * @returns
+   */
+  async setItem(key: string, value: object) {
+    return this.set(key, JSON.stringify(value), this.configService.getOrThrow('ACCESS_SECRET_REDIS_EXPIRE'));
   }
 
   async existToken(userId: string) {

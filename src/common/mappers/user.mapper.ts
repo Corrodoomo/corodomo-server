@@ -48,6 +48,7 @@ export class ProfiledUserMapper {
   @ApiProperty()
   role?: string;
 }
+
 export class LessonRecentMapper {
   @ApiProperty()
   lessonId: string;
@@ -82,9 +83,6 @@ export class UserProfileMapper {
 
   @ApiProperty()
   emailVerified: boolean;
-
-  @ApiProperty()
-  role: string;
 
   @ApiProperty()
   createdAt: Date;

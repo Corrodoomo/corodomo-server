@@ -11,9 +11,9 @@ export class SubtitleRepository extends Repository<Subtitle> {
 
   /**
    * Update by transcript
-   * @param lessonId 
-   * @param transcripts 
-   * @returns 
+   * @param lessonId
+   * @param transcripts
+   * @returns
    */
   public async updateByTranscripts(lessonId: string, transcripts: TranscriptResponse[]) {
     // Save subtitle

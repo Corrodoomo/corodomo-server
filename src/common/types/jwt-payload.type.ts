@@ -1,5 +1,6 @@
+import { AuthMetadataMapper } from '@common/mappers/auth.mapper';
+
 export type JWTPayLoad = {
-  id: string;
-  email: string;
-  role: string;
-};
+  exp?: number;
+  iat?: number;
+} & AuthMetadataMapper;

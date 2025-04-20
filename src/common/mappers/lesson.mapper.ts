@@ -44,16 +44,18 @@ export class LessonsInFolderMapper extends PaginatedMapper<LessonInFolderMapper,
    * @returns
    */
   public static handleMapper(lesson: Lesson[]) {
-    return lesson.map(({ id, title, youtubeUrl, thumbnail, duration, watchedCount, language, folder, lessonRecents }) => ({
-      id,
-      title,
-      youtubeUrl,
-      thumbnail,
-      duration,
-      watchedCount,
-      language,
-      folder,
-      accessedAt: lessonRecents.pop()?.accessedAt,
-    }));
+    return lesson.map(
+      ({ id, title, youtubeUrl, thumbnail, duration, watchedCount, language, folder, lessonRecents }) => ({
+        id,
+        title,
+        youtubeUrl,
+        thumbnail,
+        duration,
+        watchedCount,
+        language,
+        folder,
+        accessedAt: lessonRecents.pop()?.accessedAt,
+      })
+    );
   }
 }

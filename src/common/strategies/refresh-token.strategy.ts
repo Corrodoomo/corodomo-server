@@ -1,4 +1,3 @@
-import { UserNewsRepository } from '@app/apis/user-new/user-new.repository';
 import { UserCacheService } from '@modules/cache/user-cache.service';
 import { JwtService } from '@modules/jwt';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
@@ -15,12 +14,11 @@ import { JWTPayLoad } from '@common/types/jwt-payload.type';
 export class RefreshStrategy extends PassportStrategy(Strategy, 'refresh-jwt') {
   constructor(
     private readonly configService: ConfigService,
-    private readonly userNewsRepository: UserNewsRepository,
     private readonly jwtService: JwtService,
     private readonly cacheService: UserCacheService
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromExtractors([(req: Request) => req.cookies?.refreshToken]),
+      jwtFromRequest: ExtractJwt.fromExtractors([(req: Request) => req.cookies.refreshToken]),
       secretOrKey: configService.getOrThrow('REFRESH_SECRET_KEY'),
       ignoreExpiration: false,
       passReqToCallback: true,
@@ -28,24 +26,21 @@ export class RefreshStrategy extends PassportStrategy(Strategy, 'refresh-jwt') {
   }
 
   async validate(req: Request, payload: JWTPayLoad) {
-    const { id } = payload;
-
     // Get refresh token from cookies
-    const refreshToken = req.cookies?.refreshToken;
+    const refreshToken = req.cookies.refreshToken;
 
     //Check refresh token in Redis
-    await this.cacheService.validateToken(id, USER_TOKEN.REFRESH_TOKEN, refreshToken);
-
-    // Check if user exists
-    const user = await this.userNewsRepository.findUserById(id);
-    if (!user) throw new UnauthorizedException(Messages.USER_NOT_FOUND);
+    await this.cacheService.validateToken(payload.id, USER_TOKEN.REFRESH_TOKEN, refreshToken);
 
     // Check if refresh token is valid
     const isRefreshTokenMatched = this.jwtService.verifyRefreshToken(refreshToken);
     if (!isRefreshTokenMatched) throw new UnauthorizedException(Messages.INVALID_REFRESH_TOKEN);
 
+    // Delete expire date option
+    delete payload.iat;
+    delete payload.exp;
+
     // Return user
-    const curentUser = { id: user.id, email: user.email, role: user.role };
-    return curentUser;
+    return payload;
   }
 }

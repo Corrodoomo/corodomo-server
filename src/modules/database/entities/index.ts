@@ -22,3 +22,8 @@ export * from './quiz.entity';
 export * from './vocabulary.entity';
 export * from './noted-vocabulary.entity';
 export * from './lesson-note.entity';
+export * from './role.entity';
+export * from './action.entity';
+export * from './permission.entity';
+export * from './policy.entity';
+export * from './pricing-plan.entity';

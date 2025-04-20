@@ -4,8 +4,6 @@ import { LessonModule } from '@app/apis/lesson/lesson.module';
 import { NotedVocabularyModule } from '@app/apis/noted-vocabulary/noted-vocabulary.module';
 import { QuizModule } from '@app/apis/quiz/quiz.module';
 import { SubtitleModule } from '@app/apis/subtitle/subtitle.module';
-import { UserNewModule } from '@app/apis/user-new/user-new.module';
-import { UserModule } from '@app/apis/user/user.module';
 import { VocabularyModule } from '@app/apis/vocabulary/vocabulary.module';
 import { AppController } from '@app/app.controller';
 import { HelmetMiddleware } from '@middlewares/helmet.middleware';
@@ -16,11 +14,13 @@ import { CronModule } from '@modules/cron';
 import { DatabaseModule } from '@modules/database/database.module';
 import { ElasticSearchModule } from '@modules/elastic-search/elastic-search.module';
 import { JwtModule } from '@modules/jwt';
+import { MqttModule } from '@modules/mqtt/mqtt.module';
 import { OpenAIModule } from '@modules/openai/openai.module';
 import { RateLimitModule } from '@modules/rate-limit/rate-limit.module';
 import { YoutubeModule } from '@modules/youtube/youtube.module';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 
+import { CookieMiddleware } from '@common/middlewares/cookie.middleware';
 import { SessionMiddleware } from '@common/middlewares/session.middleware';
 
 import { BlogModule } from './apis/blog/blog.module';
@@ -28,9 +28,10 @@ import { LessonCommentModule } from './apis/lesson-comment/lesson-comment.module
 import { LessonNoteModule } from './apis/lesson-note/lesson-note.module';
 import { ProjectModule } from './apis/project/project.module';
 import { TaskModule } from './apis/task/task.module';
+import { UserModule } from './apis/user/user.module';
 import { WorkspaceModule } from './apis/workspace/workspace.module';
 import { providers } from './app.provider';
-import { MqttModule } from '@modules/mqtt/mqtt.module';
+import { PolicyModule } from './modules/policy/policy.module';
 
 @Module({
   imports: [
@@ -59,13 +60,15 @@ import { MqttModule } from '@modules/mqtt/mqtt.module';
     LessonNoteModule,
     BlogModule,
     AuthModule,
-    UserNewModule,
     TaskModule,
     WorkspaceModule,
     ProjectModule,
 
     // Message Queue
     MqttModule,
+
+    // Authentication and Authorization Module
+    PolicyModule,
   ],
   exports: [],
   controllers: [AppController],
@@ -73,6 +76,6 @@ import { MqttModule } from '@modules/mqtt/mqtt.module';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(HelmetMiddleware, LoggerMiddleware, SessionMiddleware).forRoutes('*');
+    consumer.apply(HelmetMiddleware, LoggerMiddleware, CookieMiddleware, SessionMiddleware).forRoutes('*');
   }
 }

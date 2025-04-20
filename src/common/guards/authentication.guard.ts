@@ -1,46 +1,41 @@
-import { JwtService } from '@modules/jwt';
-import {
-  CanActivate,
-  ExecutionContext,
-  ForbiddenException,
-  Injectable,
-  Logger,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import { isEqual } from 'lodash';
 
-import { Request } from '@common/models';
+import { IS_PUBLIC_KEY } from '@common/decorators/public-route.decorator';
+import { Messages } from '@common/enums';
+import { WebSession } from '@common/utils/session.util';
 
 @Injectable()
 export class AuthenticationGuard implements CanActivate {
-  logger = new Logger('AuthenticationGuard');
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(private readonly reflector: Reflector) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest<Request>();
-    const token = this.extractTokenFromHeader(request);
+    const request = context.switchToHttp().getRequest<SystemRequest>();
 
-    if (!token) {
-      throw new ForbiddenException();
+    // Add your custom authentication logic here (Example: Check user roles)
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    // Next step if Api is public
+    if (isPublic) {
+      return true;
     }
 
-    try {
-      if (request.originalUrl === '/api/v1/users/refresh') {
-        request.user = await this.jwtService.verifyRefreshToken(token);
-      }
-      else {
-        request.user = await this.jwtService.verifyAccessToken(token);
-      }
-    } catch (error) {
-      this.logger.error(error);
-      throw new UnauthorizedException();
+    // Error if session not found
+    if (!request.session.userId) {
+      throw new UnauthorizedException(Messages.SESSION_NOT_FOUND);
+    }
+
+    const metadata = WebSession.getSessionMetadata(request);
+
+    // Error if current session is not equal with logged in session
+    if (!isEqual(request.session.metadata, metadata)) {
+      throw new UnauthorizedException(Messages.DUPLICATED_DEVICE);
     }
 
     return true;
-  }
-
-  private extractTokenFromHeader(request: Request): string | undefined {
-    const { authorization = '' } = request.headers;
-    const [type, token] = authorization.split(' ') ?? [];
-    return type === 'Bearer' ? token : undefined;
   }
 }

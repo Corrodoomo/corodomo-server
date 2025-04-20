@@ -1,8 +1,8 @@
+import { ProjectRecent } from '@modules/database/entities/project-recent.entity';
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 
 import { BaseRepository } from '@common/repository';
-import { ProjectRecent } from '@modules/database/entities/project-recent.entity';
 
 @Injectable()
 export class ProjectRecentRepository extends BaseRepository<ProjectRecent> {

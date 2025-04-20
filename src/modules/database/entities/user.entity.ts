@@ -1,4 +1,4 @@
-import { Column, Entity, Index, OneToMany, OneToOne } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, OneToMany, OneToOne } from 'typeorm';
 
 import { BaseEntity } from './base.entity';
 import { Blog } from './blog.entity';
@@ -11,12 +11,14 @@ import { LessonRecent } from './lesson-recent.entity';
 import { Lesson } from './lesson.entity';
 import { Note } from './note.entity';
 import { NotedVocabulary } from './noted-vocabulary.entity';
+import { PricingPlan } from './pricing-plan.entity';
+import { ProjectRecent } from './project-recent.entity';
+import { Project } from './project.entity';
+import { Role } from './role.entity';
 import { Song } from './song.entity';
 import { TaskComment } from './task-comment.entity';
 import { Task } from './task.entity';
 import { Workspace } from './workspace.entity';
-import { ProjectRecent } from './project-recent.entity';
-import { Project } from './project.entity';
 
 @Index('users_pkey', ['id'], { unique: true })
 @Entity('users', { schema: 'public' })
@@ -30,17 +32,22 @@ export class User extends BaseEntity {
   @Column('character varying', { name: 'name', nullable: true })
   name: string;
 
-  @Column('character varying', { name: 'role', default: 'learner' })
-  role: string;
-
   @Column('boolean', { name: 'email_verified', default: false })
   emailVerified: boolean;
 
   @Column('character varying', { name: 'avatar_url' })
   avatarUrl: string;
 
-  @Column('character varying', { name: 'auth_provider' })
+  @Column('character varying', { name: 'auth_provider', default: 'corodomo_system' })
   authProvider: string;
+
+  @OneToOne(() => Role, (role) => role.user)
+  @JoinColumn({ name: 'role_id' })
+  role: Role;
+
+  @OneToOne(() => PricingPlan, (pricingPlan) => pricingPlan.user)
+  @JoinColumn({ name: 'pricing_plan_id' })
+  pricingPlan: PricingPlan;
 
   @OneToMany(() => Blog, (blog) => blog.createdBy)
   blogs: Blog[];

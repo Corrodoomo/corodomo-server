@@ -1,5 +1,8 @@
-import { User } from '@modules/database/entities';
 import { Request as ExpressRequest, Response as ExpressResponse } from 'express';
+import { Cookie } from 'express-session';
+
+import { AuthMetadataMapper } from '@common/mappers/auth.mapper';
+import { SignedInUserMapper } from '@common/mappers/user.mapper';
 
 declare global {
   type Session = {
@@ -10,7 +13,11 @@ declare global {
     exp: number; // Thời gian hết hạn cũng là số nguyên
   };
 
-  type SystemRequest = ExpressRequest & { user: User; timeId: string };
+  type CustomCookie = Cookie & SignedInUserMapper
+
+  type CustomRequest = { user: AuthMetadataMapper; cookies: CustomCookie; timeId: string };
+
+  type SystemRequest = ExpressRequest & CustomRequest;
 
   type SystemResponse = ExpressResponse;
 
