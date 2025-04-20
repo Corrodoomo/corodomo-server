@@ -1,106 +1,84 @@
-import { CreateUserDto } from '@app/apis/user-new/dtos/create-user.dto';
-import { UserNewsRepository } from '@app/apis/user-new/user-new.repository';
-import { UserNewService } from '@app/apis/user-new/user-new.service';
+import { CreateUserDto } from '@app/apis/user/dtos/create-user.dto';
+import { UserRepository } from '@app/apis/user/user.repository';
+import { UserService } from '@app/apis/user/user.service';
 import { UserCacheService } from '@modules/cache/user-cache.service';
-import { User } from '@modules/database/entities';
 import { JwtService } from '@modules/jwt';
-import { ConflictException, Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { Request, Response } from 'express';
+import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Transactional } from 'typeorm-transactional';
 
 import { Messages } from '@common/enums';
-import { CookieService } from '@common/services/cookie.service';
-import { SessionService } from '@common/services/session.service';
-import { WebCookie } from '@common/utils/cookie.util';
-import { WebSession } from '@common/utils/session.util';
+import { AuthMetadataMapper } from '@common/mappers/auth.mapper';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly userNewsService: UserNewService,
-    private readonly userNewsRepository: UserNewsRepository,
+    private readonly userService: UserService,
+    private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
-    private readonly cookieService: CookieService,
-    private readonly sessionService: SessionService,
-    private readonly configService: ConfigService,
     private readonly cacheService: UserCacheService
   ) {}
 
   // Register user
   @Transactional()
   public async registerUser(body: CreateUserDto) {
-    const user = await this.userNewsRepository.findByEmail(body.email);
+    const user = await this.userRepository.findByEmail(body.email);
     if (user) throw new ConflictException(Messages.USER_ALREADY_EXIST);
-    return this.userNewsService.create(body);
+    return this.userService.create(body);
   }
 
-  // Sign in
-  public async signIn(
-    request: SystemRequest,
-    response: SystemResponse,
-    userAgent: string,
-    cookie: WebCookie,
-    session: WebSession
-  ) {
-    const user = request.user;
+  /**
+   * Sign In with Cookie Http Only
+   * @param user
+   * @returns
+   */
+  public async signIn(user: AuthMetadataMapper) {
+    // Get current sesson
+    const duplicated = await this.cacheService.get(user.id);
 
+    // Error if session duplicated
+    if (duplicated) {
+      throw new UnauthorizedException(Messages.DUPLICATED_SESSION);
+    }
+
+    // Generate access token and refresh token
     const { accessToken, refreshToken } = await this.jwtService.generateToken(user);
 
-    // Set cookies
-    cookie.setHttpOnlyCookie('accessToken', accessToken);
-    cookie.setHttpOnlyCookie('refreshToken', refreshToken);
-
-    // Get metadata
-    const metadata = session.getSessionMetadata(userAgent);
-
-    // Save session
-    await session.saveSession(user, metadata);
-
     // Save token to cache
-    await this.cacheService.setItem(
-      user.id,
-      JSON.stringify({
-        accessToken,
-        refreshToken,
-        createdAt: new Date().toISOString(),
-      })
-    );
+    await this.cacheService.setItem(user.id, {
+      accessToken,
+      refreshToken,
+      createdAt: new Date().toISOString(),
+    });
 
-    response.send({ message: 'Login successful' });
-
-    return null;
+    // Send access token and refresh token to middleware interceptor
+    return { accessToken, refreshToken };
   }
 
-  public async refresh(user: User, response: Response, cookie: WebCookie) {
+  public async refresh(user: AuthMetadataMapper) {
+    // Generate access token and refresh token
     const { accessToken, refreshToken } = await this.jwtService.generateToken(user);
 
-    // Set cookies
-    cookie.setHttpOnlyCookie('accessToken', accessToken);
-    cookie.setHttpOnlyCookie('refreshToken', refreshToken);
-
     // Save token to cache
-    await this.cacheService.setItem(
-      user.id,
-      JSON.stringify({
-        accessToken,
-        refreshToken,
-        createdAt: new Date().toISOString(),
-      })
-    );
+    await this.cacheService.setItem(user.id, {
+      accessToken,
+      refreshToken,
+      createdAt: new Date().toISOString(),
+    });
 
-    response.send({ message: 'Refresh successful' });
-    return null;
+    // Send access token and refresh token to middleware interceptor
+    return { accessToken, refreshToken };
   }
 
-  public async logout(request: Request, response: Response) {
-    await this.sessionService.destroySession(request, this.configService);
+  /**
+   * Logout user from system
+   * @param user
+   * @returns
+   */
+  public async logout(user: AuthMetadataMapper) {
+    // Delete token from cache
+    await this.cacheService.del(user.id);
 
-    //Clear cookie
-    this.cookieService.clearCookie(response, 'accessToken');
-    this.cookieService.clearCookie(response, 'refreshToken');
-
-    response.send({ message: 'Logout successful' });
-    return null;
+    // Return message
+    return { message: 'Logout successful' };
   }
 }

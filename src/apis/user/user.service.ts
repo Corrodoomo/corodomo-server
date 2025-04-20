@@ -1,131 +1,51 @@
-import { UserCacheService } from '@modules/cache/user-cache.service';
-import { JwtService } from '@modules/jwt';
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { isEmpty } from 'lodash';
+import { CreateUserDto } from '@app/apis/user/dtos/create-user.dto';
+import { UserRepository } from '@app/apis/user/user.repository';
+import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { InsertResultDto } from '@common/dtos';
 import { Messages } from '@common/enums';
-import { SignedInUserMapper } from '@common/mappers/user.mapper';
+import { ProfileMapper } from '@common/mappers/user.mapper';
 import { BryptService } from '@common/services';
-
-import { UsersRepository } from './user.repository';
 
 @Injectable()
 export class UserService {
   constructor(
-    private readonly userRepository: UsersRepository,
-    private readonly jwtService: JwtService,
-    private readonly cacheService: UserCacheService,
+    private readonly userRepository: UserRepository,
     private readonly bryptService: BryptService
   ) {}
 
-  /**
-   * Sign in
-   * @param email
-   * @param password
-   * @returns
-   */
-  public async signIn(email: string, password: string): Promise<SignedInUserMapper> {
-    // Get user by email
-    const user = await this.userRepository.findByEmail(email);
-    // Error if user invalid
-    if (isEmpty(user)) {
-      throw new BadRequestException(Messages.INVALID_EMAIL_OR_PASSWORD);
-    }
+  public async create(body: CreateUserDto) {
+    const { password, ...user } = body;
 
-    // Compare hash password
-    const valid = await this.bryptService.compare(password, user.password);
-    // Invalid password
-    if (!valid) {
-      throw new BadRequestException(Messages.INVALID_EMAIL_OR_PASSWORD);
-    }
-
-    // Check token if existed
-    await this.cacheService.existToken(user.id);
-
-    // Generate token
-    const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAccessToken({ id: user.id, email: user.email, role: user.role }),
-      this.jwtService.signRefreshToken({ id: user.id, email: user.email, role: user.role }),
-    ]);
-
-    // Save refresh token to cache
-    await this.cacheService.setItem(user.id, `${accessToken}:${refreshToken}`);
-
-    // Return result
-    return { accessToken, refreshToken };
-  }
-
-  public async refresh(userId: string): Promise<SignedInUserMapper> {
-    // Get user by email
-    const user = await this.userRepository.findOne({ where: { id: userId } });
-
-    // Error if user invalid
-    if (isEmpty(user)) {
-      throw new BadRequestException(Messages.INVALID_EMAIL_OR_PASSWORD);
-    }
-
-    // Generate token
-    const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAccessToken({ id: user.id, email: user.email, role: user.role }),
-      this.jwtService.signRefreshToken({ id: user.id, email: user.email, role: user.role }),
-    ]);
-
-    // Save refresh token to cache
-    const cachedToken = await this.cacheService.getItem(user.id);
-
-    // Set new access token
-    await this.cacheService.setItem(user.id, `${accessToken}:${cachedToken.refreshToken}`);
-
-    // Return result
-    return { accessToken, refreshToken };
-  }
-
-  /**
-   * Sign up
-   * @param email
-   * @param password
-   * @returns
-   */
-  public async signUp(email: string, password: string) {
-    // Get user by email
-    const user = await this.userRepository.findByEmail(email);
-
-    // Duplicated error
-    if (!isEmpty(user)) {
-      throw new BadRequestException(Messages.DUPLICATED_EMAIL);
-    }
-
-    // Hash password
-    const hash = await this.bryptService.hashPassword(password);
-
-    // Insert user if valid
+    const hashPassword = await this.bryptService.hashPassword(password);
     const savedUser = await this.userRepository.save({
-      email,
-      password: hash,
+      email: user.email,
+      password: hashPassword,
+      name: user.name
     });
 
-    // Return result
     return new InsertResultDto(
       {
         id: savedUser.id,
-        email,
+        email: savedUser.email,
         emailVerified: savedUser.emailVerified,
         updatedAt: savedUser.updatedAt,
         createdAt: savedUser.createdAt,
+        name: savedUser.name,
       },
       1
     );
   }
 
-  /**
-   * Sign out
-   * @param userId
-   */
-  public async signOut(userId: string) {
-    // Delete token on redis
-    await this.cacheService.del(userId);
+  public async get(id: string) {
+    const user = await this.userRepository.findOne({
+      where: { id },
+    });
 
-    return { message: 'Sign out successfully' };
+    if (!user) {
+      throw new NotFoundException(Messages.USER_NOT_FOUND);
+    }
+
+    return new ProfileMapper(user);
   }
 }

@@ -1,17 +1,9 @@
-import { Body, Controller, Req } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 
-import { ApiPost, Roles } from '@common/decorators';
-import { ApiOkInsertResultExample, ApiOkResponseExample } from '@common/decorators/example.decorator';
-import { Public } from '@common/decorators/public-route.decorator';
-import { SignInUserDto } from '@common/dtos';
-import { SystemRoles } from '@common/enums';
-import {
-  RefreshUserMapper,
-  SignedInUserMapper,
-  SignedOutUserMapper,
-  SignedUpUserMapper,
-} from '@common/mappers/user.mapper';
-import { Request } from '@common/models';
+import { ApiGet } from '@common/decorators';
+import { ApiOkResponseExample } from '@common/decorators/example.decorator';
+import { Authorized } from '@common/guards/authorized.guard';
+import { ProfileMapper } from '@common/mappers/user.mapper';
 
 import { UserService } from './user.service';
 
@@ -19,30 +11,9 @@ import { UserService } from './user.service';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Public()
-  @ApiPost('signin')
-  @ApiOkResponseExample(SignedInUserMapper)
-  signIn(@Body() body: SignInUserDto) {
-    return this.userService.signIn(body.email, body.password);
-  }
-
-  @ApiPost('signup')
-  @ApiOkInsertResultExample(SignedUpUserMapper)
-  signUp(@Body() body: SignInUserDto) {
-    return this.userService.signUp(body.email, body.password);
-  }
-
-  @ApiPost('signout')
-  @Roles(SystemRoles.LEARNER)
-  @ApiOkResponseExample(SignedOutUserMapper)
-  signOut(@Req() request: Request) {
-    return this.userService.signOut(request.user.id);
-  }
-
-  @ApiPost('refresh')
-  @Roles(SystemRoles.LEARNER)
-  @ApiOkResponseExample(RefreshUserMapper)
-  refresh(@Req() request: Request) {
-    return this.userService.refresh(request.user.id);
+  @ApiGet('profile')
+  @ApiOkResponseExample(ProfileMapper)
+  async get(@Authorized('id') id: string) {
+    return this.userService.get(id);
   }
 }

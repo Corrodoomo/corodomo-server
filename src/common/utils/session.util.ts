@@ -1,6 +1,4 @@
-import { User } from '@modules/database/entities';
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Injectable } from '@nestjs/common';
 import { lookup } from 'geoip-lite';
 import * as countries from 'i18n-iso-countries';
 
@@ -15,46 +13,15 @@ import DeviceDetector = require('device-detector-js');
 countries.registerLocale(require('i18n-iso-countries/langs/en.json'));
 @Injectable()
 export class WebSession {
-  private readonly request: SystemRequest;
-
-  constructor(request: SystemRequest) {
-    this.request = request;
-  }
-
-  saveSession(user: User, metadata: SessionMetadata) {
-    return new Promise((resolve, reject) => {
-      this.request.session.regenerate((err) => {
-        if (err) reject(new InternalServerErrorException('Error regenerating session'));
-
-        this.request.session.createdAt = new Date();
-        this.request.session.userId = user.id;
-        this.request.session.metadata = metadata;
-        this.request.session.save((err) => {
-          if (err) reject(new InternalServerErrorException('Error saving session'));
-          resolve(true);
-        });
-      });
-    });
-  }
-
-  destroySession(configService: ConfigService) {
-    return new Promise((resolve, reject) => {
-      this.request.session.destroy((err) => {
-        if (err) {
-          return reject(new InternalServerErrorException('Error destroying session'));
-        }
-
-        // Clear cookies
-        this.request.res?.clearCookie(configService.getOrThrow('SESSION_NAME'));
-        resolve(true);
-      });
-    });
-  }
-
-  getSessionMetadata(userAgent: string): SessionMetadata {
-    const ip = getClientIp(this.request);
+  /**
+   * Get session metadata
+   * @param request
+   * @returns
+   */
+  static getSessionMetadata(request: SystemRequest): SessionMetadata {
+    const ip = getClientIp(request);
     const location = lookup(ip);
-    const device = new DeviceDetector().parse(userAgent);
+    const device = new DeviceDetector().parse(request.headers['user-agent'] || '');
 
     return {
       location: {

@@ -1,46 +1,20 @@
-import { JwtService } from '@modules/jwt';
-import {
-  CanActivate,
-  ExecutionContext,
-  ForbiddenException,
-  Injectable,
-  Logger,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import { isEqual } from 'lodash';
 
-import { Request } from '@common/models';
+import { Messages } from '@common/enums';
+import { WebSession } from '@common/utils/session.util';
 
 @Injectable()
 export class AuthenticationGuard implements CanActivate {
-  logger = new Logger('AuthenticationGuard');
-  constructor(private readonly jwtService: JwtService) {}
-
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest<Request>();
-    const token = this.extractTokenFromHeader(request);
+    const request = context.switchToHttp().getRequest<SystemRequest>();
+    const metadata = WebSession.getSessionMetadata(request);
 
-    if (!token) {
-      throw new ForbiddenException();
-    }
-
-    try {
-      if (request.originalUrl === '/api/v1/users/refresh') {
-        request.user = await this.jwtService.verifyRefreshToken(token);
-      }
-      else {
-        request.user = await this.jwtService.verifyAccessToken(token);
-      }
-    } catch (error) {
-      this.logger.error(error);
-      throw new UnauthorizedException();
+    // Error if current session is not equal with logged in session
+    if (!isEqual(request.session.metadata, metadata)) {
+      throw new UnauthorizedException(Messages.DUPLICATED_DEVICE);
     }
 
     return true;
-  }
-
-  private extractTokenFromHeader(request: Request): string | undefined {
-    const { authorization = '' } = request.headers;
-    const [type, token] = authorization.split(' ') ?? [];
-    return type === 'Bearer' ? token : undefined;
   }
 }

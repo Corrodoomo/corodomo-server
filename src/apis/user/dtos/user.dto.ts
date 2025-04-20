@@ -17,9 +17,6 @@ export class UserDto extends BaseRecordDto {
   emailVerified: boolean;
 
   @ApiProperty()
-  role: string;
-
-  @ApiProperty()
   createdAt: string;
 
   @ApiProperty()
@@ -31,7 +28,6 @@ export class UserDto extends BaseRecordDto {
     this.email = user.email;
     this.name = user.name;
     this.emailVerified = user.emailVerified;
-    this.role = user.role;
     this.createdAt = user.createdAt?.toISOString();
     this.updatedAt = user.updatedAt?.toISOString();
   }

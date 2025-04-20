@@ -1,4 +1,5 @@
 import { Folder } from '@modules/database/entities';
+import { Policy } from '@modules/policy/policy.decorator';
 import { Body, Controller, Param, Query, Req } from '@nestjs/common';
 
 import { ApiDelete, ApiGet, ApiPost, ApiPut, Roles } from '@common/decorators';
@@ -21,7 +22,7 @@ export class FolderController {
   constructor(private readonly folderService: FolderService) {}
 
   @ApiGet('/')
-  @Roles(SystemRoles.LEARNER)
+  @Policy('read', 'folders')
   @ApiOkPaginationRawExample(MyFolderDto)
   get(@Query() query: PaginateQueryDto, @Req() req: Request) {
     return this.folderService.get(query, req.user.id);

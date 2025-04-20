@@ -14,7 +14,7 @@ export class FormatResponseInterceptor implements NestInterceptor {
     const status = response.statusCode;
 
     return next.handle().pipe(
-      map(async (result) => {
+      map((result) => {
         console.timeEnd(request.timeId);
         this.logger.debug(JSON.stringify(result).substring(0, 1000));
 
