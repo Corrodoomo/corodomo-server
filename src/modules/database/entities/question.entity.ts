@@ -1,7 +1,6 @@
 import { BaseEntity } from './base.entity';
 import { ExamPart } from './exam-part.entity';
-import { QuestionChoice } from './question-choice.entity';
-import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 
 @Index('questions_pkey', ['id'], { unique: true })
 @Entity('questions', { schema: 'public' })
@@ -12,8 +11,17 @@ export class Question extends BaseEntity {
 	@Column('character varying', { name: 'answer' })
 	answer: string;
 
-	@OneToMany(() => QuestionChoice, (questionChoice) => questionChoice.question)
-	questionChoices: QuestionChoice[];
+	@Column('character varying', { name: 'choices' })
+	choices: string;
+
+	@Column('character varying', { name: 'explanation' })
+	explanation: string;
+
+	@Column('character varying', { name: 'script' })
+	script: string;
+
+	@Column('character varying', { name: 'content' })
+	content: string;
 
 	@ManyToOne(() => ExamPart, (examPart) => examPart.questions, { nullable: false })
 	@JoinColumn([{ name: 'exam_part_id', referencedColumnName: 'id' }])

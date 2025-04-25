@@ -6,14 +6,14 @@ import { SignedInUserMapper } from '@common/mappers/user.mapper';
 
 @Injectable()
 export class RefreshSessionInterceptor implements NestInterceptor {
-  logger = new Logger('Initialize Session Interceptor');
+  logger = new Logger('Refresh Session Interceptor');
 
   intercept(context: ExecutionContext, next: CallHandler) {
     const response = context.switchToHttp().getResponse<SystemResponse>();
 
     return next.handle().pipe(
       map((result: SignedInUserMapper) => {
-        this.logger.debug(JSON.stringify(result).substring(0, 1000));
+        this.logger.debug(JSON.stringify(result));
 
         // Get access token and refresh token
         const { accessToken, refreshToken } = result;

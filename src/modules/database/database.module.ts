@@ -9,7 +9,6 @@ import { addTransactionalDataSource } from 'typeorm-transactional';
 
 import { Quiz } from './entities';
 import { ExamPart } from './entities/exam-part.entity';
-import { ExamSection } from './entities/exam-section.entity';
 import { Folder } from './entities/folder.entity';
 import { GroupTask } from './entities/group-task.entity';
 import { LessonComment } from './entities/lesson-comment.entity';
@@ -22,7 +21,6 @@ import { Permission } from './entities/permission.entity';
 import { Policy } from './entities/policy.entity';
 import { ProjectRecent } from './entities/project-recent.entity';
 import { Project } from './entities/project.entity';
-import { QuestionChoice } from './entities/question-choice.entity';
 import { Question } from './entities/question.entity';
 import { Resource } from './entities/resource.entity';
 import { Song } from './entities/song.entity';
@@ -75,10 +73,8 @@ import { PricingPlan } from './entities/pricing-plan.entity';
           Blog,
           Note,
           Exam,
-          ExamSection,
           ExamPart,
           Question,
-          QuestionChoice,
           LessonComment,
           Lesson,
           LessonNote,

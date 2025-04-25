@@ -32,6 +32,7 @@ import { UserModule } from './apis/user/user.module';
 import { WorkspaceModule } from './apis/workspace/workspace.module';
 import { providers } from './app.provider';
 import { PolicyModule } from './modules/policy/policy.module';
+import { ExamModule } from './apis/exam/exam.module';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { PolicyModule } from './modules/policy/policy.module';
     TaskModule,
     WorkspaceModule,
     ProjectModule,
+    ExamModule,
 
     // Message Queue
     MqttModule,
