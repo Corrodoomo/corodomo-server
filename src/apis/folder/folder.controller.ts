@@ -10,8 +10,9 @@ import {
   ApiOkPaginationRawExample,
   ApiOkUpdateResultExample,
 } from '@common/decorators/example.decorator';
-import { CreateFolderDto, FolderIdDto, FolderRecordDto, MyFolderDto } from '@common/dtos';
+import { CreateFolderDto, FolderRecordDto, MyFolderDto } from '@common/dtos';
 import { PaginateQueryDto } from '@common/dtos/common.dto';
+import { IdDto } from '@common/dtos/id.dto';
 import { Request } from '@common/models';
 
 import { FolderService } from './folder.service';
@@ -41,17 +42,17 @@ export class FolderController {
     return this.folderService.create(req.user.id, body);
   }
 
-  @ApiPut('/:folderId')
+  @ApiPut('/:id')
   @Policy('update', 'folders')
   @ApiOkUpdateResultExample(FolderRecordDto)
-  update(@Req() req: Request, @Param() params: FolderIdDto, @Body() body: CreateFolderDto) {
-    return this.folderService.update(params.folderId, body, req.user.id);
+  update(@Param() params: IdDto, @Body() body: CreateFolderDto) {
+    return this.folderService.update(params.id, body);
   }
 
-  @ApiDelete('/:folderId')
+  @ApiDelete('/:id')
   @Policy('delete', 'folders')
   @ApiOkDeleteResultExample()
-  delete(@Param() params: FolderIdDto, @Req() req: Request) {
-    return this.folderService.delete(params.folderId, req.user.id);
+  delete(@Param() params: IdDto, @Req() req: Request) {
+    return this.folderService.delete(params.id, req.user.id);
   }
 }

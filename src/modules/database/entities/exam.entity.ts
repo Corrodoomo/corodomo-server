@@ -1,31 +1,34 @@
-import {
-  Column,
-  Entity,
-  Index,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-} from "typeorm";
-import { ExamSection } from "./exam-section.entity";
-import { User } from "./user.entity";
-import { BaseEntity } from "./base.entity";
+import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 
-@Index("exams_pkey", ["id"], { unique: true })
-@Entity("exams", { schema: "public" })
+import { BaseEntity } from './base.entity';
+import { ExamPart } from './exam-part.entity';
+import { User } from './user.entity';
+
+@Index('exams_pkey', ['id'], { unique: true })
+@Entity('exams', { schema: 'public' })
 export class Exam extends BaseEntity {
-  @Column("character varying", { name: "title" })
+  @Column('character varying', { name: 'title' })
   title: string;
 
-  @Column("integer", { name: "participants_count", default: 0 })
+  @Column('integer', { name: 'participants_count', default: 0 })
   participantsCount: number;
 
-  @Column("character varying", { name: "categories" })
-  categories: string;
+  @Column('double precision', { name: 'duration' })
+  duration: number;
 
-  @OneToMany(() => ExamSection, (examSection) => examSection.exam)
-  examSections: ExamSection[];
+  @Column('character varying', { name: 'type' })
+  type: string;
+
+  @Column('integer', { name: 'total_sections' })
+  totalSections: string;
+
+  @Column('integer', { name: 'total_questions' })
+  totalQuestions: string;
+
+  @OneToMany(() => ExamPart, (part) => part.exam)
+  parts: ExamPart[];
 
   @ManyToOne(() => User, (user) => user.exams, { nullable: false })
-  @JoinColumn([{ name: "created_by", referencedColumnName: "id" }])
+  @JoinColumn([{ name: 'created_by', referencedColumnName: 'id' }])
   createdBy: User;
 }

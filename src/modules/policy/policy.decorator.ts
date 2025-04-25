@@ -10,6 +10,7 @@ import { CHECK_POLICIES_KEY, PoliciesGuard, PolicyHandler } from './policy.guard
  */
 export const Policy = (action: Actions, resource: Resources) => {
   return applyDecorators(
+    SetMetadata('policy', { action, resource }), // 👈 Gắn metadata
     UseGuards(PoliciesGuard),
     CheckPolicies((ability: AppAbility) => ability.can(action, resource))
   );

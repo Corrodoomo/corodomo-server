@@ -63,20 +63,7 @@ export class FolderService {
    * @param folderId
    * @returns
    */
-  public async update(folderId: string, folder: CreateFolderDto, userId: string) {
-    // Find folder of user
-    const myFolder = await this.folderRepository.getRawOne(folderId, ['id', 'created_by as "createdBy"']);
-
-    // If empty, invalid permisison
-    if (isEmpty(myFolder)) {
-      throw new BadRequestException(Messages.ITEM_NOT_FOUND);
-    }
-
-    // If empty, invalid permisison
-    if (myFolder.createdBy !== userId) {
-      throw new ForbiddenException(Messages.INVALID_ACCESS_RESOURCE);
-    }
-
+  public async update(folderId: string, folder: CreateFolderDto) {
     // Update a folder
     await this.folderRepository.update({ id: folderId }, { name: folder.name });
 

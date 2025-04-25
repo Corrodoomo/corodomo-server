@@ -1,6 +1,7 @@
 import { Ability, AbilityBuilder, AbilityClass } from '@casl/ability';
 import { PricingPlanRepository } from '@modules/pricing-plan/pricing-plan.repository';
 import { Injectable } from '@nestjs/common';
+import { DataSource } from 'typeorm';
 
 import { AuthMetadataMapper } from '@common/mappers/auth.mapper';
 
@@ -55,48 +56,72 @@ export type AppAbility = Ability<[Actions, Resources]>;
 
 @Injectable()
 export class PolicyAbilityFactory {
-  constructor(private readonly pricingPlanRepository: PricingPlanRepository) {}
+  constructor(
+    private readonly pricingPlanRepository: PricingPlanRepository,
+    private dataSource: DataSource
+  ) {}
 
   /**
    * Query all permisison from database and then, initialize permissions for Learner role
    * @param user
    * @returns
    */
-  async learner(user: AuthMetadataMapper) {
+  async learner(user: AuthMetadataMapper, resource: Resources, resourceId?: string) {
     // Destrucing function
     const { can, build } = new AbilityBuilder<Ability<[Actions, Resources]>>(Ability as AbilityClass<AppAbility>);
 
     // Query permission by pricing
-    const pricing = await this.pricingPlanRepository.queryPermissions(user.pricingPlanMetadata.id);
+    const permissions = await this.findPermissionsByRole(user.pricingPlanMetadata.id, resource);
 
-    // If pricing has existed
-    if (pricing) {
-      pricing.policies.forEach((policy) => {
-        policy.permissions.forEach((permission) => {
-          // Pass if it is valid with flexible conditions in database permissions
-          if (user.userMetadata.emailVerified !== permission.conditions[0]['email_verified']) {
-            return;
-          }
+    permissions.forEach(async (permission) => {
+      // Pass if it is valid with flexible conditions in database permissions
+      if (user.userMetadata.emailVerified !== permission.conditions[0]['email_verified']) {
+        return;
+      }
 
-          if (permission.action === Action.WRITE_READ) {
-            can(Action.Create, permission.resource);
-            can(Action.Update, permission.resource);
-            can(Action.Delete, permission.resource);
+      // Pass if owner id is equal to user id
+      if (Boolean(permission.conditions[0]['owner'])) {
+        // Check if resource id is valid
+        const records = await this.dataSource.query(
+          `SELECT id FROM ${resource} WHERE id = $1 AND created_by = $2 LIMIT 1`,
+          [resourceId, user.id]
+        );
 
-            can(Action.READ, permission.resource);
-            return;
-          }
+        if (!records.length) {
+          return;
+        }
+      }
 
-          // Create permission based on action and resource allowed in the database
-          can(permission.action, permission.resource);
-        });
-      });
-    }
+      if (permission.action === Action.WRITE_READ) {
+        can(Action.Create, permission.resource);
+        can(Action.Update, permission.resource);
+        can(Action.Delete, permission.resource);
+        can(Action.READ, permission.resource);
+        return;
+      }
+
+      // Create permission based on action and resource allowed in the database
+      can(permission.action, permission.resource);
+    });
 
     // Build all permission
     return build({
       // Read https://casl.js.org/v6/en/guide/subject-type-detection#use-classes-as-subject-types for details
       detectSubjectType: (item) => item,
     });
+  }
+
+  async findPermissionsByRole(pricingPlanId: string, resource: Resources) {
+    // Query permission by pricing
+    const pricing = await this.pricingPlanRepository.queryPermissions(pricingPlanId);
+
+    // If pricing has existed
+    if (pricing) {
+      for (const policy of pricing.policies) {
+        return policy.permissions.filter((permission) => permission.resource === resource);
+      }
+    }
+
+    return [];
   }
 }
