@@ -3,6 +3,7 @@ import { PricingPlanRepository } from '@modules/pricing-plan/pricing-plan.reposi
 import { Injectable } from '@nestjs/common';
 
 import { AuthMetadataMapper } from '@common/mappers/auth.mapper';
+import { DataSource } from 'typeorm';
 
 /**
  * Action defined
@@ -46,7 +47,8 @@ export type Resources =
   | 'tasks'
   | 'vocabularies'
   | 'workspaces'
-  | 'users';
+  | 'users'
+  | 'exams';
 
 /**
  * App Ability type
@@ -55,14 +57,14 @@ export type AppAbility = Ability<[Actions, Resources]>;
 
 @Injectable()
 export class PolicyAbilityFactory {
-  constructor(private readonly pricingPlanRepository: PricingPlanRepository) {}
+  constructor(private readonly dataSource: DataSource, private readonly pricingPlanRepository: PricingPlanRepository) {}
 
   /**
    * Query all permisison from database and then, initialize permissions for Learner role
    * @param user
    * @returns
    */
-  async learner(user: AuthMetadataMapper) {
+  async learner(user: AuthMetadataMapper, action: Actions, resource: Resources, resourceId?: string) {
     // Destrucing function
     const { can, build } = new AbilityBuilder<Ability<[Actions, Resources]>>(Ability as AbilityClass<AppAbility>);
 
@@ -72,13 +74,25 @@ export class PolicyAbilityFactory {
     // If pricing has existed
     if (pricing) {
       pricing.policies.forEach((policy) => {
-        policy.permissions.forEach((permission) => {
+        policy.permissions.forEach(async (permission) => {
           // Pass if it is valid with flexible conditions in database permissions
           if (user.userMetadata.emailVerified !== permission.conditions[0]['email_verified']) {
             return;
           }
 
           if (permission.action === Action.WRITE_READ) {
+            // Pass if owner id is equal to user id
+            if (Boolean(permission.conditions[0]['owner']) && action === 'write/read') {
+              // Check if resource id is valid
+              const records = await this.dataSource.query(
+                `SELECT id FROM ${resource} WHERE id = $1 AND created_by = $2 LIMIT 1`,
+                [resourceId, user.id]
+              );
+
+              if (!records.length) {
+                return;
+              }
+            }
             can(Action.Create, permission.resource);
             can(Action.Update, permission.resource);
             can(Action.Delete, permission.resource);

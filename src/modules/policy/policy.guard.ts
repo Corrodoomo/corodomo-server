@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 
-import { AppAbility, PolicyAbilityFactory } from './policy.factory';
+import { Actions, AppAbility, PolicyAbilityFactory, Resources } from './policy.factory';
 
 /**
  * Policy Handler interface
@@ -25,6 +25,8 @@ export type PolicyHandler = IPolicyHandler | PolicyHandlerCallback;
  */
 export const CHECK_POLICIES_KEY = 'check_policy';
 
+export const POLICIES_KEY = 'policies_key';
+
 @Injectable()
 export class PoliciesGuard implements CanActivate {
   constructor(
@@ -40,12 +42,13 @@ export class PoliciesGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     // Get all metadata
     const policyHandlers = this.reflector.get<PolicyHandler[]>(CHECK_POLICIES_KEY, context.getHandler()) || [];
+    const { action, resource } = this.reflector.get<{ action: Actions; resource: Resources}>(POLICIES_KEY, context.getHandler()) || [];
 
     // Detructing user
-    const { user } = context.switchToHttp().getRequest<SystemRequest>();
+    const { user, params } = context.switchToHttp().getRequest<SystemRequest>();
 
     // Create permissions based on pricing plan for Learner role
-    const ability = await this.policyAbilityFactory.learner(user);
+    const ability = await this.policyAbilityFactory.learner(user, action, resource, params?.id);
 
     // Forloop if all is valid
     return policyHandlers.every((handler) => this.execPolicyHandler(handler, ability));
