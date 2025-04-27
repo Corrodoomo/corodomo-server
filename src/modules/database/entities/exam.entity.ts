@@ -19,9 +19,6 @@ export class Exam extends BaseEntity {
   @Column("integer", { name: "participants_count", default: 0 })
   participantsCount: number;
 
-  @Column("character varying", { name: "categories" })
-  categories: string;
-
   @Column('character varying', { name: 'type' })
   type: string;
 
@@ -33,6 +30,9 @@ export class Exam extends BaseEntity {
 
   @Column('integer', { name: 'total_questions' })
   totalQuestions: number;
+
+  @Column('character varying', { name: 'audio_url' })
+  audioUrl: string;
 
   @OneToMany(() => ExamPart, (part) => part.exam)
   parts: ExamPart[];

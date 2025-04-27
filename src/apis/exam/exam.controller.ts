@@ -23,8 +23,8 @@ export class ExamController {
   @ApiGet('/:id')
   @Policy('read', 'exams')
   @ApiOkItemExample(Blog)
-  getDetail(@Param() param: IdDto, @Query() query: PaginateQueryDto) {
-    return this.examService.getDetail(param.id, query);
+  getDetail(@Param() param: IdDto) {
+    return this.examService.getDetail(param.id);
   }
 
   @ApiPut('/:id/join')
