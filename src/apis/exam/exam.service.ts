@@ -28,16 +28,14 @@ export class ExamService {
 
     // Add condition If keyword existed
     if (keyword) {
-      must.push(
-        {
-          match: {
-            title: {
-              query: keyword,
-              fuzziness: 'AUTO',
-            },
+      must.push({
+        match: {
+          title: {
+            query: keyword,
+            fuzziness: 'AUTO',
           },
-        }
-      );
+        },
+      });
     }
 
     // Add condition If type existed
@@ -70,13 +68,10 @@ export class ExamService {
    * @param examId
    * @returns
    */
-  public async getDetail(examId: string, query: PaginateQueryDto) {
+  public async getDetail(examId: string) {
     const exam = await this.examRepository.findOne({
       where: {
         id: examId,
-        parts: {
-          skill: String(query.filter?.['skill']),
-        },
       },
       relations: ['parts', 'parts.questions'],
     });
@@ -95,7 +90,7 @@ export class ExamService {
       where: {
         id: examId,
       },
-      select: ['id', 'participantsCount']
+      select: ['id', 'participantsCount'],
     });
 
     // Error if exam not found

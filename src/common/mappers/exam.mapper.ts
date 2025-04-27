@@ -10,6 +10,7 @@ export type TDetailExam = {
   type: string;
   totalSections: number;
   totalQuestions: number;
+  audioUrl: string;
   parts: TExamPart[];
 };
 
@@ -42,7 +43,7 @@ export class DetailExamMapper extends ItemMapper<TDetailExam | null> {
       return null;
     }
 
-    const { id, title, duration, participantsCount, totalQuestions, totalSections, type, parts } = exam;
+    const { id, title, duration, participantsCount, totalQuestions, totalSections, type, parts, audioUrl } = exam;
 
     let questionNo = 0;
 
@@ -53,6 +54,7 @@ export class DetailExamMapper extends ItemMapper<TDetailExam | null> {
       participantsCount,
       totalQuestions,
       totalSections,
+      audioUrl,
       type,
       parts: parts.map(({ id, title, audioUrl, questions, skill }) => ({
         id,
