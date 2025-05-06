@@ -85,3 +85,6 @@ docker exec -t corodomo_pgdb pg_dump -U corodomo_admin -E UTF8 corodomo_db > bac
 # Restore database
 docker exec -i corodomo_pgdb psql -U corodomo_admin -d corodomo_db < backup_new.sql
 ```
+npx elasticdump \   --input=http://localhost:9200 \   --output=exams_bulk.json \   --type=data \   --format=bulk
+docker cp src/databases/resources/bulk.json elasticsearch:/bulk.json
+docker exec -it elasticsearch curl -XPOST localhost:9200/_bulk -H "Content-Type: application/json" --data-binary @/bulk.json

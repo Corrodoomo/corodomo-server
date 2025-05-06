@@ -1,21 +1,29 @@
 import { Request as ExpressRequest, Response as ExpressResponse } from 'express';
-import { Cookie } from 'express-session';
 
 import { AuthMetadataMapper } from '@common/mappers/auth.mapper';
 import { SignedInUserMapper } from '@common/mappers/user.mapper';
 
 declare global {
-  type Session = {
+  type TCachedSession = {
     id: string;
-    email: string;
-    role: string;
-    iat: number; // Thời gian là số nguyên (timestamp)
-    exp: number; // Thời gian hết hạn cũng là số nguyên
+    createdAt: string;
+    updatedAt: string;
+    accessToken: string;
+    idToken: string;
+    refreshToken: string;
+    userAgent: object;
   };
 
-  type CustomCookie = Cookie & SignedInUserMapper
+  type TSession = {
+    id: string;
+    name: string;
+    email: string;
+    avatarUrl: string;
+    createdAt: string;
+    updatedAt: string;
+  };
 
-  type CustomRequest = { user: AuthMetadataMapper; cookies: CustomCookie; timeId: string };
+  type CustomRequest = { user: AuthMetadataMapper; cookies: SignedInUserMapper; session: TSession; timeId: string };
 
   type SystemRequest = ExpressRequest & CustomRequest;
 

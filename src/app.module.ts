@@ -21,7 +21,6 @@ import { YoutubeModule } from '@modules/youtube/youtube.module';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 
 import { CookieMiddleware } from '@common/middlewares/cookie.middleware';
-import { SessionMiddleware } from '@common/middlewares/session.middleware';
 
 import { BlogModule } from './apis/blog/blog.module';
 import { LessonCommentModule } from './apis/lesson-comment/lesson-comment.module';
@@ -78,6 +77,6 @@ import { ExamModule } from './apis/exam/exam.module';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(HelmetMiddleware, LoggerMiddleware, CookieMiddleware, SessionMiddleware).forRoutes('*');
+    consumer.apply(HelmetMiddleware, LoggerMiddleware, CookieMiddleware).forRoutes('*');
   }
 }

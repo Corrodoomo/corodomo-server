@@ -1,12 +1,10 @@
 import { Inject, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
+import { isNil } from 'lodash';
 
 import { MetadataKey } from '@common/constants';
-import { USER_TOKEN } from '@common/constants/token';
 import { Messages } from '@common/enums';
-import { SignedInUserMapper } from '@common/mappers/user.mapper';
-import { TUserTokenType } from '@common/types/token.type';
 
 import { CacheService } from './cache.service';
 
@@ -18,42 +16,39 @@ export class UserCacheService extends CacheService {
     super(redis);
   }
 
-  async getItem(key: string): Promise<SignedInUserMapper> {
-    const value = await this.get(key);
-    if (!value) return { accessToken: '', refreshToken: '' };
-
-    const tokenData = JSON.parse(value);
-    return {
-      accessToken: tokenData.accessToken,
-      refreshToken: tokenData.refreshToken,
-    };
+  /**
+   * Set session
+   * @param key 
+   * @param value 
+   * @returns 
+   */
+  async setSession(key: string, value: object) {
+    return this.set(`session_${key}`, JSON.stringify(value), this.configService.getOrThrow('REFRESH_SECRET_KEY_EXPIRE'));
   }
 
   /**
-   * Set Json Item
-   * @param key
-   * @param value
+   * Set session by devices
+   * @param key 
+   * @param value 
+   * @returns 
+   */
+  async setSessionDevices(key: string, value: object) {
+    return this.setNx(`session_devices_${key}`, JSON.stringify(value));
+  }
+
+  /**
+   * Check if token has existed
+   * @param userId
    * @returns
    */
-  async setItem(key: string, value: object) {
-    return this.set(key, JSON.stringify(value), this.configService.getOrThrow('ACCESS_SECRET_REDIS_EXPIRE'));
-  }
-
-  async existToken(userId: string) {
-    const existed = await this.get(userId);
-
-    if (existed) {
-      throw new UnauthorizedException(Messages.DUPLICATED_SESSION);
+  async existSession(idToken: string) {
+    const value = await this.get(`session_${idToken}`);
+    console.log('`session_${idToken}`', `session_${idToken}`);
+    // Error if session not found
+    if (isNil(value)) {
+      throw new UnauthorizedException(Messages.SESSION_NOT_FOUND);
     }
-  }
 
-  async validateToken(userId: string, type: TUserTokenType, token: string) {
-    const storedToken = await this.getItem(userId);
-
-    if (!storedToken || storedToken[type] !== token) {
-      const message = type === USER_TOKEN.ACCESS_TOKEN ? Messages.INVALID_ACCESS_TOKEN : Messages.INVALID_REFRESH_TOKEN;
-
-      throw new UnauthorizedException(message);
-    }
+    return JSON.parse(value) as TCachedSession;
   }
 }

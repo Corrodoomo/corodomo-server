@@ -1,3 +1,5 @@
+import { UserCacheService } from '@modules/cache/user-cache.service';
+import { JwtService } from '@modules/jwt';
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { isEqual } from 'lodash';
@@ -8,7 +10,11 @@ import { WebSession } from '@common/utils/session.util';
 
 @Injectable()
 export class AuthenticationGuard implements CanActivate {
-  constructor(private readonly reflector: Reflector) {}
+  constructor(
+    private readonly reflector: Reflector,
+    private readonly jwtService: JwtService,
+    private readonly cacheService: UserCacheService
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<SystemRequest>();
@@ -23,16 +29,19 @@ export class AuthenticationGuard implements CanActivate {
     if (isPublic) {
       return true;
     }
+    console.log('vao day 1', request.cookies.idToken);
 
-    // Error if session not found
-    if (!request.session.userId) {
-      throw new UnauthorizedException(Messages.SESSION_NOT_FOUND);
-    }
+    // Verify id token
+    this.jwtService.verifyIdToken(request.cookies.idToken);
 
-    const metadata = WebSession.getSessionMetadata(request);
+    // Get all cached sessions
+    const session = await this.cacheService.existSession(request.cookies.idToken);
+
+    // Get user agent of current request
+    const userAgent = WebSession.getSessionMetadata(request);
 
     // Error if current session is not equal with logged in session
-    if (!isEqual(request.session.metadata, metadata)) {
+    if (!isEqual(session.userAgent, userAgent)) {
       throw new UnauthorizedException(Messages.DUPLICATED_DEVICE);
     }
 

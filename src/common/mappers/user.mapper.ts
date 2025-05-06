@@ -10,6 +10,9 @@ export class SignedInUserMapper {
 
   @ApiProperty()
   refreshToken?: string;
+
+  @ApiProperty()
+  idToken: string;
 }
 
 export class AuthUserMapper {
