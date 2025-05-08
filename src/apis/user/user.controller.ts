@@ -1,4 +1,5 @@
-import { Controller } from '@nestjs/common';
+import { Policy } from '@modules/policy/policy.decorator';
+import { Controller, Req } from '@nestjs/common';
 
 import { ApiGet } from '@common/decorators';
 import { ApiOkResponseExample } from '@common/decorators/example.decorator';
@@ -6,7 +7,6 @@ import { Authorized } from '@common/guards/authorized.guard';
 import { ProfileMapper } from '@common/mappers/user.mapper';
 
 import { UserService } from './user.service';
-import { Policy } from '@modules/policy/policy.decorator';
 
 @Controller('users')
 export class UserController {
@@ -15,7 +15,7 @@ export class UserController {
   @ApiGet('profile')
   @Policy('read', 'users')
   @ApiOkResponseExample(ProfileMapper)
-  async get(@Authorized('id') id: string) {
-    return this.userService.get(id);
+  async get(@Authorized('id') id: string, @Req() req: SystemRequest) {
+    return this.userService.get(id, req.cookies.idToken);
   }
 }

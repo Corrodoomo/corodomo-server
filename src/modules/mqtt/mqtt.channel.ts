@@ -11,6 +11,6 @@ export class MqttChannel {
   getNotifications(@Payload() data: number[], @Ctx() context: MqttContext) {
     console.log(`Topic: ${context.getTopic()} `, data);
 
-    return this.mqttService.notify();
+    return this.mqttService.notify({ id: 1, message: 'Your email is not verified. Please, confirm your email.', sentAt: new Date() });
   }
 }

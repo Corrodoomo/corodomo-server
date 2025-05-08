@@ -92,10 +92,13 @@ export class UserProfileMapper {
 
   @ApiProperty()
   updatedAt: Date;
+
+  @ApiProperty()
+  channelId: string;
 }
 
 export class ProfileMapper extends ItemMapper<UserProfileMapper> {
-  constructor(user: User) {
+  constructor(user: User & { channelId: string }) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...rest } = user;
     super(rest);

@@ -4,7 +4,7 @@ import { UserService } from '@app/apis/user/user.service';
 import { UserCacheService } from '@modules/cache/user-cache.service';
 import { JwtService } from '@modules/jwt';
 import { MqttService } from '@modules/mqtt/mqtt.service';
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { Transactional } from 'typeorm-transactional';
 
 import { Messages } from '@common/enums';
@@ -36,7 +36,7 @@ export class AuthService {
    */
   public async signIn(user: AuthMetadataMapper, request: SystemRequest) {
     // Get current sesson
-    const duplicated = await this.cacheService.getJsonItem<string[]>(user.id);
+    const duplicated = await this.cacheService.getJsonItem<string[]>(`session_devices_${user.id}`);
 
     // Generate access token and refresh token
     const { idToken, accessToken, refreshToken } = await this.jwtService.generateToken(user);
@@ -48,11 +48,11 @@ export class AuthService {
     // Case session duplicated
     if (duplicated) {
       // Sau do handle thông báo đến device chính nếu có người lạ đăng nhập ở đây
-      this.mqttService.notifyDuplicatedSession({
+      this.mqttService.notifyDuplicatedDevices(duplicated[0], {
         id: user.id,
+        message: 'duplicatedDevices',
+        sentAt: new Date(),
         userAgent,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
       });
     }
 
@@ -87,8 +87,6 @@ export class AuthService {
       updatedAt: new Date().toISOString(),
     });
 
-    throw new UnauthorizedException();
-
     // Send access token and refresh token to middleware interceptor
     return { accessToken, refreshToken };
   }
@@ -104,7 +102,6 @@ export class AuthService {
 
     // Count number of sessions
     if (duplicated) {
-      console.log('vao day 1');
       if (duplicated.length === 1) {
         // Delete token from cache
         await this.cacheService.del(`session_devices_${user.id}`);
@@ -115,10 +112,10 @@ export class AuthService {
           duplicated.filter((item) => item !== idToken)
         );
       }
-
-      // Save token to cache
-      await this.cacheService.del(`session_${idToken}`);
     }
+
+    // Save token to cache
+    await this.cacheService.del(`session_${idToken}`);
 
     // Return message
     return { message: 'Logout successful' };

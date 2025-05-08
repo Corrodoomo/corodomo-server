@@ -37,7 +37,7 @@ export class UserService {
     );
   }
 
-  public async get(id: string) {
+  public async get(id: string, idToken: string) {
     const user = await this.userRepository.findOne({
       where: { id },
     });
@@ -46,6 +46,6 @@ export class UserService {
       throw new NotFoundException(Messages.USER_NOT_FOUND);
     }
 
-    return new ProfileMapper(user);
+    return new ProfileMapper({ ...user, channelId: idToken });
   }
 }

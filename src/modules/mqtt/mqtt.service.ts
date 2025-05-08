@@ -8,15 +8,14 @@ export class MqttService {
   /**
    * Notification emit
    */
-  public notify() {
-    this.client.emit('notification/receive', { id: 1, message: 'Hi, This is message from System', sentAt: new Date() });
-    this.client.emit('notification/receive', { id: 1, message: 'Your email is not verified. Please, confirm your email.', sentAt: new Date() });
+  public notify(message: object) {
+    this.client.emit('notification/receive', message);
   }
 
   /**
    * Notification emit
    */
-  public notifyDuplicatedSession(user: object) {
-    this.client.emit('session/duplicated', user);
+  public notifyDuplicatedDevices(idToken: string, message: object) {
+    this.client.emit(`notification/receive/${idToken}`, message);
   }
 }
