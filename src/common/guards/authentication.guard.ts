@@ -29,7 +29,6 @@ export class AuthenticationGuard implements CanActivate {
     if (isPublic) {
       return true;
     }
-    console.log('vao day 1', request.cookies.idToken);
 
     // Verify id token
     this.jwtService.verifyIdToken(request.cookies.idToken);

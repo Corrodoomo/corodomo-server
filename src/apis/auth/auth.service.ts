@@ -4,7 +4,7 @@ import { UserService } from '@app/apis/user/user.service';
 import { UserCacheService } from '@modules/cache/user-cache.service';
 import { JwtService } from '@modules/jwt';
 import { MqttService } from '@modules/mqtt/mqtt.service';
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Transactional } from 'typeorm-transactional';
 
 import { Messages } from '@common/enums';
@@ -77,15 +77,17 @@ export class AuthService {
     // Generate access token and refresh token
     const { accessToken, refreshToken } = await this.jwtService.generateToken(user);
 
-    // Save token to cache
+    // Get session data
+    const session = await this.cacheService.existSession(idToken);
     // Save session by id token
     await this.cacheService.setSession(idToken, {
-      id: user.id,
+      ...session,
       accessToken,
       refreshToken,
-      createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });
+
+    throw new UnauthorizedException();
 
     // Send access token and refresh token to middleware interceptor
     return { accessToken, refreshToken };

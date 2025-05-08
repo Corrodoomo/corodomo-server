@@ -23,7 +23,7 @@ export class UserCacheService extends CacheService {
    * @returns 
    */
   async setSession(key: string, value: object) {
-    return this.set(`session_${key}`, JSON.stringify(value), this.configService.getOrThrow('REFRESH_SECRET_KEY_EXPIRE'));
+    return this.set(`session_${key}`, JSON.stringify(value), this.configService.getOrThrow('SESSON_REDIS'));
   }
 
   /**
@@ -43,7 +43,7 @@ export class UserCacheService extends CacheService {
    */
   async existSession(idToken: string) {
     const value = await this.get(`session_${idToken}`);
-    console.log('`session_${idToken}`', `session_${idToken}`);
+    
     // Error if session not found
     if (isNil(value)) {
       throw new UnauthorizedException(Messages.SESSION_NOT_FOUND);
