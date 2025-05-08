@@ -1,4 +1,5 @@
 import Redis from 'ioredis';
+import { isNil } from 'lodash';
 
 export class CacheService {
   constructor(protected readonly redis: Redis) {}
@@ -19,5 +20,19 @@ export class CacheService {
   }
   keys(prefix: string) {
     return this.redis.keys(`${prefix}:*`);
+  }
+
+  /**
+   * Get token from item
+   * @param key
+   * @returns
+   */
+  async getJsonItem<T>(key: string) {
+    const value = await this.get(key);
+
+    // Error if session not found
+    if (isNil(value)) return null;
+
+    return JSON.parse(value) as T;
   }
 }

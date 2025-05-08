@@ -1,5 +1,5 @@
 import { CreateUserDto } from '@app/apis/user/dtos/create-user.dto';
-import { Body, Controller, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Req, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ApiBody } from '@nestjs/swagger';
 
 import { ApiPost } from '@common/decorators';
@@ -36,8 +36,19 @@ export class AuthController {
   })
   @UseGuards(LocalAuthGuard)
   @UseInterceptors(InitializeSessionInterceptor)
-  signIn(@Authorized() user: AuthMetadataMapper) {
-    return this.authService.signIn(user);
+  signIn(@Authorized() user: AuthMetadataMapper, @Req() request: SystemRequest) {
+    return this.authService.signIn(user, request);
+  }
+
+  @Public()
+  @ApiPost('token')
+  @ApiOkResponseExample(AuthUserMapper)
+  @ApiBody({
+    type: SignInUserDto,
+  })
+  @UseGuards(LocalAuthGuard)
+  token(@Authorized() user: AuthMetadataMapper, @Req() request: SystemRequest) {
+    return this.authService.signIn(user, request);
   }
 
   @Public()
@@ -45,20 +56,14 @@ export class AuthController {
   @ApiOkResponseExample(AuthUserMapper)
   @UseGuards(RefreshAuthGuard)
   @UseInterceptors(RefreshSessionInterceptor)
-  refresh(@Authorized() user: AuthMetadataMapper) {
-    return this.authService.refresh(user);
+  refresh(@Authorized() user: AuthMetadataMapper, @Req() request: SystemRequest) {
+    return this.authService.refresh(user, request.cookies.idToken);
   }
 
   @ApiPost('signout')
   @ApiOkResponseExample(AuthUserMapper)
   @UseInterceptors(ClearSessionInterceptor)
-  logout(@Authorized() user: AuthMetadataMapper) {
-    return this.authService.logout(user);
-  }
-
-  @ApiPost('verify')
-  @ApiOkResponseExample(AuthUserMapper)
-  verify(@Authorized() user: AuthMetadataMapper) {
-    return `Verify successful for ${user.email}`;
+  logout(@Authorized() user: AuthMetadataMapper, @Req() request: SystemRequest) {
+    return this.authService.logout(user, request.cookies.idToken);
   }
 }

@@ -2,22 +2,21 @@ import { UserCacheService } from '@modules/cache/user-cache.service';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
-import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
 import { Messages } from '@common/enums';
 import { JWTPayLoad } from '@common/types/jwt-payload.type';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
+export class IdTokenStrategy extends PassportStrategy(Strategy, 'id-jwt') {
   constructor(
     private readonly configService: ConfigService,
     private readonly cacheService: UserCacheService
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
-        (req: Request) => {
-          return req.cookies.accessToken;
+        (req: SystemRequest) => {
+          return req.cookies.idToken;
         },
       ]),
       ignoreExpiration: false,
@@ -27,12 +26,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(req: SystemRequest, payload: JWTPayLoad) {
+    const { id } = payload;
+
     // Check accessToken token in Redis
-    const session = await this.cacheService.existSession(req.cookies.idToken);
-    
-    // Token Not found
-    if (session.accessToken !== req.cookies.accessToken) {
-      throw new UnauthorizedException(Messages.TOKEN_NOT_FOUND);
+    const existed = await this.cacheService.get(id);
+
+    // Error if not found session
+    if (existed) {
+      throw new UnauthorizedException(Messages.SESSION_NOT_FOUND);
     }
 
     // Return decoded payload

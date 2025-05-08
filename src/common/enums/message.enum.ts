@@ -15,9 +15,7 @@ export enum Messages {
   USER_ALREADY_EXIST = 'User already exists',
   PERMISSION_REQUIRED = 'You do not have permission to access this resource',
   JWT_INVALID = 'JWT token is invalid',
-  ERROR_REGENERATING_SESSION = 'Error regenerating session',
-  ERROR_SAVING_SESSION = 'Error saving session',
-  ERROR_DESTROYING_SESSION = 'Error destroying session',
+  TOKEN_NOT_FOUND = 'Token not found',
   SESSION_NOT_FOUND = 'Session not found',
   DUPLICATED_DEVICE = 'Duplicated device',
 }

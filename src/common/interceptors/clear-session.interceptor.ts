@@ -1,15 +1,7 @@
-import {
-  CallHandler,
-  ExecutionContext,
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-  NestInterceptor,
-} from '@nestjs/common';
+import { CallHandler, ExecutionContext, Injectable, Logger, NestInterceptor } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { mergeMap } from 'rxjs';
 
-import { Messages } from '@common/enums';
 import { SignedInUserMapper } from '@common/mappers/user.mapper';
 
 @Injectable()
@@ -19,7 +11,6 @@ export class ClearSessionInterceptor implements NestInterceptor {
   constructor(private readonly configService: ConfigService) {}
 
   intercept(context: ExecutionContext, next: CallHandler) {
-    const request = context.switchToHttp().getRequest<SystemRequest>();
     const response = context.switchToHttp().getResponse<SystemResponse>();
 
     return next.handle().pipe(
@@ -29,38 +20,11 @@ export class ClearSessionInterceptor implements NestInterceptor {
         // Clear all token from cookie
         response.clearCookie('accessToken');
         response.clearCookie('refreshToken');
-
-        // Destroy session for user
-        await this.destroy(request);
+        response.clearCookie('idToken');
 
         // Next data
         return result;
       })
     );
-  }
-
-  /**
-   * Destroy all session
-   * @param request
-   * @returns
-   */
-  destroy(request: SystemRequest) {
-    return new Promise((resolve, reject) => {
-      request.session.destroy((err) => {
-        if (err) {
-          return reject(new InternalServerErrorException(Messages.ERROR_DESTROYING_SESSION));
-        }
-
-        // Clear cookies
-        request.res?.clearCookie(this.configService.getOrThrow('SESSION_NAME'));
-
-        // Clear session from Redis
-        request.sessionStore.destroy(request.sessionID, (err) => {
-          if (err) new InternalServerErrorException(Messages.ERROR_DESTROYING_SESSION);
-        });
-
-        resolve(true);
-      });
-    });
   }
 }
