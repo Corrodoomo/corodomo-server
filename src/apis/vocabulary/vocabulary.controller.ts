@@ -4,7 +4,7 @@ import { Controller, Param } from '@nestjs/common';
 import { ApiGet, ApiPost } from '@common/decorators';
 import { ApiOkInsertResultExample } from '@common/decorators/example.decorator';
 import { LessonIdDto } from '@common/dtos/id.dto';
-import { OpenAIVocabularyMinimapDto } from '@common/dtos/vocabulary.dto';
+import { MindmapRecordMapper } from '@common/mappers/mindmap.mapper';
 
 import { VocabularyService } from './vocabulary.service';
 
@@ -14,7 +14,7 @@ export class VocabularyController {
 
   @ApiPost('/lesson/:lessonId/generate')
   @Policy('read', 'vocabularies')
-  @ApiOkInsertResultExample(OpenAIVocabularyMinimapDto)
+  @ApiOkInsertResultExample(MindmapRecordMapper)
   generateForLesson(@Param() params: LessonIdDto) {
     return this.vocabularyService.generateForLesson(params.lessonId);
   }

@@ -3,13 +3,14 @@ import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany } from 'typeorm
 import { BaseEntity } from './base.entity';
 import { Folder } from './folder.entity';
 import { LessonComment } from './lesson-comment.entity';
+import { LessonNote } from './lesson-note.entity';
+import { LessonRecent } from './lesson-recent.entity';
+import { Mindmap } from './mindmap.entity';
 import { NotedVocabulary } from './noted-vocabulary.entity';
 import { Quiz } from './quiz.entity';
 import { Subtitle } from './subtitle.entity';
 import { User } from './user.entity';
 import { Vocabulary } from './vocabulary.entity';
-import { LessonNote } from './lesson-note.entity';
-import { LessonRecent } from './lesson-recent.entity';
 
 @Index('lessons_pkey', ['id'], { unique: true })
 @Entity('lessons', { schema: 'public' })
@@ -75,4 +76,7 @@ export class Lesson extends BaseEntity {
   @ManyToOne(() => User, (user) => user.lessons, { nullable: false })
   @JoinColumn([{ name: 'created_by', referencedColumnName: 'id' }])
   createdBy: User | string;
+
+  @OneToMany(() => Mindmap, (mindmap) => mindmap.lesson, { onDelete: 'CASCADE' })
+  mindmaps: Mindmap[];
 }

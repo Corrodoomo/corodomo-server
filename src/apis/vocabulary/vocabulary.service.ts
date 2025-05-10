@@ -2,13 +2,14 @@ import { LessonRepository } from '@app/apis/lesson/lesson.repository';
 import { MinimapEsService } from '@modules/elastic-search/services/minimap-es.service';
 import { OpenAIService } from '@modules/openai/openai.service';
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { isNotEmpty } from 'class-validator';
 import { isEmpty } from 'lodash';
 
 import { InsertResultDto } from '@common/dtos';
 import { Messages } from '@common/enums';
+import { MindmapRecordMapper } from '@common/mappers/mindmap.mapper';
 import { FlashcardListMapper } from '@common/mappers/vocabulary.mapper';
 
+import { MindmapRepository } from '../mindmap/mindmap.repository';
 import { VocabularyRepository } from './vocabulary.repository';
 
 @Injectable()
@@ -17,7 +18,8 @@ export class VocabularyService {
     private readonly vocabularyRepository: VocabularyRepository,
     private readonly lessonRepository: LessonRepository,
     private readonly openaiService: OpenAIService,
-    private readonly minimapEsService: MinimapEsService
+    private readonly minimapEsService: MinimapEsService,
+    private readonly mindmapRepository: MindmapRepository
   ) {}
 
   /**
@@ -29,7 +31,7 @@ export class VocabularyService {
     // Get lesson from id
     const lesson = await this.lessonRepository.findOne({
       where: { id: lessonId },
-      select: ['id', 'fullSubtitles', 'language', 'minimapId'],
+      select: ['id', 'fullSubtitles', 'language'],
     });
 
     // Check if lesson not existed
@@ -38,25 +40,21 @@ export class VocabularyService {
     }
 
     let vocabularies;
-    let minimap;
+    let minimap: MindmapRecordMapper[] = [];
 
-    // Skip this step if minimap is created
-    if (isNotEmpty(lesson.minimapId)) {
-      // Get minimap in eleastic search
-      const minimapInLesson = await this.minimapEsService.getById(lesson.minimapId);
+    const mindmapExist = this.mindmapRepository.getById(lessonId);
 
-      // Skip this step if minimap is created in elastic search
-      if (isEmpty(minimapInLesson)) {
-        // Get minimap in eleastic search
-        minimap = await this.openaiService.minimap(lesson.fullSubtitles, lesson.language);
-
-        // Save document to elastic search
-        const document = await this.minimapEsService.indexDocument(minimap);
-
-        // Update minimap id
-        await this.lessonRepository.update({ id: lessonId }, { minimapId: document._id });
-      }
+    if (!isEmpty(mindmapExist)) {
+      throw new BadRequestException(Messages.ITEM_EXISTED);
     }
+
+    minimap = await this.openaiService.minimap(lesson.fullSubtitles, lesson.language);
+
+    minimap.forEach((item) => {
+      item.lesson = { id: lessonId };
+    });
+    // insert to mindmap table
+    this.mindmapRepository.insert(minimap);
 
     // Get vocabulary from id
     const vocabulary = await this.vocabularyRepository.findOne({

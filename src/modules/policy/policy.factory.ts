@@ -1,9 +1,9 @@
-import { Ability, AbilityBuilder, AbilityClass } from '@casl/ability';
+import { AbilityBuilder, AbilityClass, PureAbility } from '@casl/ability';
 import { PricingPlanRepository } from '@modules/pricing-plan/pricing-plan.repository';
 import { Injectable } from '@nestjs/common';
+import { DataSource } from 'typeorm';
 
 import { AuthMetadataMapper } from '@common/mappers/auth.mapper';
-import { DataSource } from 'typeorm';
 
 /**
  * Action defined
@@ -48,16 +48,20 @@ export type Resources =
   | 'vocabularies'
   | 'workspaces'
   | 'users'
-  | 'exams';
+  | 'exams'
+  | 'mindmap';
 
 /**
  * App Ability type
  */
-export type AppAbility = Ability<[Actions, Resources]>;
+export type AppAbility = PureAbility<[Actions, Resources]>;
 
 @Injectable()
 export class PolicyAbilityFactory {
-  constructor(private readonly dataSource: DataSource, private readonly pricingPlanRepository: PricingPlanRepository) {}
+  constructor(
+    private readonly dataSource: DataSource,
+    private readonly pricingPlanRepository: PricingPlanRepository
+  ) {}
 
   /**
    * Query all permisison from database and then, initialize permissions for Learner role
@@ -66,7 +70,9 @@ export class PolicyAbilityFactory {
    */
   async learner(user: AuthMetadataMapper, action: Actions, resource: Resources, resourceId?: string) {
     // Destrucing function
-    const { can, build } = new AbilityBuilder<Ability<[Actions, Resources]>>(Ability as AbilityClass<AppAbility>);
+    const { can, build } = new AbilityBuilder<PureAbility<[Actions, Resources]>>(
+      PureAbility as AbilityClass<AppAbility>
+    );
 
     // Query permission by pricing
     const pricing = await this.pricingPlanRepository.queryPermissions(user.pricingPlanMetadata.id);

@@ -4,7 +4,7 @@ import { UserService } from '@app/apis/user/user.service';
 import { UserCacheService } from '@modules/cache/user-cache.service';
 import { JwtService } from '@modules/jwt';
 import { MqttService } from '@modules/mqtt/mqtt.service';
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { Transactional } from 'typeorm-transactional';
 
 import { Messages } from '@common/enums';
@@ -86,8 +86,6 @@ export class AuthService {
       refreshToken,
       updatedAt: new Date().toISOString(),
     });
-
-    throw new UnauthorizedException();
 
     // Send access token and refresh token to middleware interceptor
     return { accessToken, refreshToken };
