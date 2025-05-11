@@ -5,7 +5,7 @@ import { TMeta } from '@common/types/elastic-search.type';
 
 import '@nestjs/elasticsearch';
 
-import { QueryDslQueryContainer, SearchRequest, Script } from '@elastic/elasticsearch/lib/api/types';
+import { QueryDslQueryContainer, Script, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 
 import { PaginateRawMapper } from '@common/mappers';
 

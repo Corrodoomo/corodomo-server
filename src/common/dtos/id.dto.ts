@@ -10,6 +10,11 @@ export class LessonIdDto {
   lessonId: string;
 }
 
+export class MindmapIdDto {
+  @IsUUID()
+  nodeId: string;
+}
+
 export class CommentIdDto {
   @IsUUID()
   commentId: string;

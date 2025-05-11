@@ -9,6 +9,7 @@ import { LessonComment } from './lesson-comment.entity';
 import { LessonNote } from './lesson-note.entity';
 import { LessonRecent } from './lesson-recent.entity';
 import { Lesson } from './lesson.entity';
+import { Mindmap } from './mindmap.entity';
 import { Note } from './note.entity';
 import { NotedVocabulary } from './noted-vocabulary.entity';
 import { PricingPlan } from './pricing-plan.entity';
@@ -96,4 +97,7 @@ export class User extends BaseEntity {
 
   @OneToOne(() => Task, (task) => task.createdBy)
   tasks: Task[];
+
+  @OneToMany(() => Mindmap, (mindmap) => mindmap.createdBy)
+  mindmaps: Mindmap[];
 }

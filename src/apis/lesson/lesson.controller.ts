@@ -11,7 +11,6 @@ import {
   ApiOkPaginationExample,
   ApiOkUpdateResultExample,
 } from '@common/decorators/example.decorator';
-import { OpenAIMinimapItemDto } from '@common/dtos';
 import { PaginateQueryDto } from '@common/dtos/common.dto';
 import { LessonIdDto } from '@common/dtos/id.dto';
 import {
@@ -83,13 +82,6 @@ export class LessonController {
   @ApiOkItemExample(LessonVideoCourse)
   getDetail(@Param() params: LessonIdDto, @Req() req: Request) {
     return this.lessonService.getDetail(params.lessonId, req.user.id);
-  }
-
-  @ApiGet('/:lessonId/minimap')
-  @Policy('read', 'lessons')
-  @ApiOkItemExample(OpenAIMinimapItemDto)
-  getMinimaps(@Param() params: LessonIdDto) {
-    return this.lessonService.getMinimaps(params.lessonId);
   }
 
   @ApiPut('/:lessonId/watched')

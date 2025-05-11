@@ -524,25 +524,4 @@ export class LessonService {
     // Return result
     return new ItemMapper(lesson);
   }
-
-  /**
-   * Get minimaps
-   * @param lessonId
-   * @returns
-   */
-  public async getMinimaps(lessonId: string) {
-    // Get lesson by id
-    const lesson = await this.lessonRepository.getById(lessonId, ['id', 'minimapId']);
-
-    // Error if lesson not found
-    if (isEmpty(lesson)) {
-      throw new BadRequestException(Messages.ITEM_NOT_FOUND);
-    }
-
-    // Get minimap in elastic search
-    const minimap = await this.minimapEsService.getById(lesson.minimapId);
-
-    // Return result
-    return new ItemMapper({ id: minimap?._id, source: minimap?._source });
-  }
 }

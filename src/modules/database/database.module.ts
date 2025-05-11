@@ -8,6 +8,7 @@ import { DataSource } from 'typeorm';
 import { addTransactionalDataSource } from 'typeorm-transactional';
 
 import { Quiz } from './entities';
+import { Action } from './entities/action.entity';
 import { ExamPart } from './entities/exam-part.entity';
 import { Folder } from './entities/folder.entity';
 import { GroupTask } from './entities/group-task.entity';
@@ -15,14 +16,17 @@ import { LessonComment } from './entities/lesson-comment.entity';
 import { LessonNote } from './entities/lesson-note.entity';
 import { LessonRecent } from './entities/lesson-recent.entity';
 import { Lesson } from './entities/lesson.entity';
+import { Mindmap } from './entities/mindmap.entity';
 import { Note } from './entities/note.entity';
 import { NotedVocabulary } from './entities/noted-vocabulary.entity';
 import { Permission } from './entities/permission.entity';
 import { Policy } from './entities/policy.entity';
+import { PricingPlan } from './entities/pricing-plan.entity';
 import { ProjectRecent } from './entities/project-recent.entity';
 import { Project } from './entities/project.entity';
 import { Question } from './entities/question.entity';
 import { Resource } from './entities/resource.entity';
+import { Role } from './entities/role.entity';
 import { Song } from './entities/song.entity';
 import { SubTask } from './entities/sub-task.entity';
 import { Subtitle } from './entities/subtitle.entity';
@@ -30,9 +34,6 @@ import { TaskComment } from './entities/task-comment.entity';
 import { Task } from './entities/task.entity';
 import { Vocabulary } from './entities/vocabulary.entity';
 import { Workspace } from './entities/workspace.entity';
-import { Role } from './entities/role.entity';
-import { Action } from './entities/action.entity';
-import { PricingPlan } from './entities/pricing-plan.entity';
 
 @Module({
   imports: [
@@ -92,6 +93,7 @@ import { PricingPlan } from './entities/pricing-plan.entity';
           SubTask,
           TaskComment,
           Folder,
+          Mindmap,
         ],
       }),
       dataSourceFactory: async (options) => {
