@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { isEmpty } from 'lodash';
 
-import { DeleteResultDto, UpdateResultDto } from '@common/dtos';
+import { DeleteResultDto, InsertResultDto, UpdateResultDto } from '@common/dtos';
 import { MindmapDto } from '@common/dtos/mindmap.dto';
 import { Messages } from '@common/enums';
 import { GroupMindmapDto } from '@common/mappers/mindmap.mapper';
@@ -13,12 +13,14 @@ export class MindmapService {
   constructor(private readonly mindmapRepository: MindmapRepository) {}
 
   async createNode(lessonId: string, body: MindmapDto) {
-    return this.mindmapRepository.save({
+    const node = await this.mindmapRepository.save({
       ...body,
       lesson: {
         id: lessonId,
       },
     });
+
+    return new InsertResultDto(node, 1);
   }
 
   async getMindmapsByLessonId(lessonId: string) {
