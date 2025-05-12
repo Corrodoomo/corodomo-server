@@ -1,9 +1,9 @@
-import { Mindmap } from '@modules/database/entities/mindmap.entity';
 import { Policy } from '@modules/policy/policy.decorator';
 import { Body, Controller, Param } from '@nestjs/common';
 
 import {
   ApiOkDeleteResultExample,
+  ApiOkInsertResultExample,
   ApiOkItemsExample,
   ApiOkUpdateResultExample,
 } from '@common/decorators/example.decorator';
@@ -27,21 +27,20 @@ export class MindmapController {
 
   @ApiPost('/:lessonId')
   @Policy('create', 'mindmap')
-  @ApiOkItemsExample(MindmapRecordMapper)
+  @ApiOkInsertResultExample(MindmapRecordMapper)
   createNode(@Param() params: LessonIdDto, @Body() body: MindmapDto) {
     return this.mindmapService.createNode(params.lessonId, body);
   }
 
   @ApiPut('/:nodeId')
   @Policy('update', 'mindmap')
-  @ApiOkUpdateResultExample(Mindmap)
+  @ApiOkUpdateResultExample(MindmapRecordMapper)
   updateNode(@Param() params: MindmapIdDto, @Body() body: MindmapDto) {
     return this.mindmapService.updateNode(params.nodeId, body);
   }
 
   @ApiDelete('/:nodeId')
   @Policy('delete', 'mindmap')
-  @ApiOkItemsExample(MindmapRecordMapper)
   @ApiOkDeleteResultExample()
   deleteNode(@Param() params: MindmapIdDto) {
     return this.mindmapService.deleteNode(params.nodeId);
