@@ -34,10 +34,10 @@ export class MindmapRecordMapper extends BelongToUserMapper {
 
 export class GroupMindmapDto extends ItemsMapper<Mindmap> {
   constructor(blogs: Mindmap[]) {
-    super(GroupMindmapDto.groupBlogs(blogs));
+    super(GroupMindmapDto.groupMindmap(blogs));
   }
 
-  public static groupBlogs(mindmap: Mindmap[]) {
+  public static groupMindmap(mindmap: Mindmap[]) {
     // Create a map to store blogs
     const map = new Map();
 
@@ -55,6 +55,6 @@ export class GroupMindmapDto extends ItemsMapper<Mindmap> {
       }
     });
 
-    return mindmap;
+    return mindmap.filter((item) => !item.parentNodeId);
   }
 }

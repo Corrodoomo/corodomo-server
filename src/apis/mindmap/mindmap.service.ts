@@ -26,7 +26,7 @@ export class MindmapService {
     return new GroupMindmapDto(mindmaps);
   }
 
-  async updateNode(userId: string, nodeId: string, body: MindmapDto) {
+  async updateNode(nodeId: string, body: MindmapDto) {
     // Get blog by id
     const node = await this.mindmapRepository.getRawOne(nodeId, ['id']);
 

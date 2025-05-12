@@ -1,6 +1,6 @@
 import { Mindmap } from '@modules/database/entities/mindmap.entity';
 import { Policy } from '@modules/policy/policy.decorator';
-import { Body, Controller, Param, Req } from '@nestjs/common';
+import { Body, Controller, Param } from '@nestjs/common';
 
 import {
   ApiOkDeleteResultExample,
@@ -8,10 +8,9 @@ import {
   ApiOkUpdateResultExample,
 } from '@common/decorators/example.decorator';
 import { ApiDelete, ApiGet, ApiPost, ApiPut } from '@common/decorators/http.decorator';
-import { LessonIdDto } from '@common/dtos/id.dto';
+import { LessonIdDto, MindmapIdDto } from '@common/dtos/id.dto';
 import { MindmapDto } from '@common/dtos/mindmap.dto';
 import { MindmapRecordMapper } from '@common/mappers/mindmap.mapper';
-import { Request } from '@common/models';
 
 import { MindmapService } from './mindmap.service';
 
@@ -36,15 +35,15 @@ export class MindmapController {
   @ApiPut('/:nodeId')
   @Policy('update', 'mindmap')
   @ApiOkUpdateResultExample(Mindmap)
-  updateNode(@Param() params: LessonIdDto, @Body() body: MindmapDto, @Req() request: Request) {
-    return this.mindmapService.updateNode(request.user.id, params.lessonId, body);
+  updateNode(@Param() params: MindmapIdDto, @Body() body: MindmapDto) {
+    return this.mindmapService.updateNode(params.nodeId, body);
   }
 
   @ApiDelete('/:nodeId')
   @Policy('delete', 'mindmap')
   @ApiOkItemsExample(MindmapRecordMapper)
   @ApiOkDeleteResultExample()
-  deleteNode(@Param() params: LessonIdDto) {
-    return this.mindmapService.deleteNode(params.lessonId);
+  deleteNode(@Param() params: MindmapIdDto) {
+    return this.mindmapService.deleteNode(params.nodeId);
   }
 }

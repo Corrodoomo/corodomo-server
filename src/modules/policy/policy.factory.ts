@@ -64,7 +64,7 @@ export class PolicyAbilityFactory {
   ) {}
 
   /**
-   * Query all permisison from database and then, initialize permissions for Learner role
+   * Query all permission from database and then, initialize permissions for Learner role
    * @param user
    * @returns
    */
