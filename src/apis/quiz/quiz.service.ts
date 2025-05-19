@@ -3,8 +3,8 @@ import { OpenAIService } from '@modules/openai/openai.service';
 import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { isEmpty } from 'lodash';
 
-import { ListQuizDto } from '@common/dtos/quiz.dto';
 import { Messages } from '@common/enums';
+import { QuizMapper } from '@common/mappers/quiz.mapper';
 
 import { QuizRepository } from './quiz.repository';
 
@@ -89,12 +89,18 @@ export class QuizService {
    * @param query
    * @returns
    */
-  public async getByLessonId(lessonId: string): Promise<ListQuizDto> {
+  public async getByLessonId(lessonId: string): Promise<QuizMapper> {
+    const lesson = await this.lessonRepository.getRawOne(lessonId, ['id', 'language']);
+
+    if (isEmpty(lesson)) {
+      throw new BadRequestException();
+    }
+
     const quizzes = await this.quizRepository.find({
       where: { lesson: { id: lessonId } },
       select: ['id', 'question', 'answer', 'choices', 'createdAt', 'updatedAt'],
     });
 
-    return new ListQuizDto(quizzes);
+    return new QuizMapper(quizzes, lesson.language);
   }
 }
