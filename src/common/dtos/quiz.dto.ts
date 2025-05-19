@@ -1,6 +1,7 @@
 import { Quiz } from '@modules/database/entities';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
+
 import { BelongToLessonDto } from './common.dto';
 
 export class QuizDto {
