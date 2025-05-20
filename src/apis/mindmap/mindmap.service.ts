@@ -4,7 +4,7 @@ import { isEmpty } from 'lodash';
 import { DeleteResultDto, InsertResultDto, UpdateResultDto } from '@common/dtos';
 import { MindmapDto } from '@common/dtos/mindmap.dto';
 import { Messages } from '@common/enums';
-import { GroupMindmapDto } from '@common/mappers/mindmap.mapper';
+import { ItemsMapper } from '@common/mappers';
 
 import { MindmapRepository } from './mindmap.repository';
 
@@ -25,7 +25,7 @@ export class MindmapService {
 
   async getMindmapsByLessonId(lessonId: string) {
     const mindmaps = await this.mindmapRepository.find({ where: { lesson: { id: lessonId } } });
-    return new GroupMindmapDto(mindmaps);
+    return new ItemsMapper(mindmaps);
   }
 
   async updateNode(nodeId: string, body: MindmapDto) {
