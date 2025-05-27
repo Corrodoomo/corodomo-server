@@ -1,5 +1,7 @@
 import { User } from '@modules/database/entities';
 
+import { ItemMapper } from './common.mapper';
+
 /**
  * Re-map a object into AuthMetadataMapper
  */
@@ -48,5 +50,14 @@ export class AuthMetadataMapper {
       id: user.pricingPlan.id,
       name: user.pricingPlan.name,
     };
+  }
+}
+
+/**
+ * Re-map a object into AuthUserMapper
+ */
+export class QRCodeMapper extends ItemMapper<{ qrToken: string }> {
+  constructor(public readonly qrToken: string) {
+    super({ qrToken });
   }
 }

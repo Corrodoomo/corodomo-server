@@ -18,9 +18,9 @@ export class UserCacheService extends CacheService {
 
   /**
    * Set session
-   * @param key 
-   * @param value 
-   * @returns 
+   * @param key
+   * @param value
+   * @returns
    */
   async setSession(key: string, value: object) {
     return this.set(`session_${key}`, JSON.stringify(value), this.configService.getOrThrow('SESSON_REDIS'));
@@ -28,9 +28,9 @@ export class UserCacheService extends CacheService {
 
   /**
    * Set session by devices
-   * @param key 
-   * @param value 
-   * @returns 
+   * @param key
+   * @param value
+   * @returns
    */
   async setSessionDevices(key: string, value: object) {
     return this.setNx(`session_devices_${key}`, JSON.stringify(value));
@@ -41,9 +41,9 @@ export class UserCacheService extends CacheService {
    * @param userId
    * @returns
    */
-  async existSession(idToken: string) {
-    const value = await this.get(`session_${idToken}`);
-    
+  async existSession(accessToken: string) {
+    const value = await this.get(`session_${accessToken}`);
+
     // Error if session not found
     if (isNil(value)) {
       throw new UnauthorizedException(Messages.SESSION_NOT_FOUND);

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { lookup } from 'geoip-lite';
 import * as countries from 'i18n-iso-countries';
 
-import { SessionMetadata } from '@common/types/session-metadata.type';
+import { UserAgentMetadata } from '@common/types/session-metadata.type';
 import { getClientIp } from '@common/utils/get-client-ip.util';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -11,6 +11,7 @@ import DeviceDetector = require('device-detector-js');
 // Register English locale for i18n-iso-countries
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 countries.registerLocale(require('i18n-iso-countries/langs/en.json'));
+
 @Injectable()
 export class WebSession {
   /**
@@ -18,7 +19,7 @@ export class WebSession {
    * @param request
    * @returns
    */
-  static getSessionMetadata(request: SystemRequest): SessionMetadata {
+  static getSessionMetadata(request: SystemRequest): UserAgentMetadata {
     const ip = getClientIp(request);
     const location = lookup(ip);
     const device = new DeviceDetector().parse(request.headers['user-agent'] || '');

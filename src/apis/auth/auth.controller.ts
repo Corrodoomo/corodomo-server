@@ -1,17 +1,15 @@
-import { CreateUserDto } from '@app/apis/user/dtos/create-user.dto';
-import { Body, Controller, Req, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Req, UseGuards } from '@nestjs/common';
 import { ApiBody } from '@nestjs/swagger';
 
-import { ApiPost } from '@common/decorators';
+import { ApiGet, ApiPost } from '@common/decorators';
 import { ApiOkInsertResultExample, ApiOkResponseExample } from '@common/decorators/example.decorator';
 import { Public } from '@common/decorators/public-route.decorator';
-import { SignInUserDto } from '@common/dtos';
+import { SignInOAuthDto, SignInQRCodeDto, SignInUserDto, SignUpUserDto } from '@common/dtos';
 import { Authorized } from '@common/guards/authorized.guard';
 import { LocalAuthGuard } from '@common/guards/local-auth.guard';
+import { OAuthGuard } from '@common/guards/oauth.guard';
+import { QRAuthGuard } from '@common/guards/qr-auth.guard';
 import { RefreshAuthGuard } from '@common/guards/refresh-auth.guard';
-import { ClearSessionInterceptor } from '@common/interceptors/clear-session.interceptor';
-import { InitializeSessionInterceptor } from '@common/interceptors/initialize-session.interceptor';
-import { RefreshSessionInterceptor } from '@common/interceptors/refresh-session.interceptor';
 import { AuthMetadataMapper } from '@common/mappers/auth.mapper';
 import { AuthUserMapper, SignedUpUserMapper } from '@common/mappers/user.mapper';
 
@@ -24,7 +22,7 @@ export class AuthController {
   @Public()
   @ApiPost('signup')
   @ApiOkInsertResultExample(SignedUpUserMapper)
-  registerUser(@Body() createUserDto: CreateUserDto) {
+  registerUser(@Body() createUserDto: SignUpUserDto) {
     return this.authService.registerUser(createUserDto);
   }
 
@@ -35,35 +33,48 @@ export class AuthController {
     type: SignInUserDto,
   })
   @UseGuards(LocalAuthGuard)
-  @UseInterceptors(InitializeSessionInterceptor)
   signIn(@Authorized() user: AuthMetadataMapper, @Req() request: SystemRequest) {
     return this.authService.signIn(user, request);
   }
 
-  @Public()
-  @ApiPost('token')
+  @ApiPost('signin/qr_code')
   @ApiOkResponseExample(AuthUserMapper)
   @ApiBody({
-    type: SignInUserDto,
+    type: SignInQRCodeDto,
   })
-  @UseGuards(LocalAuthGuard)
-  token(@Authorized() user: AuthMetadataMapper, @Req() request: SystemRequest) {
+  @UseGuards(QRAuthGuard)
+  signInWithQR(@Authorized() user: AuthMetadataMapper, @Req() request: SystemRequest) {
+    return this.authService.signInWithQR(user, request);
+  }
+
+  @Public()
+  @ApiPost('signin/:authProvider')
+  @ApiOkResponseExample(AuthUserMapper)
+  @ApiBody({
+    type: SignInOAuthDto,
+  })
+  @UseGuards(OAuthGuard)
+  signInWithSSO(@Authorized() user: AuthMetadataMapper, @Req() request: SystemRequest) {
     return this.authService.signIn(user, request);
   }
 
   @Public()
-  @ApiPost('refresh')
+  @ApiGet('qr_code')
+  getQRCode(@Req() request: SystemRequest) {
+    return this.authService.getQRCode(request);
+  }
+
+  @Public()
+  @ApiPost('refresh_token')
   @ApiOkResponseExample(AuthUserMapper)
   @UseGuards(RefreshAuthGuard)
-  @UseInterceptors(RefreshSessionInterceptor)
-  refresh(@Authorized() user: AuthMetadataMapper, @Req() request: SystemRequest) {
-    return this.authService.refresh(user, request.cookies.idToken);
+  refreshToken(@Authorized() user: AuthMetadataMapper, @Req() request: SystemRequest) {
+    return this.authService.refreshToken(user, request.headers.authorization);
   }
 
   @ApiPost('signout')
   @ApiOkResponseExample(AuthUserMapper)
-  @UseInterceptors(ClearSessionInterceptor)
   logout(@Authorized() user: AuthMetadataMapper, @Req() request: SystemRequest) {
-    return this.authService.logout(user, request.cookies.idToken);
+    return this.authService.logout(user, request.headers.authorization);
   }
 }
