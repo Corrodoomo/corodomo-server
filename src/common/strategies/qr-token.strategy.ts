@@ -1,5 +1,5 @@
 import { UserRepository } from '@app/apis/user/user.repository';
-import { UserCacheService } from '@modules/cache/user-cache.service';
+import { CacheService } from '@modules/cache/cache.service';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
@@ -14,7 +14,7 @@ export class QRStrategy extends PassportStrategy(Strategy, 'qr-code') {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly configService: ConfigService,
-    private readonly cacheService: UserCacheService
+    private readonly cacheService: CacheService
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([(req: Request) => req.body.qrToken]),
@@ -26,7 +26,7 @@ export class QRStrategy extends PassportStrategy(Strategy, 'qr-code') {
 
   async validate(req: SystemRequest) {
     // Check accessToken token in Redis
-    const qrToken = await this.cacheService.get(`qr_token_${req.body.qrToken}`);
+    const qrToken = await this.cacheService.prefix('qr_token').get(req.body.qrToken);
 
     // Check refresh token in Redis
     if (isEmpty(qrToken)) {
@@ -34,7 +34,7 @@ export class QRStrategy extends PassportStrategy(Strategy, 'qr-code') {
     }
 
     // Destroy QR code token
-    this.cacheService.del(`qr_token_${req.body.qrToken}`);
+    this.cacheService.prefix('qr_token').del(req.body.qrToken);
 
     // Check if user has already logged in with QR code
     req.user.userMetadata.authProvider = 'qr_code';

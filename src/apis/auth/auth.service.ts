@@ -1,9 +1,10 @@
 import { UserRepository } from '@app/apis/user/user.repository';
 import { UserService } from '@app/apis/user/user.service';
-import { UserCacheService } from '@modules/cache/user-cache.service';
+import { CacheService } from '@modules/cache/cache.service';
 import { JwtService } from '@modules/jwt';
 import { MqttService } from '@modules/mqtt/mqtt.service';
 import { ConflictException, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Transactional } from 'typeorm-transactional';
 
 import { InsertResultDto, SignUpUserDto } from '@common/dtos';
@@ -16,8 +17,9 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
-    private readonly cacheService: UserCacheService,
-    private readonly mqttService: MqttService
+    private readonly cacheService: CacheService,
+    private readonly mqttService: MqttService,
+    private readonly configService: ConfigService
   ) {}
 
   // Register user
@@ -57,7 +59,7 @@ export class AuthService {
    */
   public async signIn(user: AuthMetadataMapper, request: SystemRequest) {
     // Get current sesson
-    const duplicated = await this.cacheService.getJsonItem<string[]>(user.id);
+    const duplicated = await this.cacheService.keys(user.id);
 
     // Generate access token and refresh token
     const { idToken, accessToken, refreshToken } = await this.jwtService.generateToken(user);
@@ -77,17 +79,18 @@ export class AuthService {
     }
 
     // Save session by id token
-    await this.cacheService.setSession(accessToken, {
-      id: user.id,
-      userAgent: request.userAgent,
+    await this.cacheService.prefix(user.id).set(
       accessToken,
-      refreshToken,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    });
-
-    // Save session by user id to check duplicated
-    await this.cacheService.setSessionDevices(user.id, [...(duplicated || []), accessToken]);
+      {
+        id: user.id,
+        userAgent: request.userAgent,
+        accessToken,
+        refreshToken,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      this.configService.getOrThrow('ACCESS_TOKEN_EXPIRE')
+    );
 
     // Send access token and refresh token to middleware interceptor
     return { accessToken, refreshToken, idToken };
@@ -113,25 +116,23 @@ export class AuthService {
   /**
    * Refresh token
    * @param user
-   * @param authorization
    * @returns
    */
-  public async refreshToken(user: AuthMetadataMapper, authorization: string) {
+  public async refreshToken(user: AuthMetadataMapper) {
     // Generate access token and refresh token
-
     const { accessToken, refreshToken } = await this.jwtService.generateToken(user);
 
-    // Get session data
-    const [_, oldToken] = authorization.split(' ');
-    const session = await this.cacheService.existSession(oldToken);
-
     // Save session by id token
-    await this.cacheService.setSession(accessToken, {
-      ...session,
+    await this.cacheService.prefix(user.id).set(
       accessToken,
-      refreshToken,
-      updatedAt: new Date().toISOString(),
-    });
+      {
+        ...user,
+        accessToken,
+        refreshToken,
+        updatedAt: new Date().toISOString(),
+      },
+      this.configService.getOrThrow('ACCESS_TOKEN_EXPIRE')
+    );
 
     // Send access token and refresh token to middleware interceptor
     return { accessToken, refreshToken };
@@ -143,25 +144,8 @@ export class AuthService {
    * @returns
    */
   public async logout(user: AuthMetadataMapper, accessToken: string) {
-    // Get current sesson
-    const duplicated = await this.cacheService.getJsonItem<string[]>(`session_devices_${user.id}`);
-
-    // Count number of sessions
-    if (duplicated) {
-      if (duplicated.length === 1) {
-        // Delete token from cache
-        await this.cacheService.del(`session_devices_${user.id}`);
-      } else {
-        // Delete from session by devices
-        await this.cacheService.setSessionDevices(
-          user.id,
-          duplicated.filter((item) => item !== accessToken)
-        );
-      }
-    }
-
     // Delete token to cache
-    await this.cacheService.del(`session_${accessToken}`);
+    await this.cacheService.prefix(user.id).del(accessToken);
 
     // Return message
     return { message: 'Logout successful' };
@@ -179,7 +163,7 @@ export class AuthService {
 
     // Save QR code token to cache with user agent
     // Set expiration time for QR code token
-    this.cacheService.set(`qr_token_${qrToken}`, JSON.stringify(req.userAgent), 60);
+    this.cacheService.prefix('qr_token').set(qrToken, req.userAgent, this.configService.getOrThrow('QR_CODE_EXPIRE'));
 
     // Check if user has already logged in with QR code
     return new QRCodeMapper(qrToken);

@@ -14,10 +14,17 @@ import * as Joi from 'joi';
         CLIENT_DOMAIN: Joi.string().required(),
 
         ACCESS_SECRET_KEY: Joi.string().required(),
-        ACCESS_SECRET_KEY_EXPIRE: Joi.string().required(),
+        ACCESS_TOKEN_EXPIRE: Joi.number().required(),
         REFRESH_SECRET_KEY: Joi.string().required(),
-        REFRESH_SECRET_KEY_EXPIRE: Joi.string().required(),
+        REFRESH_TOKEN_EXPIRE: Joi.string().required(),
+        QR_CODE_KEY: Joi.string().required(),
+        QR_CODE_EXPIRE: Joi.number().required(),
         BCRYPT_SALT_OR_ROUNDS: Joi.number().required(),
+
+        GITHUB_CLIENT_ID: Joi.string().required(),
+        GITHUB_CLIENT_SECRET: Joi.string().required(),
+        GOOGLE_CLIENT_ID: Joi.string().required(),
+        GOOGLE_CLIENT_SECRET: Joi.string().required(),
 
         // Database Postgres Config
         DB_HOST: Joi.string().hostname().required(),

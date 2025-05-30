@@ -4,8 +4,6 @@ import Redis from 'ioredis';
 
 import { MetadataKey } from '@common/constants';
 
-import { UserCacheService } from './user-cache.service';
-
 const providers = [
   {
     provide: MetadataKey.USER_REDIS,
@@ -24,7 +22,7 @@ const providers = [
 
 @Global()
 @Module({
-  providers: [...providers, UserCacheService],
-  exports: [...providers, UserCacheService],
+  providers: [...providers],
+  exports: [...providers],
 })
 export class CacheModule {}

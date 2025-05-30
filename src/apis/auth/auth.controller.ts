@@ -68,13 +68,13 @@ export class AuthController {
   @ApiPost('refresh_token')
   @ApiOkResponseExample(AuthUserMapper)
   @UseGuards(RefreshAuthGuard)
-  refreshToken(@Authorized() user: AuthMetadataMapper, @Req() request: SystemRequest) {
-    return this.authService.refreshToken(user, request.headers.authorization);
+  refreshToken(@Authorized() user: AuthMetadataMapper) {
+    return this.authService.refreshToken(user);
   }
 
   @ApiPost('signout')
   @ApiOkResponseExample(AuthUserMapper)
   logout(@Authorized() user: AuthMetadataMapper, @Req() request: SystemRequest) {
-    return this.authService.logout(user, request.headers.authorization);
+    return this.authService.logout(user, request.accessToken);
   }
 }

@@ -38,7 +38,7 @@ export class JwtService {
   signAccessToken(user: AuthMetadataMapper) {
     return this.jwtService.sign(user, {
       secret: this.configService.getOrThrow('ACCESS_SECRET_KEY'),
-      expiresIn: this.configService.getOrThrow('ACCESS_SECRET_KEY_EXPIRE'),
+      expiresIn: this.configService.getOrThrow('ACCESS_TOKEN_EXPIRE'),
       algorithm: 'HS256',
     });
   }
@@ -53,7 +53,7 @@ export class JwtService {
   signRefreshToken(user: AuthMetadataMapper) {
     return this.jwtService.signAsync(user, {
       secret: this.configService.getOrThrow('REFRESH_SECRET_KEY'),
-      expiresIn: this.configService.getOrThrow('REFRESH_SECRET_KEY_EXPIRE'),
+      expiresIn: this.configService.getOrThrow('REFRESH_TOKEN_EXPIRE'),
       algorithm: 'HS256',
     });
   }

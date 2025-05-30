@@ -29,6 +29,7 @@ declare global {
     timeId: string;
     headers: { authorization: string };
     userAgent: UserAgentMetadata;
+    accessToken: string;
   };
 
   type SystemRequest = ExpressRequest & CustomRequest;

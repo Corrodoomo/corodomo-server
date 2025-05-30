@@ -21,6 +21,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const req = context.switchToHttp().getRequest<SystemRequest>();
 
     req.userAgent = WebSession.getSessionMetadata(req);
+    req.accessToken = req.headers.authorization.split(' ')[0];
 
     if (isPublic) {
       return true;

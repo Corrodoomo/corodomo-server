@@ -9,6 +9,7 @@ import { OAuth2Client } from 'google-auth-library';
 import { isEmpty } from 'lodash';
 import { Strategy } from 'passport-custom';
 
+import { Messages } from '@common/enums';
 import { AuthMetadataMapper } from '@common/mappers/auth.mapper';
 
 @Injectable()
@@ -25,42 +26,55 @@ export class OAuthStrategy extends PassportStrategy(Strategy, 'oauth-jwt') {
     // Get auth provider from request params
     const { authProvider } = req.params;
 
+    // Init user
     let user: User | null = null;
 
+    // Validate Google ID Token
     if (authProvider === 'google') {
-      // Validate Google ID Token
       user = await this.verifyGoogle(req.body.idToken);
     }
 
+    // Validate Google ID Token
     if (authProvider === 'github') {
-      // Validate Google ID Token
       user = await this.verifyGithub(req.body.idToken);
     }
 
+    // Error if user is not found
     if (isEmpty(user)) {
-      throw new UnauthorizedException('OAUTH Invalid');
+      throw new UnauthorizedException(Messages.OAUTH_FAILED);
     }
 
+    // Metadata
     const metadata = await this.userRepository.getUserMetadata(user.id);
 
     // Return user
     return new AuthMetadataMapper(metadata);
   }
 
+  /**
+   * Verify Google
+   * @param idToken
+   * @returns
+   */
   async verifyGoogle(idToken: string): Promise<any> {
-    const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID); // Replace with your Google Client ID
+    // Create client
+    const client = new OAuth2Client(this.configService.getOrThrow('GOOGLE_CLIENT_ID')); // Replace with your Google Client ID
 
+    // Verify id token
     const ticket = await client.verifyIdToken({
       idToken,
-      audience: process.env.GOOGLE_CLIENT_ID, // Client ID của bạn
+      audience: this.configService.getOrThrow('GOOGLE_CLIENT_ID'), // Client ID của bạn
     });
 
+    // Decoded token
     const payload = ticket.getPayload();
 
+    // Error if paylod invalid
     if (isEmpty(payload)) {
-      throw new UnauthorizedException('OAUTH Invalid');
+      throw new UnauthorizedException(Messages.OAUTH_FAILED);
     }
 
+    // Detructering payload
     const { email, picture, name } = payload;
 
     // Validate required fields
@@ -77,16 +91,24 @@ export class OAuthStrategy extends PassportStrategy(Strategy, 'oauth-jwt') {
       });
     }
 
+    // Return user
     return user;
   }
 
+  /**
+   * Verify Github
+   * @param idToken
+   * @returns
+   */
   async verifyGithub(idToken: string): Promise<any> {
+    // Get profile
     const profile: any = await axios.get('https://api.github.com/user', {
       headers: {
         Authorization: `Bearer ${idToken}`,
       },
     });
 
+    // Email prefix
     const email = `${profile.data.login}@github.com`;
 
     // Validate required fields
@@ -103,6 +125,7 @@ export class OAuthStrategy extends PassportStrategy(Strategy, 'oauth-jwt') {
       });
     }
 
+    // Return user
     return user;
   }
 }

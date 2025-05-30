@@ -13,6 +13,7 @@ import { RefreshStrategy } from '@common/strategies/refresh-token.strategy';
 
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { CacheService } from '@modules/cache/cache.service';
 
 @Module({
   controllers: [AuthController],
@@ -26,6 +27,7 @@ import { AuthService } from './auth.service';
     MqttService,
     RoleRepository,
     PricingPlanRepository,
+    CacheService,
   ],
   imports: [UserModule, PassportModule],
 })
