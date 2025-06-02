@@ -60,13 +60,13 @@ export class AuthService {
   public async signIn(user: AuthMetadataMapper, request: SystemRequest) {
     // Get current sesson
     const duplicated = await this.cacheService.keys(user.id);
-
+    
     // Generate access token and refresh token
     const { idToken, accessToken, refreshToken } = await this.jwtService.generateToken(user);
 
     // Save token to cache
     // Case session duplicated
-    if (duplicated) {
+    if (duplicated.length) {
       // Sau do handle thông báo đến device chính nếu có người lạ đăng nhập ở đây
       this.mqttService.notifyDuplicatedSession({
         id: user.id,
@@ -166,6 +166,6 @@ export class AuthService {
     this.cacheService.prefix('qr_token').set(qrToken, req.userAgent, this.configService.getOrThrow('QR_CODE_EXPIRE'));
 
     // Check if user has already logged in with QR code
-    return new QRCodeMapper(qrToken);
+    return new QRCodeMapper(qrToken, req.userAgent);
   }
 }

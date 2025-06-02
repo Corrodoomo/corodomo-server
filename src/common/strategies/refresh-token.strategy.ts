@@ -6,6 +6,7 @@ import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
 import { Messages } from '@common/enums';
+import { CachedUser } from '@common/mappers/auth.mapper';
 import { JWTPayLoad } from '@common/types/jwt-payload.type';
 
 @Injectable()
@@ -24,10 +25,10 @@ export class RefreshStrategy extends PassportStrategy(Strategy, 'refresh-jwt') {
 
   async validate(req: SystemRequest, payload: JWTPayLoad) {
     // Check accessToken token in Redis
-    const session = await this.cacheService.prefix(payload.id).get(req.accessToken);
+    const session = await this.cacheService.prefix(payload.id).get<CachedUser>(req.accessToken);
 
     // Check refresh token in Redis
-    if (session.refreshToken !== req.body.refreshToken) {
+    if (session && session.refreshToken !== req.body.refreshToken) {
       throw new UnauthorizedException(Messages.TOKEN_NOT_FOUND);
     }
 

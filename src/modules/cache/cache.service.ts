@@ -1,8 +1,11 @@
+import { Inject } from '@nestjs/common';
 import Redis from 'ioredis';
 import { isNil } from 'lodash';
 
+import { MetadataKey } from '@common/constants';
+
 export class CacheService {
-  constructor(protected readonly redis: Redis) {}
+  constructor(@Inject(MetadataKey.REDIS) private readonly redis: Redis) {}
 
   /**
    * Set key based on expired time
@@ -31,7 +34,7 @@ export class CacheService {
    * @returns
    */
   async get<T>(key: string) {
-    const value = await this.get(key);
+    const value = await this.redis.get(key);
 
     // Error if session not found
     if (isNil(value)) return null;
@@ -64,8 +67,9 @@ export class CacheService {
    */
   prefix(prefixKey: string) {
     return {
-      set: (key: string, value: object, expired: string | number) => this.set(`${prefixKey}:${key}`, JSON.stringify(value), expired),
-      get: (key: string) => this.get(`${prefixKey}:${key}`),
+      set: (key: string, value: object, expired: string | number) =>
+        this.set(`${prefixKey}:${key}`, JSON.stringify(value), expired),
+      get: <T>(key: string) => this.get<T>(`${prefixKey}:${key}`),
       del: (key: string) => this.del(`${prefixKey}:${key}`),
     };
   }
