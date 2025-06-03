@@ -29,7 +29,7 @@ export class MindmapService {
   }
 
   async updateNode(nodeId: string, body: MindmapDto) {
-    // Get blog by id
+    // Get mindmap by id
     const node = await this.mindmapRepository.getRawOne(nodeId, ['id']);
 
     // Check if blog is empty
@@ -39,13 +39,14 @@ export class MindmapService {
 
     // Create blog
     await this.mindmapRepository.update(nodeId, body);
+    const updatedData = await this.mindmapRepository.findOne({ where: { id: nodeId } });
 
     // Return result
-    return new UpdateResultDto(1);
+    return new UpdateResultDto(updatedData, 1);
   }
 
   async deleteNode(nodeId: string) {
-    // Get blog by id
+    // Get mindmap by id
     const node = await this.mindmapRepository.getRawOne(nodeId, ['id']);
 
     // Check if blog is empty
@@ -56,6 +57,6 @@ export class MindmapService {
     await this.mindmapRepository.delete(nodeId);
 
     // Return result
-    return new DeleteResultDto(1);
+    return new DeleteResultDto(node, 1);
   }
 }
