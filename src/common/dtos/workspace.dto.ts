@@ -8,9 +8,9 @@ export class CreateWorkspaceDto {
   @IsNotEmpty()
   @MinLength(1)
   @MaxLength(50)
-  title: string;
+  title: string;  
 
-  @ApiProperty()
+  @ApiProperty() 
   @IsNotEmpty()
   @IsIn(WORKSPACE_THEMES)
   theme: string;

@@ -1,4 +1,6 @@
 import { UserRepository } from '@app/apis/user/user.repository';
+import { PricingPlanRepository } from '@modules/pricing-plan/pricing-plan.repository';
+import { RoleRepository } from '@modules/role/role.repository';
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
@@ -19,6 +21,8 @@ import { UserService } from './user.service';
       },
       inject: [ConfigService],
     },
+    PricingPlanRepository,
+    RoleRepository,
   ],
   exports: [
     UserService,

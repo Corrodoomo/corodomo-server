@@ -19,4 +19,11 @@ export class MqttService {
   public notifyDuplicatedSession(user: object) {
     this.client.emit('session/duplicated', user);
   }
+
+  /**
+   * Notification emit
+   */
+  public notifyAuthQR(qrToken: string, message: object) {
+    this.client.emit(`notification/qr/${qrToken}`, message);
+  }
 }

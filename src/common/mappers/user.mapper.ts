@@ -85,6 +85,9 @@ export class UserProfileMapper {
   name: string;
 
   @ApiProperty()
+  image: string;
+
+  @ApiProperty()
   emailVerified: boolean;
 
   @ApiProperty()
@@ -98,6 +101,6 @@ export class ProfileMapper extends ItemMapper<UserProfileMapper> {
   constructor(user: User) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...rest } = user;
-    super(rest);
+    super({ ...rest, image: rest.avatarUrl });
   }
 }

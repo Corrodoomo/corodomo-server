@@ -6,16 +6,11 @@ import { ThrottlerGuard } from '@nestjs/throttler';
 import { HttpExceptionFilter } from '@common/filters/http-exception.filter';
 import { TypeOrmFilter } from '@common/filters/typeorm.filter';
 import { UndefinedExceptionFilter } from '@common/filters/undefined-exception.filter';
-import { AuthenticationGuard } from '@common/guards/authentication.guard';
 import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
 import { FormatResponseInterceptor } from '@common/interceptors/format-response.interceptor';
 
 export const providers: Provider[] = [
   AppService,
-  {
-    provide: APP_GUARD,
-    useClass: AuthenticationGuard,
-  },
   {
     provide: APP_GUARD,
     useClass: JwtAuthGuard,

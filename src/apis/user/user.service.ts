@@ -1,8 +1,9 @@
-import { CreateUserDto } from '@app/apis/user/dtos/create-user.dto';
 import { UserRepository } from '@app/apis/user/user.repository';
+import { User } from '@modules/database/entities';
+import { PricingPlanRepository } from '@modules/pricing-plan/pricing-plan.repository';
+import { RoleRepository } from '@modules/role/role.repository';
 import { Injectable, NotFoundException } from '@nestjs/common';
 
-import { InsertResultDto } from '@common/dtos';
 import { Messages } from '@common/enums';
 import { ProfileMapper } from '@common/mappers/user.mapper';
 import { BryptService } from '@common/services';
@@ -11,32 +12,50 @@ import { BryptService } from '@common/services';
 export class UserService {
   constructor(
     private readonly userRepository: UserRepository,
+    private readonly pricingPlanRepository: PricingPlanRepository,
+    private readonly roleRepository: RoleRepository,
     private readonly bryptService: BryptService
   ) {}
 
-  public async create(body: CreateUserDto) {
+  /**
+   * Create a new user
+   * @param body
+   * @returns
+   */
+  public async create(body: Partial<User>) {
     const { password, ...user } = body;
 
-    const hashPassword = await this.bryptService.hashPassword(password);
-    const savedUser = await this.userRepository.save({
-      email: user.email,
-      password: hashPassword,
-      name: user.name
+    let hashPassword = '';
+
+    if (password) {
+      hashPassword = await this.bryptService.hashPassword(password);
+    }
+
+    const pricingPlan = await this.pricingPlanRepository.findOneOrFail({
+      select: ['id'],
+      where: { name: 'trial_plan' },
+      cache: true,
     });
 
-    return new InsertResultDto(
-      {
-        id: savedUser.id,
-        email: savedUser.email,
-        emailVerified: savedUser.emailVerified,
-        updatedAt: savedUser.updatedAt,
-        createdAt: savedUser.createdAt,
-        name: savedUser.name,
-      },
-      1
-    );
+    const role = await this.roleRepository.findOneOrFail({
+      select: ['id'],
+      where: { name: 'learner' },
+      cache: true,
+    });
+
+    return this.userRepository.save({
+      ...user,
+      password: hashPassword,
+      pricingPlan,
+      role,
+    });
   }
 
+  /**
+   * Get user profile by id
+   * @param id
+   * @returns
+   */
   public async get(id: string) {
     const user = await this.userRepository.findOne({
       where: { id },

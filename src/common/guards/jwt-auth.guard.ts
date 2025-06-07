@@ -4,6 +4,7 @@ import { AuthGuard } from '@nestjs/passport';
 
 import { IS_PUBLIC_KEY } from '@common/decorators/public-route.decorator';
 import { Messages } from '@common/enums';
+import { WebSession } from '@common/utils/session.util';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -17,6 +18,11 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       context.getClass(),
     ]);
 
+    const req = context.switchToHttp().getRequest<SystemRequest>();
+
+    req.userAgent = WebSession.getSessionMetadata(req);
+    req.accessToken = req.headers?.authorization?.split(' ')?.[1];
+
     if (isPublic) {
       return true;
     }
@@ -29,6 +35,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     if (err || !user) {
       throw err || new UnauthorizedException(Messages.JWT_INVALID);
     }
+
     return user;
   }
 }
