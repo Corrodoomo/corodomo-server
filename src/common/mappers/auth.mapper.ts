@@ -1,5 +1,8 @@
 import { User } from '@modules/database/entities';
 
+import { ItemMapper } from './common.mapper';
+import { UserAgentMetadata } from '@common/types/session-metadata.type';
+
 /**
  * Re-map a object into AuthMetadataMapper
  */
@@ -48,5 +51,26 @@ export class AuthMetadataMapper {
       id: user.pricingPlan.id,
       name: user.pricingPlan.name,
     };
+  }
+}
+
+/**
+ * Class defined cached information for users
+ */
+export class CachedUser {
+  id: string;
+  userAgent: UserAgentMetadata;
+  accessToken: string;
+  refreshToken: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Re-map a object into AuthUserMapper
+ */
+export class QRCodeMapper extends ItemMapper<{ qrToken: string, userAgent: UserAgentMetadata }> {
+  constructor(qrToken: string, userAgent: UserAgentMetadata) {
+    super({ qrToken, userAgent });
   }
 }

@@ -1,3 +1,4 @@
+import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { Lesson } from '@modules/database/entities';
 import { LessonEsService } from '@modules/elastic-search/services/lesson-es.service';
 import { LessonRecentEsService } from '@modules/elastic-search/services/lesson-recent-es.service';
@@ -315,12 +316,17 @@ export class LessonService {
   public async searchMyHistory(query: PaginateQuery, userId: string) {
     const keyword = String(query.filter?.['keyword']);
 
-    const should: any[] = [];
-    const sort: any[] = [];
+    const body: SearchRequest = {
+      query: {
+        bool: {
+          must: [{ terms: { 'userId.keyword': [userId] } }],
+        },
+      },
+    };
 
     // Add condition If keyword existed
-    if (keyword) {
-      should.push(
+    if (keyword && body?.query?.bool) {
+      body.query.bool.should = [
         {
           match: {
             title: {
@@ -343,8 +349,10 @@ export class LessonService {
               value: keyword,
             },
           },
-        }
-      );
+        },
+      ];
+
+      body.query.bool.minimum_should_match = 1;
     }
 
     // Add condition If sortBy existed
@@ -352,29 +360,20 @@ export class LessonService {
     if (query.sortBy?.length) {
       const order = query.sortBy[0];
 
-      sort.push({
-        accessedAt: {
-          order: order[1],
+      body.sort = [
+        {
+          accessedAt: {
+            order: String(order[1]) as 'desc' | 'asc',
+          },
         },
-      });
+      ];
     }
 
     // Search data of elastic
-    return this.lessonRecentEsService.paginate(
-      {
-        query: {
-          bool: {
-            should,
-            must: [{ terms: { 'userId.keyword': [userId] } }],
-          },
-        },
-        sort,
-      },
-      {
-        page: Number(query.page),
-        limit: Number(query.limit),
-      }
-    );
+    return this.lessonRecentEsService.paginate(body, {
+      page: Number(query.page),
+      limit: Number(query.limit),
+    });
   }
 
   /**

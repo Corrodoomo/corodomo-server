@@ -16,6 +16,6 @@ export enum Messages {
   PERMISSION_REQUIRED = 'You do not have permission to access this resource',
   JWT_INVALID = 'JWT token is invalid',
   TOKEN_NOT_FOUND = 'Token not found',
-  SESSION_NOT_FOUND = 'Session not found',
   DUPLICATED_DEVICE = 'Duplicated device',
+  OAUTH_FAILED = 'OAuth Failed',
 }

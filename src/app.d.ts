@@ -1,7 +1,7 @@
 import { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 
 import { AuthMetadataMapper } from '@common/mappers/auth.mapper';
-import { SignedInUserMapper } from '@common/mappers/user.mapper';
+import { UserAgentMetadata } from '@common/types/session-metadata.type';
 
 declare global {
   type TCachedSession = {
@@ -23,7 +23,14 @@ declare global {
     updatedAt: string;
   };
 
-  type CustomRequest = { user: AuthMetadataMapper; cookies: SignedInUserMapper; session: TSession; timeId: string };
+  type CustomRequest = {
+    user: AuthMetadataMapper;
+    session: TSession;
+    timeId: string;
+    headers: { authorization: string };
+    userAgent: UserAgentMetadata;
+    accessToken: string;
+  };
 
   type SystemRequest = ExpressRequest & CustomRequest;
 

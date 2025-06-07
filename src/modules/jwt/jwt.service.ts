@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService as NestJwtService } from '@nestjs/jwt';
+import { v4 } from 'uuid';
 
 import { AuthMetadataMapper } from '@common/mappers/auth.mapper';
+import { UserAgentMetadata } from '@common/types/session-metadata.type';
 
 @Injectable()
 export class JwtService {
@@ -36,7 +38,7 @@ export class JwtService {
   signAccessToken(user: AuthMetadataMapper) {
     return this.jwtService.sign(user, {
       secret: this.configService.getOrThrow('ACCESS_SECRET_KEY'),
-      expiresIn: this.configService.getOrThrow('ACCESS_SECRET_KEY_EXPIRE'),
+      expiresIn: this.configService.getOrThrow('ACCESS_TOKEN_EXPIRE'),
       algorithm: 'HS256',
     });
   }
@@ -51,9 +53,30 @@ export class JwtService {
   signRefreshToken(user: AuthMetadataMapper) {
     return this.jwtService.signAsync(user, {
       secret: this.configService.getOrThrow('REFRESH_SECRET_KEY'),
-      expiresIn: this.configService.getOrThrow('REFRESH_SECRET_KEY_EXPIRE'),
+      expiresIn: this.configService.getOrThrow('REFRESH_TOKEN_EXPIRE'),
       algorithm: 'HS256',
     });
+  }
+
+  /**
+   * Sign QR Code token
+   * @description This token is used for QR Code login, it is signed with a different key and has a different expiration time.
+   * @param userAgent
+   * @returns
+   */
+  signQRToken(userAgent: UserAgentMetadata) {
+    return this.jwtService.signAsync(
+      {
+        id: v4(),
+        provider: 'qr_code',
+        ...userAgent,
+      },
+      {
+        secret: this.configService.getOrThrow('QR_CODE_KEY'),
+        expiresIn: this.configService.getOrThrow('QR_CODE_EXPIRE'),
+        algorithm: 'HS256',
+      }
+    );
   }
 
   /**
