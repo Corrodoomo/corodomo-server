@@ -12,9 +12,12 @@ import { MindmapRepository } from './mindmap.repository';
 export class MindmapService {
   constructor(private readonly mindmapRepository: MindmapRepository) {}
 
-  async createNode(lessonId: string, body: MindmapDto) {
+  async createNode(lessonId: string, body: MindmapDto, userId: string) {
     const node = await this.mindmapRepository.save({
       ...body,
+      createdBy: {
+        id: userId,
+      },
       lesson: {
         id: lessonId,
       },
@@ -38,11 +41,13 @@ export class MindmapService {
     }
 
     // Create blog
-    await this.mindmapRepository.update(nodeId, body);
-    const updatedData = await this.mindmapRepository.findOne({ where: { id: nodeId } });
+    const data = await this.mindmapRepository.save({
+      id: nodeId,
+      ...body,
+    });
 
     // Return result
-    return new UpdateResultDto(updatedData, 1);
+    return new UpdateResultDto(data, 1);
   }
 
   async deleteNode(nodeId: string) {
