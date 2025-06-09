@@ -1,5 +1,5 @@
 import { Policy } from '@modules/policy/policy.decorator';
-import { Body, Controller, Param } from '@nestjs/common';
+import { Body, Controller, Param, Req } from '@nestjs/common';
 
 import {
   ApiOkDeleteResultExample,
@@ -28,8 +28,9 @@ export class MindmapController {
   @ApiPost('/:lessonId')
   @Policy('create', 'mindmap')
   @ApiOkInsertResultExample(MindmapRecordMapper)
-  createNode(@Param() params: LessonIdDto, @Body() body: MindmapDto) {
-    return this.mindmapService.createNode(params.lessonId, body);
+  createNode(@Param() params: LessonIdDto, @Body() body: MindmapDto, @Req() req: SystemRequest) {
+    const { user } = req;
+    return this.mindmapService.createNode(params.lessonId, body, user.id);
   }
 
   @ApiPut('/:nodeId')

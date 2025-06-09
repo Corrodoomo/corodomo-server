@@ -12,9 +12,12 @@ import { MindmapRepository } from './mindmap.repository';
 export class MindmapService {
   constructor(private readonly mindmapRepository: MindmapRepository) {}
 
-  async createNode(lessonId: string, body: MindmapDto) {
+  async createNode(lessonId: string, body: MindmapDto, userId: string) {
     const node = await this.mindmapRepository.save({
       ...body,
+      createdBy: {
+        id: userId,
+      },
       lesson: {
         id: lessonId,
       },
@@ -29,7 +32,7 @@ export class MindmapService {
   }
 
   async updateNode(nodeId: string, body: MindmapDto) {
-    // Get blog by id
+    // Get mindmap by id
     const node = await this.mindmapRepository.getRawOne(nodeId, ['id']);
 
     // Check if blog is empty
@@ -38,14 +41,17 @@ export class MindmapService {
     }
 
     // Create blog
-    await this.mindmapRepository.update(nodeId, body);
+    const data = await this.mindmapRepository.save({
+      id: nodeId,
+      ...body,
+    });
 
     // Return result
-    return new UpdateResultDto(1);
+    return new UpdateResultDto(data, 1);
   }
 
   async deleteNode(nodeId: string) {
-    // Get blog by id
+    // Get mindmap by id
     const node = await this.mindmapRepository.getRawOne(nodeId, ['id']);
 
     // Check if blog is empty
@@ -56,6 +62,6 @@ export class MindmapService {
     await this.mindmapRepository.delete(nodeId);
 
     // Return result
-    return new DeleteResultDto(1);
+    return new DeleteResultDto(node, 1);
   }
 }

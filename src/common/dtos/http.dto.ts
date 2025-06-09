@@ -76,7 +76,7 @@ export class InsertResultDto<T> {
   }
 }
 
-export class UpdateResultDto {
+export class UpdateResultDto<T> {
   /**
    * Contains inserted entity id.
    * Has entity-like structure (not just column database name and values).
@@ -84,12 +84,15 @@ export class UpdateResultDto {
   @ApiProperty({ example: 1 })
   updated: number;
 
-  constructor(updated: number = 1) {
+  raw?: T;
+
+  constructor(raw: T, updated: number = 1) {
     this.updated = updated;
+    this.raw = raw;
   }
 }
 
-export class DeleteResultDto {
+export class DeleteResultDto<T> {
   /**
    * Contains inserted entity id.
    * Has entity-like structure (not just column database name and values).
@@ -97,7 +100,9 @@ export class DeleteResultDto {
   @ApiProperty({ example: 1 })
   deleted: number;
 
-  constructor(deleted: number | null = 1) {
-    this.deleted = deleted || 1;
+  raw?: T;
+
+  constructor(raw: T, deleted: number | null = 1) {
+    this.deleted = deleted ?? 1;
   }
 }
